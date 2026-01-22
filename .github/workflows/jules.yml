@@ -3,6 +3,8 @@ name: Jules Agent
 on:
   issues:
     types: [opened]
+  issue_comment:
+    types: [created]
 
 jobs:
   jules_respond:
