@@ -39,7 +39,7 @@ class JulesClient:
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
-    def create_session(self, source_name, prompt, title):
+    def create_session(self, source_name, prompt, title, branch="main"):
         """Create a new Jules session."""
         url = f"{JULES_API_BASE}/sessions"
         payload = {
@@ -47,7 +47,7 @@ class JulesClient:
             "sourceContext": {
                 "source": source_name,
                 "githubRepoContext": {
-                    "startingBranch": "main" # Defaulting to main for now
+                    "startingBranch": branch
                 }
             },
             "automationMode": "AUTO_CREATE_PR",
@@ -72,6 +72,18 @@ def run_command(command):
         print(f"Error executing command: {command}")
         print(f"Stderr: {e.stderr}")
         return None
+
+def get_default_branch():
+    """Get the default branch of the repository using gh CLI."""
+    # We rely on gh CLI being available and authenticated
+    try:
+        # gh repo view --json defaultBranchRef -q .defaultBranchRef.name
+        branch = run_command(["gh", "repo", "view", "--json", "defaultBranchRef", "-q", ".defaultBranchRef.name"])
+        if branch:
+            return branch
+    except Exception as e:
+        print(f"Warning: Could not detect default branch: {e}")
+    return "main"
 
 def get_event_data():
     """Read and parse the GitHub event data."""
@@ -104,7 +116,14 @@ def main():
         print("No event data found. Exiting.")
         sys.exit(1)
 
+    event_name = os.environ.get("GITHUB_EVENT_NAME")
     action = event_data.get("action")
+
+    if event_name == "issue_comment" and action == "created":
+        print("User comment received. Continuing session not yet implemented (API unknown).")
+        # TODO: Implement session continuation
+        sys.exit(0)
+
     if action != "opened":
         print(f"Skipping action: {action}")
         sys.exit(0)
@@ -142,8 +161,9 @@ def main():
             sys.exit(1)
 
         # Create Session
-        print(f"Creating Session with Source: {source_name}")
-        session = client.create_session(source_name, prompt=body, title=title)
+        default_branch = get_default_branch()
+        print(f"Creating Session with Source: {source_name} on branch: {default_branch}")
+        session = client.create_session(source_name, prompt=body, title=title, branch=default_branch)
         session_id = session.get("name") # e.g. "sessions/12345"
 
         # 4. Post Success Comment

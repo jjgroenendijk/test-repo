@@ -7,7 +7,7 @@ This repository integrates **Google Jules** via its REST API. The goal is to all
 
 ### 1. The Bridge (GitHub Actions)
 *   A GitHub Action workflow acts as the bridge.
-*   It listens for GitHub events (specifically `issues: opened`).
+*   It listens for GitHub events (e.g., `issues: opened`, `issue_comment: created`).
 *   It executes a Python script (`jules.py`) to process the event and call the Jules API.
 
 ### 2. Google Jules API Integration
@@ -28,5 +28,4 @@ This repository integrates **Google Jules** via its REST API. The goal is to all
     *   Python 3 with `uv` for package management.
 
 ## Future Scope
-*   Two-way sync: Forwarding comments from GitHub to the Jules Session.
 *   Polling: Automatically updating the GitHub issue when Jules completes the task or opens a PR.
