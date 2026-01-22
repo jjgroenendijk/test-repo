@@ -31,9 +31,10 @@ jobs:
           # or if the PR is already approved.
           gh pr review "$PR_URL" --approve || echo "Approval step skipped or failed."
 
-          # Merge the PR immediately using a merge commit
-          # If merge fails (e.g. conflicts), we catch it.
-          gh pr merge "$PR_URL" --merge --delete-branch || echo "MERGE_FAILED=true" >> $GITHUB_ENV
+          # Enable auto-merge for the PR using a merge commit
+          # This will wait for checks to pass before merging.
+          # If enabling auto-merge fails (e.g. conflicts), we catch it.
+          gh pr merge "$PR_URL" --auto --merge --delete-branch || echo "MERGE_FAILED=true" >> $GITHUB_ENV
 
       - name: Report Merge Conflict
         if: env.MERGE_FAILED == 'true'
