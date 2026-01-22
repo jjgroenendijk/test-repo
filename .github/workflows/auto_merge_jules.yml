@@ -1,7 +1,7 @@
 name: Auto Merge Jules PRs
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types:
@@ -12,10 +12,11 @@ on:
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'jjgroenendijk'
+    if: github.event.pull_request.user.login == 'jjgroenendijk' || github.event.pull_request.user.login == 'google-labs-jules[bot]'
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,4 +32,15 @@ jobs:
           gh pr review "$PR_URL" --approve || echo "Approval step skipped or failed."
 
           # Merge the PR immediately using a merge commit
-          gh pr merge "$PR_URL" --merge
+          # If merge fails (e.g. conflicts), we catch it.
+          gh pr merge "$PR_URL" --merge || echo "MERGE_FAILED=true" >> $GITHUB_ENV
+
+      - name: Report Merge Conflict
+        if: env.MERGE_FAILED == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh issue create \
+            --title "Merge Conflict: PR #${PR_NUMBER}" \
+            --body "The auto-merge workflow failed to merge PR #${PR_NUMBER}. A Jules session is requested to resolve this."
