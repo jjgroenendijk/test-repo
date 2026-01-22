@@ -31,7 +31,14 @@ jobs:
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
 
           # Extract PR numbers using jq
-          PR_NUMBERS=$(jq -r '.pull_requests[].number' workflow_run.json)
+          PR_NUMBERS=$(jq -r '.pull_requests[]?.number' workflow_run.json)
+          
+          # Fallback: Look up PR by head branch if payload is empty
+          if [ -z "$PR_NUMBERS" ]; then
+            HEAD_BRANCH=$(jq -r '.head_branch' workflow_run.json)
+            echo "No PRs found in payload. Looking up PRs for branch: $HEAD_BRANCH"
+            PR_NUMBERS=$(gh pr list --head "$HEAD_BRANCH" --state all --json number -q '.[].number')
+          fi
 
           if [ -z "$PR_NUMBERS" ]; then
             echo "No PRs associated with this run."
