@@ -19,6 +19,14 @@ This repository integrates **Google Jules** via its REST API. The goal is to all
 *   **Input:** User creates an issue with a description of the task.
 *   **Feedback:** The system posts a comment on the issue confirming that a Jules Session has been started, including the Session ID.
 
+### 4. Automated Failure Reporting
+*   **Trigger:** When a CI check fails on a Pull Request.
+*   **Action:** A new GitHub Issue is automatically created.
+*   **Content:** The issue contains:
+    *   The PR number.
+    *   A snippet of the log failure (10 lines before/after the error).
+    *   A link to the full logs.
+
 ## Setup Requirements
 *   **Environment Variables:**
     *   `GITHUB_TOKEN`: For interacting with the GitHub Issue (posting comments).
