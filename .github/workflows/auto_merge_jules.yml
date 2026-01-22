@@ -33,7 +33,7 @@ jobs:
 
           # Merge the PR immediately using a merge commit
           # If merge fails (e.g. conflicts), we catch it.
-          gh pr merge "$PR_URL" --merge || echo "MERGE_FAILED=true" >> $GITHUB_ENV
+          gh pr merge "$PR_URL" --merge --delete-branch || echo "MERGE_FAILED=true" >> $GITHUB_ENV
 
       - name: Report Merge Conflict
         if: env.MERGE_FAILED == 'true'
