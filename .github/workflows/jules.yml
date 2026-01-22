@@ -1,0 +1,30 @@
+name: Jules Agent
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  jules_respond:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Setup Environment
+        run: |
+          chmod +x setup.sh
+          ./setup.sh
+
+      - name: Run Jules
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_JULES_API: ${{ secrets.GOOGLE_JULES_API }}
+        run: uv run jules.py
