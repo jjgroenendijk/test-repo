@@ -14,7 +14,7 @@ jobs:
       github.event.workflow_run.event == 'pull_request'
     permissions:
       issues: write
-      contents: read
+      contents: write
       actions: read
       pull-requests: read
     steps:
@@ -71,6 +71,7 @@ jobs:
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
             gh issue create \
+              --repo ${{ github.repository }} \
               --title "CI Failure: PR #$PR_NUMBER" \
               --body-file issue_body.md
           done
