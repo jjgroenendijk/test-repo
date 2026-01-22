@@ -41,4 +41,5 @@ Simply **open a new Issue** in this repository.
 
 ## Documentation
 
-For detailed requirements and architecture, see [docs/requirements.md](docs/requirements.md).
+*   **Requirements & Architecture:** [docs/requirements.md](docs/requirements.md)
+*   **Dependency Management:** [docs/dependency-management.md](docs/dependency-management.md)
