@@ -1,0 +1,52 @@
+name: Report CI Failure
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  report-failure:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event == 'pull_request'
+    permissions:
+      issues: write
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Report Failure
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          # Save payload to file
+          echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
+
+          # Extract PR numbers using jq
+          PR_NUMBERS=$(jq -r '.pull_requests[].number' workflow_run.json)
+
+          if [ -z "$PR_NUMBERS" ]; then
+            echo "No PRs associated with this run."
+            exit 0
+          fi
+
+          # Download logs
+          # We use || true to prevent failure if logs are missing or retrieval fails
+          gh run view "$RUN_ID" --log-failed > failed.log 2>&1 || echo "Failed to retrieve logs" > failed.log
+
+          for PR_NUMBER in $PR_NUMBERS; do
+            echo "Creating issue for PR #$PR_NUMBER"
+
+            # Generate body using python script safely
+            python3 .github/scripts/extract_log.py failed.log "$PR_NUMBER" "$RUN_ID" "${{ github.repository }}"
+
+            gh issue create \
+              --title "CI Failure: PR #$PR_NUMBER" \
+              --body-file issue_body.md
+          done
