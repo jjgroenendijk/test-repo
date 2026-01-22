@@ -12,7 +12,7 @@ on:
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'jjgroenendijk' || github.event.pull_request.user.login == 'google-labs-jules[bot]'
+    if: github.event.pull_request.user.login == 'jjgroenendijk' || github.event.pull_request.user.login == 'google-labs-jules[bot]' || github.event.pull_request.user.login == 'dependabot[bot]'
     permissions:
       contents: write
       pull-requests: write
