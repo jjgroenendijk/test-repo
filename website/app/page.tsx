@@ -134,8 +134,12 @@ export default function Home() {
                   <ul className="bg-white/30 p-4 rounded-xl font-mono text-sm text-gray-700 space-y-2">
                     <li>jules.py</li>
                     <li>setup.sh</li>
+                    <li>pyproject.toml</li>
+                    <li>uv.lock</li>
                     <li>.github/workflows/jules.yml</li>
                     <li>.github/workflows/auto_merge_jules.yml</li>
+                    <li>.github/workflows/report_failure.yml</li>
+                    <li>.github/scripts/extract_log.py</li>
                   </ul>
                 </div>
               </div>
