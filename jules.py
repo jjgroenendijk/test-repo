@@ -33,14 +33,17 @@ class JulesClient:
         sources = self.list_sources()
         # Look for a match in the source metadata
         # Structure: {"githubRepo": {"owner": "...", "repo": "..."}}
+        target_owner = repo_owner.lower()
+        target_repo = repo_name.lower()
+
         for source in sources:
             gh_repo = source.get("githubRepo", {})
             owner = gh_repo.get("owner")
             repo = gh_repo.get("repo")
 
             if owner and repo and \
-               owner.lower() == repo_owner.lower() and \
-               repo.lower() == repo_name.lower():
+               owner.lower() == target_owner and \
+               repo.lower() == target_repo:
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
