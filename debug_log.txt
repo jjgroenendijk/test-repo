@@ -1,0 +1,439 @@
+report-failure	Set up job	﻿2026-01-23T05:44:28.3985483Z Current runner version: '2.331.0'
+report-failure	Set up job	2026-01-23T05:44:28.4058029Z ##[group]Runner Image Provisioner
+report-failure	Set up job	2026-01-23T05:44:28.4059306Z Hosted Compute Agent
+report-failure	Set up job	2026-01-23T05:44:28.4060107Z Version: 20260115.477
+report-failure	Set up job	2026-01-23T05:44:28.4061006Z Commit: 4b342d620503cbe250a3154040964899ea7c9b00
+report-failure	Set up job	2026-01-23T05:44:28.4062008Z Build Date: 2026-01-15T22:32:41Z
+report-failure	Set up job	2026-01-23T05:44:28.4062986Z Worker ID: {b4808897-6eb0-4e14-8de3-da5cd9e4b252}
+report-failure	Set up job	2026-01-23T05:44:28.4063900Z Azure Region: northcentralus
+report-failure	Set up job	2026-01-23T05:44:28.4064835Z ##[endgroup]
+report-failure	Set up job	2026-01-23T05:44:28.4067193Z ##[group]Operating System
+report-failure	Set up job	2026-01-23T05:44:28.4068037Z Ubuntu
+report-failure	Set up job	2026-01-23T05:44:28.4069012Z 24.04.3
+report-failure	Set up job	2026-01-23T05:44:28.4069652Z LTS
+report-failure	Set up job	2026-01-23T05:44:28.4070231Z ##[endgroup]
+report-failure	Set up job	2026-01-23T05:44:28.4070968Z ##[group]Runner Image
+report-failure	Set up job	2026-01-23T05:44:28.4071799Z Image: ubuntu-24.04
+report-failure	Set up job	2026-01-23T05:44:28.4072507Z Version: 20260119.4.1
+report-failure	Set up job	2026-01-23T05:44:28.4074073Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260119.4/images/ubuntu/Ubuntu2404-Readme.md
+report-failure	Set up job	2026-01-23T05:44:28.4076541Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260119.4
+report-failure	Set up job	2026-01-23T05:44:28.4078037Z ##[endgroup]
+report-failure	Set up job	2026-01-23T05:44:28.4082168Z ##[group]GITHUB_TOKEN Permissions
+report-failure	Set up job	2026-01-23T05:44:28.4085259Z Actions: write
+report-failure	Set up job	2026-01-23T05:44:28.4086013Z ArtifactMetadata: write
+report-failure	Set up job	2026-01-23T05:44:28.4086787Z Attestations: write
+report-failure	Set up job	2026-01-23T05:44:28.4087511Z Checks: write
+report-failure	Set up job	2026-01-23T05:44:28.4088203Z Contents: write
+report-failure	Set up job	2026-01-23T05:44:28.4089122Z Deployments: write
+report-failure	Set up job	2026-01-23T05:44:28.4089962Z Discussions: write
+report-failure	Set up job	2026-01-23T05:44:28.4090655Z Issues: write
+report-failure	Set up job	2026-01-23T05:44:28.4091360Z Metadata: read
+report-failure	Set up job	2026-01-23T05:44:28.4092087Z Models: read
+report-failure	Set up job	2026-01-23T05:44:28.4092742Z Packages: write
+report-failure	Set up job	2026-01-23T05:44:28.4093459Z Pages: write
+report-failure	Set up job	2026-01-23T05:44:28.4094286Z PullRequests: write
+report-failure	Set up job	2026-01-23T05:44:28.4095111Z RepositoryProjects: write
+report-failure	Set up job	2026-01-23T05:44:28.4095880Z SecurityEvents: write
+report-failure	Set up job	2026-01-23T05:44:28.4096623Z Statuses: write
+report-failure	Set up job	2026-01-23T05:44:28.4097367Z ##[endgroup]
+report-failure	Set up job	2026-01-23T05:44:28.4100699Z Secret source: Actions
+report-failure	Set up job	2026-01-23T05:44:28.4102045Z Prepare workflow directory
+report-failure	Set up job	2026-01-23T05:44:28.4973410Z Prepare all required actions
+report-failure	Set up job	2026-01-23T05:44:28.5086979Z Getting action download info
+report-failure	Set up job	2026-01-23T05:44:28.8808720Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+report-failure	Set up job	2026-01-23T05:44:29.0640574Z Complete job name: report-failure
+report-failure	Checkout code	﻿2026-01-23T05:44:29.1241028Z ##[group]Run actions/checkout@v4
+report-failure	Checkout code	2026-01-23T05:44:29.1241873Z with:
+report-failure	Checkout code	2026-01-23T05:44:29.1242320Z   ref: d22a84131fefdb88cb3df855bae8621e5cef3ac3
+report-failure	Checkout code	2026-01-23T05:44:29.1243008Z   repository: jjgroenendijk/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.1243739Z   token: ***
+report-failure	Checkout code	2026-01-23T05:44:29.1244166Z   ssh-strict: true
+report-failure	Checkout code	2026-01-23T05:44:29.1244614Z   ssh-user: git
+report-failure	Checkout code	2026-01-23T05:44:29.1245063Z   persist-credentials: true
+report-failure	Checkout code	2026-01-23T05:44:29.1245533Z   clean: true
+report-failure	Checkout code	2026-01-23T05:44:29.1245991Z   sparse-checkout-cone-mode: true
+report-failure	Checkout code	2026-01-23T05:44:29.1246500Z   fetch-depth: 1
+report-failure	Checkout code	2026-01-23T05:44:29.1246919Z   fetch-tags: false
+report-failure	Checkout code	2026-01-23T05:44:29.1247414Z   show-progress: true
+report-failure	Checkout code	2026-01-23T05:44:29.1247830Z   lfs: false
+report-failure	Checkout code	2026-01-23T05:44:29.1248244Z   submodules: false
+report-failure	Checkout code	2026-01-23T05:44:29.1248835Z   set-safe-directory: true
+report-failure	Checkout code	2026-01-23T05:44:29.1249601Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.2322217Z Syncing repository: jjgroenendijk/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.2331194Z ##[group]Getting Git version info
+report-failure	Checkout code	2026-01-23T05:44:29.2333452Z Working directory is '/home/runner/work/test-repo/test-repo'
+report-failure	Checkout code	2026-01-23T05:44:29.2335333Z [command]/usr/bin/git version
+report-failure	Checkout code	2026-01-23T05:44:29.2412228Z git version 2.52.0
+report-failure	Checkout code	2026-01-23T05:44:29.2437940Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.2453421Z Temporarily overriding HOME='/home/runner/work/_temp/9bf22347-ad73-42ba-970c-70c46735a298' before making global git config changes
+report-failure	Checkout code	2026-01-23T05:44:29.2456803Z Adding repository directory to the temporary git global config as a safe directory
+report-failure	Checkout code	2026-01-23T05:44:29.2460513Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/test-repo/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.2499864Z Deleting the contents of '/home/runner/work/test-repo/test-repo'
+report-failure	Checkout code	2026-01-23T05:44:29.2503920Z ##[group]Initializing the repository
+report-failure	Checkout code	2026-01-23T05:44:29.2508910Z [command]/usr/bin/git init /home/runner/work/test-repo/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.2619375Z hint: Using 'master' as the name for the initial branch. This default branch name
+report-failure	Checkout code	2026-01-23T05:44:29.2622585Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+report-failure	Checkout code	2026-01-23T05:44:29.2624029Z hint: to use in all of your new repositories, which will suppress this warning,
+report-failure	Checkout code	2026-01-23T05:44:29.2625283Z hint: call:
+report-failure	Checkout code	2026-01-23T05:44:29.2626028Z hint:
+report-failure	Checkout code	2026-01-23T05:44:29.2626836Z hint: 	git config --global init.defaultBranch <name>
+report-failure	Checkout code	2026-01-23T05:44:29.2627792Z hint:
+report-failure	Checkout code	2026-01-23T05:44:29.2628834Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+report-failure	Checkout code	2026-01-23T05:44:29.2630374Z hint: 'development'. The just-created branch can be renamed via this command:
+report-failure	Checkout code	2026-01-23T05:44:29.2631457Z hint:
+report-failure	Checkout code	2026-01-23T05:44:29.2632143Z hint: 	git branch -m <name>
+report-failure	Checkout code	2026-01-23T05:44:29.2633011Z hint:
+report-failure	Checkout code	2026-01-23T05:44:29.2633949Z hint: Disable this message with "git config set advice.defaultBranchName false"
+report-failure	Checkout code	2026-01-23T05:44:29.2636043Z Initialized empty Git repository in /home/runner/work/test-repo/test-repo/.git/
+report-failure	Checkout code	2026-01-23T05:44:29.2640275Z [command]/usr/bin/git remote add origin https://github.com/jjgroenendijk/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.2675016Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.2676164Z ##[group]Disabling automatic garbage collection
+report-failure	Checkout code	2026-01-23T05:44:29.2679043Z [command]/usr/bin/git config --local gc.auto 0
+report-failure	Checkout code	2026-01-23T05:44:29.2707704Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.2709108Z ##[group]Setting up auth
+report-failure	Checkout code	2026-01-23T05:44:29.2715003Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+report-failure	Checkout code	2026-01-23T05:44:29.2744635Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+report-failure	Checkout code	2026-01-23T05:44:29.3066418Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+report-failure	Checkout code	2026-01-23T05:44:29.3092955Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+report-failure	Checkout code	2026-01-23T05:44:29.3280570Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+report-failure	Checkout code	2026-01-23T05:44:29.3310216Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+report-failure	Checkout code	2026-01-23T05:44:29.3495944Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+report-failure	Checkout code	2026-01-23T05:44:29.3527610Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.3530337Z ##[group]Fetching the repository
+report-failure	Checkout code	2026-01-23T05:44:29.3604452Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin d22a84131fefdb88cb3df855bae8621e5cef3ac3
+report-failure	Checkout code	2026-01-23T05:44:29.6095494Z From https://github.com/jjgroenendijk/test-repo
+report-failure	Checkout code	2026-01-23T05:44:29.6315692Z  * branch            d22a84131fefdb88cb3df855bae8621e5cef3ac3 -> FETCH_HEAD
+report-failure	Checkout code	2026-01-23T05:44:29.6327048Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.6329371Z ##[group]Determining the checkout info
+report-failure	Checkout code	2026-01-23T05:44:29.6331869Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.6333319Z [command]/usr/bin/git sparse-checkout disable
+report-failure	Checkout code	2026-01-23T05:44:29.6337647Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+report-failure	Checkout code	2026-01-23T05:44:29.6343608Z ##[group]Checking out the ref
+report-failure	Checkout code	2026-01-23T05:44:29.6346110Z [command]/usr/bin/git checkout --progress --force d22a84131fefdb88cb3df855bae8621e5cef3ac3
+report-failure	Checkout code	2026-01-23T05:44:29.6350004Z Note: switching to 'd22a84131fefdb88cb3df855bae8621e5cef3ac3'.
+report-failure	Checkout code	2026-01-23T05:44:29.6351611Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6352717Z You are in 'detached HEAD' state. You can look around, make experimental
+report-failure	Checkout code	2026-01-23T05:44:29.6355810Z changes and commit them, and you can discard any commits you make in this
+report-failure	Checkout code	2026-01-23T05:44:29.6359445Z state without impacting any branches by switching back to a branch.
+report-failure	Checkout code	2026-01-23T05:44:29.6361346Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6362510Z If you want to create a new branch to retain commits you create, you may
+report-failure	Checkout code	2026-01-23T05:44:29.6365529Z do so (now or later) by using -c with the switch command. Example:
+report-failure	Checkout code	2026-01-23T05:44:29.6367180Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6367811Z   git switch -c <new-branch-name>
+report-failure	Checkout code	2026-01-23T05:44:29.6369308Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6369943Z Or undo this operation with:
+report-failure	Checkout code	2026-01-23T05:44:29.6371105Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6371723Z   git switch -
+report-failure	Checkout code	2026-01-23T05:44:29.6372467Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6373841Z Turn off this advice by setting config variable advice.detachedHead to false
+report-failure	Checkout code	2026-01-23T05:44:29.6376015Z 
+report-failure	Checkout code	2026-01-23T05:44:29.6376678Z HEAD is now at d22a841 Add failing test
+report-failure	Checkout code	2026-01-23T05:44:29.6381477Z ##[endgroup]
+report-failure	Checkout code	2026-01-23T05:44:29.6384890Z [command]/usr/bin/git log -1 --format=%H
+report-failure	Checkout code	2026-01-23T05:44:29.6388351Z d22a84131fefdb88cb3df855bae8621e5cef3ac3
+report-failure	Debug Permissions	﻿2026-01-23T05:44:29.6744614Z ##[group]Run gh auth status
+report-failure	Debug Permissions	2026-01-23T05:44:29.6746316Z [36;1mgh auth status[0m
+report-failure	Debug Permissions	2026-01-23T05:44:29.6783169Z shell: /usr/bin/bash -e {0}
+report-failure	Debug Permissions	2026-01-23T05:44:29.6784662Z env:
+report-failure	Debug Permissions	2026-01-23T05:44:29.6786433Z   GH_TOKEN: ***
+report-failure	Debug Permissions	2026-01-23T05:44:29.6787664Z ##[endgroup]
+report-failure	Debug Permissions	2026-01-23T05:44:30.1284116Z github.com
+report-failure	Debug Permissions	2026-01-23T05:44:30.1286094Z   ✓ Logged in to github.com account github-actions[bot] (GH_TOKEN)
+report-failure	Debug Permissions	2026-01-23T05:44:30.1289808Z   - Active account: true
+report-failure	Debug Permissions	2026-01-23T05:44:30.1290604Z   - Git operations protocol: https
+report-failure	Debug Permissions	2026-01-23T05:44:30.1291409Z   - Token: ghs_************************************
+report-failure	Report Failure	﻿2026-01-23T05:44:30.1397856Z ##[group]Run # Save payload to file
+report-failure	Report Failure	2026-01-23T05:44:30.1399136Z [36;1m# Save payload to file[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1399614Z [36;1mecho '{[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1400037Z [36;1m  "actor": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1400681Z [36;1m    "avatar_url": "https://avatars.githubusercontent.com/u/3110270?v=4",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1401519Z [36;1m    "events_url": "https://api.github.com/users/jjgroenendijk/events{/privacy}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1402407Z [36;1m    "followers_url": "https://api.github.com/users/jjgroenendijk/followers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1403278Z [36;1m    "following_url": "https://api.github.com/users/jjgroenendijk/following{/other_user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1404153Z [36;1m    "gists_url": "https://api.github.com/users/jjgroenendijk/gists{/gist_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1404824Z [36;1m    "gravatar_id": "",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1405421Z [36;1m    "html_url": "https://github.com/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1405976Z [36;1m    "id": 3110270,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1406480Z [36;1m    "login": "jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1407002Z [36;1m    "node_id": "MDQ6VXNlcjMxMTAyNzA=",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1407667Z [36;1m    "organizations_url": "https://api.github.com/users/jjgroenendijk/orgs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1408577Z [36;1m    "received_events_url": "https://api.github.com/users/jjgroenendijk/received_events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1409381Z [36;1m    "repos_url": "https://api.github.com/users/jjgroenendijk/repos",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1409948Z [36;1m    "site_admin": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1410560Z [36;1m    "starred_url": "https://api.github.com/users/jjgroenendijk/starred{/owner}{/repo}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1411372Z [36;1m    "subscriptions_url": "https://api.github.com/users/jjgroenendijk/subscriptions",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1412010Z [36;1m    "type": "User",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1412521Z [36;1m    "url": "https://api.github.com/users/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1413052Z [36;1m    "user_view_type": "public"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1413499Z [36;1m  },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1414174Z [36;1m  "artifacts_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650/artifacts",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1415164Z [36;1m  "cancel_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650/cancel",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1416252Z [36;1m  "check_suite_id": 55176190397,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1416837Z [36;1m  "check_suite_node_id": "CS_kwDOQ_IulM8AAAAM2MHZvQ",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1417574Z [36;1m  "check_suite_url": "https://api.github.com/repos/jjgroenendijk/test-repo/check-suites/55176190397",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1418278Z [36;1m  "conclusion": "failure",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1418930Z [36;1m  "created_at": "2026-01-23T05:43:39Z",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1419432Z [36;1m  "display_title": "Debug Verification",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1419923Z [36;1m  "event": "pull_request",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1420395Z [36;1m  "head_branch": "test/verify-debug",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1420869Z [36;1m  "head_commit": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1421280Z [36;1m    "author": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1421814Z [36;1m      "email": "161369871+google-labs-jules[bot]@users.noreply.github.com",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1422936Z [36;1m      "name": "google-labs-jules[bot]"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1423399Z [36;1m    },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1423790Z [36;1m    "committer": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1424336Z [36;1m      "email": "161369871+google-labs-jules[bot]@users.noreply.github.com",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1424933Z [36;1m      "name": "google-labs-jules[bot]"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1425390Z [36;1m    },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1425825Z [36;1m    "id": "d22a84131fefdb88cb3df855bae8621e5cef3ac3",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1426350Z [36;1m    "message": "Add failing test",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1426829Z [36;1m    "timestamp": "2026-01-23T05:43:34Z",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1427387Z [36;1m    "tree_id": "a4bd0f7fd502d5047e4bda4e67aed2b1471533fe"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1428078Z [36;1m  },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1428590Z [36;1m  "head_repository": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1429274Z [36;1m    "archive_url": "https://api.github.com/repos/jjgroenendijk/test-repo/{archive_format}{/ref}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1430171Z [36;1m    "assignees_url": "https://api.github.com/repos/jjgroenendijk/test-repo/assignees{/user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1431049Z [36;1m    "blobs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/blobs{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1431911Z [36;1m    "branches_url": "https://api.github.com/repos/jjgroenendijk/test-repo/branches{/branch}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1432856Z [36;1m    "collaborators_url": "https://api.github.com/repos/jjgroenendijk/test-repo/collaborators{/collaborator}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1433810Z [36;1m    "comments_url": "https://api.github.com/repos/jjgroenendijk/test-repo/comments{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1434649Z [36;1m    "commits_url": "https://api.github.com/repos/jjgroenendijk/test-repo/commits{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1435524Z [36;1m    "compare_url": "https://api.github.com/repos/jjgroenendijk/test-repo/compare/{base}...{head}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1436408Z [36;1m    "contents_url": "https://api.github.com/repos/jjgroenendijk/test-repo/contents/{+path}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1437244Z [36;1m    "contributors_url": "https://api.github.com/repos/jjgroenendijk/test-repo/contributors",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1438096Z [36;1m    "deployments_url": "https://api.github.com/repos/jjgroenendijk/test-repo/deployments",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1438846Z [36;1m    "description": null,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1439505Z [36;1m    "downloads_url": "https://api.github.com/repos/jjgroenendijk/test-repo/downloads",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1440285Z [36;1m    "events_url": "https://api.github.com/repos/jjgroenendijk/test-repo/events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1440883Z [36;1m    "fork": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1441427Z [36;1m    "forks_url": "https://api.github.com/repos/jjgroenendijk/test-repo/forks",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1442471Z [36;1m    "full_name": "jjgroenendijk/test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1443558Z [36;1m    "git_commits_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/commits{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1444953Z [36;1m    "git_refs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/refs{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1445926Z [36;1m    "git_tags_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/tags{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1446665Z [36;1m    "hooks_url": "https://api.github.com/repos/jjgroenendijk/test-repo/hooks",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1447333Z [36;1m    "html_url": "https://github.com/jjgroenendijk/test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1447832Z [36;1m    "id": 1139945108,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1448560Z [36;1m    "issue_comment_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues/comments{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1449475Z [36;1m    "issue_events_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues/events{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1450323Z [36;1m    "issues_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1451101Z [36;1m    "keys_url": "https://api.github.com/repos/jjgroenendijk/test-repo/keys{/key_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1451856Z [36;1m    "labels_url": "https://api.github.com/repos/jjgroenendijk/test-repo/labels{/name}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1452650Z [36;1m    "languages_url": "https://api.github.com/repos/jjgroenendijk/test-repo/languages",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1453403Z [36;1m    "merges_url": "https://api.github.com/repos/jjgroenendijk/test-repo/merges",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1454187Z [36;1m    "milestones_url": "https://api.github.com/repos/jjgroenendijk/test-repo/milestones{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1454828Z [36;1m    "name": "test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1455229Z [36;1m    "node_id": "R_kgDOQ_IulA",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1455954Z [36;1m    "notifications_url": "https://api.github.com/repos/jjgroenendijk/test-repo/notifications{?since,all,participating}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1456781Z [36;1m    "owner": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1457282Z [36;1m      "avatar_url": "https://avatars.githubusercontent.com/u/3110270?v=4",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1457984Z [36;1m      "events_url": "https://api.github.com/users/jjgroenendijk/events{/privacy}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1458762Z [36;1m      "followers_url": "https://api.github.com/users/jjgroenendijk/followers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1459514Z [36;1m      "following_url": "https://api.github.com/users/jjgroenendijk/following{/other_user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1460262Z [36;1m      "gists_url": "https://api.github.com/users/jjgroenendijk/gists{/gist_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1460826Z [36;1m      "gravatar_id": "",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1461287Z [36;1m      "html_url": "https://github.com/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1461747Z [36;1m      "id": 3110270,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1462141Z [36;1m      "login": "jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1462600Z [36;1m      "node_id": "MDQ6VXNlcjMxMTAyNzA=",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1463171Z [36;1m      "organizations_url": "https://api.github.com/users/jjgroenendijk/orgs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1463917Z [36;1m      "received_events_url": "https://api.github.com/users/jjgroenendijk/received_events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1464629Z [36;1m      "repos_url": "https://api.github.com/users/jjgroenendijk/repos",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1465165Z [36;1m      "site_admin": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1465746Z [36;1m      "starred_url": "https://api.github.com/users/jjgroenendijk/starred{/owner}{/repo}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1466508Z [36;1m      "subscriptions_url": "https://api.github.com/users/jjgroenendijk/subscriptions",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1467107Z [36;1m      "type": "User",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1467567Z [36;1m      "url": "https://api.github.com/users/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1468070Z [36;1m      "user_view_type": "public"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1468531Z [36;1m    },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1468878Z [36;1m    "private": true,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1469452Z [36;1m    "pulls_url": "https://api.github.com/repos/jjgroenendijk/test-repo/pulls{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1470220Z [36;1m    "releases_url": "https://api.github.com/repos/jjgroenendijk/test-repo/releases{/id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1471076Z [36;1m    "stargazers_url": "https://api.github.com/repos/jjgroenendijk/test-repo/stargazers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1471851Z [36;1m    "statuses_url": "https://api.github.com/repos/jjgroenendijk/test-repo/statuses/{sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1472637Z [36;1m    "subscribers_url": "https://api.github.com/repos/jjgroenendijk/test-repo/subscribers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1473674Z [36;1m    "subscription_url": "https://api.github.com/repos/jjgroenendijk/test-repo/subscription",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1474944Z [36;1m    "tags_url": "https://api.github.com/repos/jjgroenendijk/test-repo/tags",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1475927Z [36;1m    "teams_url": "https://api.github.com/repos/jjgroenendijk/test-repo/teams",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1477031Z [36;1m    "trees_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/trees{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1478252Z [36;1m    "url": "https://api.github.com/repos/jjgroenendijk/test-repo"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1479358Z [36;1m  },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1480132Z [36;1m  "head_sha": "d22a84131fefdb88cb3df855bae8621e5cef3ac3",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1481397Z [36;1m  "html_url": "https://github.com/jjgroenendijk/test-repo/actions/runs/21276009650",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1482508Z [36;1m  "id": 21276009650,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1483675Z [36;1m  "jobs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650/jobs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1485393Z [36;1m  "logs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650/logs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1486963Z [36;1m  "name": "CI",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1487904Z [36;1m  "node_id": "WFR_kwLOQ_IulM8AAAAE9CYksg",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1488925Z [36;1m  "path": ".github/workflows/ci.yml",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1489769Z [36;1m  "previous_attempt_url": null,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1490563Z [36;1m  "pull_requests": [],[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1491312Z [36;1m  "referenced_workflows": [],[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1492112Z [36;1m  "repository": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1493259Z [36;1m    "archive_url": "https://api.github.com/repos/jjgroenendijk/test-repo/{archive_format}{/ref}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1494848Z [36;1m    "assignees_url": "https://api.github.com/repos/jjgroenendijk/test-repo/assignees{/user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1495963Z [36;1m    "blobs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/blobs{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1497061Z [36;1m    "branches_url": "https://api.github.com/repos/jjgroenendijk/test-repo/branches{/branch}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1497921Z [36;1m    "collaborators_url": "https://api.github.com/repos/jjgroenendijk/test-repo/collaborators{/collaborator}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1498957Z [36;1m    "comments_url": "https://api.github.com/repos/jjgroenendijk/test-repo/comments{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1499738Z [36;1m    "commits_url": "https://api.github.com/repos/jjgroenendijk/test-repo/commits{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1500557Z [36;1m    "compare_url": "https://api.github.com/repos/jjgroenendijk/test-repo/compare/{base}...{head}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1501363Z [36;1m    "contents_url": "https://api.github.com/repos/jjgroenendijk/test-repo/contents/{+path}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1502153Z [36;1m    "contributors_url": "https://api.github.com/repos/jjgroenendijk/test-repo/contributors",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1502931Z [36;1m    "deployments_url": "https://api.github.com/repos/jjgroenendijk/test-repo/deployments",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1503545Z [36;1m    "description": null,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1504114Z [36;1m    "downloads_url": "https://api.github.com/repos/jjgroenendijk/test-repo/downloads",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1504841Z [36;1m    "events_url": "https://api.github.com/repos/jjgroenendijk/test-repo/events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1505401Z [36;1m    "fork": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1505914Z [36;1m    "forks_url": "https://api.github.com/repos/jjgroenendijk/test-repo/forks",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1506660Z [36;1m    "full_name": "jjgroenendijk/test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1507301Z [36;1m    "git_commits_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/commits{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1508079Z [36;1m    "git_refs_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/refs{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1508904Z [36;1m    "git_tags_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/tags{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1509615Z [36;1m    "hooks_url": "https://api.github.com/repos/jjgroenendijk/test-repo/hooks",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1510266Z [36;1m    "html_url": "https://github.com/jjgroenendijk/test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1510770Z [36;1m    "id": 1139945108,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1511375Z [36;1m    "issue_comment_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues/comments{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1512239Z [36;1m    "issue_events_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues/events{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1513052Z [36;1m    "issues_url": "https://api.github.com/repos/jjgroenendijk/test-repo/issues{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1513786Z [36;1m    "keys_url": "https://api.github.com/repos/jjgroenendijk/test-repo/keys{/key_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1514517Z [36;1m    "labels_url": "https://api.github.com/repos/jjgroenendijk/test-repo/labels{/name}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1515251Z [36;1m    "languages_url": "https://api.github.com/repos/jjgroenendijk/test-repo/languages",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1515967Z [36;1m    "merges_url": "https://api.github.com/repos/jjgroenendijk/test-repo/merges",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1516803Z [36;1m    "milestones_url": "https://api.github.com/repos/jjgroenendijk/test-repo/milestones{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1517422Z [36;1m    "name": "test-repo",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1517833Z [36;1m    "node_id": "R_kgDOQ_IulA",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1518592Z [36;1m    "notifications_url": "https://api.github.com/repos/jjgroenendijk/test-repo/notifications{?since,all,participating}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1519317Z [36;1m    "owner": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1519818Z [36;1m      "avatar_url": "https://avatars.githubusercontent.com/u/3110270?v=4",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1520505Z [36;1m      "events_url": "https://api.github.com/users/jjgroenendijk/events{/privacy}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1521196Z [36;1m      "followers_url": "https://api.github.com/users/jjgroenendijk/followers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1521921Z [36;1m      "following_url": "https://api.github.com/users/jjgroenendijk/following{/other_user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1522649Z [36;1m      "gists_url": "https://api.github.com/users/jjgroenendijk/gists{/gist_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1523211Z [36;1m      "gravatar_id": "",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1523659Z [36;1m      "html_url": "https://github.com/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1524115Z [36;1m      "id": 3110270,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1524494Z [36;1m      "login": "jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1524939Z [36;1m      "node_id": "MDQ6VXNlcjMxMTAyNzA=",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1525483Z [36;1m      "organizations_url": "https://api.github.com/users/jjgroenendijk/orgs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1526194Z [36;1m      "received_events_url": "https://api.github.com/users/jjgroenendijk/received_events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1526878Z [36;1m      "repos_url": "https://api.github.com/users/jjgroenendijk/repos",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1527380Z [36;1m      "site_admin": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1527938Z [36;1m      "starred_url": "https://api.github.com/users/jjgroenendijk/starred{/owner}{/repo}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1528736Z [36;1m      "subscriptions_url": "https://api.github.com/users/jjgroenendijk/subscriptions",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1529316Z [36;1m      "type": "User",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1529764Z [36;1m      "url": "https://api.github.com/users/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1530239Z [36;1m      "user_view_type": "public"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1530617Z [36;1m    },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1531025Z [36;1m    "private": true,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1531565Z [36;1m    "pulls_url": "https://api.github.com/repos/jjgroenendijk/test-repo/pulls{/number}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1532302Z [36;1m    "releases_url": "https://api.github.com/repos/jjgroenendijk/test-repo/releases{/id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1533045Z [36;1m    "stargazers_url": "https://api.github.com/repos/jjgroenendijk/test-repo/stargazers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1533787Z [36;1m    "statuses_url": "https://api.github.com/repos/jjgroenendijk/test-repo/statuses/{sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1534568Z [36;1m    "subscribers_url": "https://api.github.com/repos/jjgroenendijk/test-repo/subscribers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1535346Z [36;1m    "subscription_url": "https://api.github.com/repos/jjgroenendijk/test-repo/subscription",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1536058Z [36;1m    "tags_url": "https://api.github.com/repos/jjgroenendijk/test-repo/tags",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1536719Z [36;1m    "teams_url": "https://api.github.com/repos/jjgroenendijk/test-repo/teams",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1537428Z [36;1m    "trees_url": "https://api.github.com/repos/jjgroenendijk/test-repo/git/trees{/sha}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1538110Z [36;1m    "url": "https://api.github.com/repos/jjgroenendijk/test-repo"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1538686Z [36;1m  },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1539251Z [36;1m  "rerun_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650/rerun",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1539896Z [36;1m  "run_attempt": 1,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1540291Z [36;1m  "run_number": 19,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1540715Z [36;1m  "run_started_at": "2026-01-23T05:43:39Z",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1541242Z [36;1m  "status": "completed",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1541665Z [36;1m  "triggering_actor": {[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1542201Z [36;1m    "avatar_url": "https://avatars.githubusercontent.com/u/3110270?v=4",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1542890Z [36;1m    "events_url": "https://api.github.com/users/jjgroenendijk/events{/privacy}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1543606Z [36;1m    "followers_url": "https://api.github.com/users/jjgroenendijk/followers",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1544333Z [36;1m    "following_url": "https://api.github.com/users/jjgroenendijk/following{/other_user}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1545076Z [36;1m    "gists_url": "https://api.github.com/users/jjgroenendijk/gists{/gist_id}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1545646Z [36;1m    "gravatar_id": "",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1546113Z [36;1m    "html_url": "https://github.com/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1546592Z [36;1m    "id": 3110270,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1546988Z [36;1m    "login": "jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1547450Z [36;1m    "node_id": "MDQ6VXNlcjMxMTAyNzA=",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1548014Z [36;1m    "organizations_url": "https://api.github.com/users/jjgroenendijk/orgs",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1548803Z [36;1m    "received_events_url": "https://api.github.com/users/jjgroenendijk/received_events",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1549527Z [36;1m    "repos_url": "https://api.github.com/users/jjgroenendijk/repos",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1550060Z [36;1m    "site_admin": false,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1550637Z [36;1m    "starred_url": "https://api.github.com/users/jjgroenendijk/starred{/owner}{/repo}",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1551396Z [36;1m    "subscriptions_url": "https://api.github.com/users/jjgroenendijk/subscriptions",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1552001Z [36;1m    "type": "User",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1552468Z [36;1m    "url": "https://api.github.com/users/jjgroenendijk",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1552968Z [36;1m    "user_view_type": "public"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1553380Z [36;1m  },[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1553782Z [36;1m  "updated_at": "2026-01-23T05:44:22Z",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1554390Z [36;1m  "url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/runs/21276009650",[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1554990Z [36;1m  "workflow_id": 226161659,[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1555623Z [36;1m  "workflow_url": "https://api.github.com/repos/jjgroenendijk/test-repo/actions/workflows/226161659"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1556347Z [36;1m}' > workflow_run.json[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1556729Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1557089Z [36;1m# Extract PR numbers using jq[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1557600Z [36;1mPR_NUMBERS=$(jq -r '.pull_requests[]?.number' workflow_run.json)[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1558106Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1558610Z [36;1m# Fallback: Look up PR by head branch if payload is empty[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1559113Z [36;1mif [ -z "$PR_NUMBERS" ]; then[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1559599Z [36;1m  HEAD_BRANCH=$(jq -r '.head_branch' workflow_run.json)[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1560206Z [36;1m  echo "No PRs found in payload. Looking up PRs for branch: $HEAD_BRANCH"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1560912Z [36;1m  PR_NUMBERS=$(gh pr list --head "$HEAD_BRANCH" --state all --json number -q '.[].number')[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1561487Z [36;1mfi[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1561820Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1562169Z [36;1mif [ -z "$PR_NUMBERS" ]; then[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1562634Z [36;1m  echo "No PRs associated with this run."[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1563076Z [36;1m  exit 0[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1563414Z [36;1mfi[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1563743Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1564070Z [36;1m# Download logs[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1564568Z [36;1m# We use || true to prevent failure if logs are missing or retrieval fails[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1565301Z [36;1mgh run view "$RUN_ID" --log-failed > failed.log 2>&1 || echo "Failed to retrieve logs" > failed.log[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1565913Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1566253Z [36;1m# Extract snippet[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1566827Z [36;1mpython3 .github/scripts/extract_log.py failed.log > snippet.txt[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1567347Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1567704Z [36;1m# Read snippet into a variable.[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1568200Z [36;1m# We use EOF to handle multi-line strings safely in bash[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1568760Z [36;1mLOG_SNIPPET=$(cat snippet.txt)[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1569188Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1569539Z [36;1mfor PR_NUMBER in $PR_NUMBERS; do[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1570009Z [36;1m  echo "Creating issue for PR #$PR_NUMBER"[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1570451Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1570915Z [36;1m  # Construct body using echo to avoid YAML indentation issues with heredoc[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1571555Z [36;1m  echo "The CI check failed for PR #$PR_NUMBER." > issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1572064Z [36;1m  echo "" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1572513Z [36;1m  echo "**Log Snippet:**" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1572959Z [36;1m  echo "\`\`\`" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1573414Z [36;1m  cat snippet.txt >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1573854Z [36;1m  echo "\`\`\`" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1574269Z [36;1m  echo "" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1574932Z [36;1m  echo "[View Full Logs](https://github.com/jjgroenendijk/test-repo/actions/runs/$RUN_ID)" >> issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1575593Z [36;1m[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1575943Z [36;1m  gh issue create \[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1576400Z [36;1m    --repo jjgroenendijk/test-repo \[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1576878Z [36;1m    --title "CI Failure: PR #$PR_NUMBER" \[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1577349Z [36;1m    --body-file issue_body.md[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1577748Z [36;1mdone[0m
+report-failure	Report Failure	2026-01-23T05:44:30.1599630Z shell: /usr/bin/bash -e {0}
+report-failure	Report Failure	2026-01-23T05:44:30.1600064Z env:
+report-failure	Report Failure	2026-01-23T05:44:30.1600843Z   GH_TOKEN: ***
+report-failure	Report Failure	2026-01-23T05:44:30.1601208Z   RUN_ID: 21276009650
+report-failure	Report Failure	2026-01-23T05:44:30.1601568Z ##[endgroup]
+report-failure	Report Failure	2026-01-23T05:44:30.1704083Z No PRs found in payload. Looking up PRs for branch: test/verify-debug
+report-failure	Report Failure	2026-01-23T05:44:31.5004613Z Creating issue for PR #40
+report-failure	Report Failure	2026-01-23T05:44:32.2783599Z GraphQL: Resource not accessible by integration (createIssue.issue)
+report-failure	Report Failure	2026-01-23T05:44:32.2807739Z ##[error]Process completed with exit code 1.
+report-failure	Post Checkout code	﻿2026-01-23T05:44:32.2903608Z Post job cleanup.
+report-failure	Post Checkout code	2026-01-23T05:44:32.3792499Z [command]/usr/bin/git version
+report-failure	Post Checkout code	2026-01-23T05:44:32.3828585Z git version 2.52.0
+report-failure	Post Checkout code	2026-01-23T05:44:32.3869798Z Temporarily overriding HOME='/home/runner/work/_temp/ebfd7388-0ae7-4beb-8bd5-80ee2c7ca00e' before making global git config changes
+report-failure	Post Checkout code	2026-01-23T05:44:32.3872459Z Adding repository directory to the temporary git global config as a safe directory
+report-failure	Post Checkout code	2026-01-23T05:44:32.3888187Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/test-repo/test-repo
+report-failure	Post Checkout code	2026-01-23T05:44:32.3922274Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+report-failure	Post Checkout code	2026-01-23T05:44:32.3953334Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+report-failure	Post Checkout code	2026-01-23T05:44:32.4147315Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+report-failure	Post Checkout code	2026-01-23T05:44:32.4168806Z http.https://github.com/.extraheader
+report-failure	Post Checkout code	2026-01-23T05:44:32.4181369Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+report-failure	Post Checkout code	2026-01-23T05:44:32.4210663Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+report-failure	Post Checkout code	2026-01-23T05:44:32.4390035Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+report-failure	Post Checkout code	2026-01-23T05:44:32.4419400Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+report-failure	Complete job	﻿2026-01-23T05:44:32.4683527Z Cleaning up orphan processes
