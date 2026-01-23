@@ -64,21 +64,32 @@ class JulesClient:
 
         response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
+        session = response.json()
+
+        # Verify persistence
+        session_id = session.get("name")
+        if session_id:
+            print(f"Verifying session {session_id}...")
+            try:
+                self.get_session(session_id)
+                print("Session verification successful.")
+            except Exception as e:
+                print(f"Warning: Session created but verification failed: {e}")
+
+        return session
+
+    def get_session(self, session_id):
+        """Get session details."""
+        url = f"{JULES_API_BASE}/{session_id}"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
         return response.json()
 
     def send_message(self, session_id, message):
         """Send a message to an existing Jules session."""
-        # TODO: Update endpoint when documentation is available.
-        # Assuming pattern: POST /sessions/{session_id}/messages
-        # Note: session_id usually comes as "sessions/12345", so we handle that.
-
-        # If session_id is a full path, use it directly or append /messages?
-        # Typically Google APIs use resource names.
-        # Let's assume session_id is "sessions/xyz".
-
-        url = f"{JULES_API_BASE}/{session_id}/messages"
+        url = f"{JULES_API_BASE}/{session_id}:sendMessage"
         payload = {
-            "content": message
+            "prompt": message
         }
 
         response = requests.post(url, headers=self.headers, json=payload)
@@ -230,6 +241,8 @@ def main():
             print("Comment forwarded successfully.")
         except Exception as e:
             print(f"Error forwarding comment: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response Text: {e.response.text}")
             sys.exit(1)
 
     elif action == "opened":
@@ -268,8 +281,14 @@ def main():
 
         except Exception as e:
             print(f"An error occurred: {e}")
+            # Capture response text for detailed logging
+            response_text = ""
+            if hasattr(e, 'response') and e.response is not None:
+                response_text = f"\nAPI Error: {e.response.text}"
+                print(f"Response Text: {e.response.text}")
+
             # Try to post error
-            run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}"])
+            run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
             sys.exit(1)
 
 if __name__ == "__main__":
