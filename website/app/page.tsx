@@ -7,7 +7,8 @@ import {
   Terminal,
   Workflow,
   ShieldCheck,
-  Cpu
+  Cpu,
+  AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -166,8 +167,13 @@ export default function Home() {
                   <p className="text-gray-600 dark:text-gray-300 mb-2">
                     Ensure your repository allows GitHub Actions to create Pull Requests and Issues.
                   </p>
-                  <div className="glass p-4 rounded-xl text-sm border border-yellow-400/30 bg-yellow-500/5 text-yellow-900 dark:text-yellow-100">
-                    <strong>Note:</strong> Go to Settings &gt; Actions &gt; General &gt; Workflow permissions and select &quot;Read and write permissions&quot;.
+                  <div className="glass p-4 rounded-xl flex gap-3 items-start">
+                    <div className="p-2 bg-white/50 dark:bg-white/10 rounded-lg shrink-0">
+                      <AlertCircle className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                    </div>
+                    <div className="text-sm text-gray-700 dark:text-gray-300 pt-1">
+                      <strong>Note:</strong> Go to Settings &gt; Actions &gt; General &gt; Workflow permissions and select &quot;Read and write permissions&quot;.
+                    </div>
                   </div>
                 </div>
               </div>
