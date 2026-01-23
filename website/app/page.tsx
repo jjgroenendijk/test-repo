@@ -77,7 +77,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">Event Workflows</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                GitHub Actions (<code>jules.yml</code>) trigger on <code>issues: opened</code> and comments. They boostrap the environment using <code>uv</code> and execute the bridge script.
+                GitHub Actions (<code>run-agent.yml</code>) trigger on <code>issues: opened</code> and comments. They boostrap the environment using <code>uv</code> and execute the bridge script.
               </p>
             </div>
 
@@ -87,7 +87,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">Auto-Merge & Repair</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                Trusted PRs are automatically merged via <code>auto_merge_jules.yml</code>. If a conflict occurs, the system self-reports by opening a new issue to request Jules&apos; help.
+                Trusted PRs are automatically merged via <code>manage-pr-lifecycle.yml</code>. If a conflict occurs, the system self-reports by opening a new issue to request Jules&apos; help.
               </p>
             </div>
           </div>
@@ -142,10 +142,12 @@ export default function Home() {
                     <li>setup.sh</li>
                     <li>pyproject.toml</li>
                     <li>uv.lock</li>
-                    <li>.github/workflows/jules.yml</li>
-                    <li>.github/workflows/auto_merge_jules.yml</li>
-                    <li>.github/workflows/report_failure.yml</li>
+                    <li>.github/workflows/run-agent.yml</li>
+                    <li>.github/workflows/manage-pr-lifecycle.yml</li>
+                    <li>.github/workflows/report-ci-failure.yml</li>
+                    <li>.github/workflows/detect-merge-conflicts.yml</li>
                     <li>.github/scripts/extract_log.py</li>
+                    <li>.github/scripts/detect_merge_conflicts.py</li>
                   </ul>
                 </div>
               </div>
