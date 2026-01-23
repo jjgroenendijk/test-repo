@@ -65,17 +65,12 @@ class JulesClient:
 
     def send_message(self, session_id, message):
         """Send a message to an existing Jules session."""
-        # TODO: Update endpoint when documentation is available.
-        # Assuming pattern: POST /sessions/{session_id}/messages
-        # Note: session_id usually comes as "sessions/12345", so we handle that.
+        # Endpoint verified from documentation:
+        # POST /v1alpha/{session=sessions/*}:sendMessage
 
-        # If session_id is a full path, use it directly or append /messages?
-        # Typically Google APIs use resource names.
-        # Let's assume session_id is "sessions/xyz".
-
-        url = f"{JULES_API_BASE}/{session_id}/messages"
+        url = f"{JULES_API_BASE}/{session_id}:sendMessage"
         payload = {
-            "content": message
+            "prompt": message
         }
 
         response = requests.post(url, headers=self.headers, json=payload)
