@@ -1,2 +1,2 @@
 def test_fail():
-    assert False, "Verification 5"
+    assert False, "Debug verification"
