@@ -16,6 +16,7 @@ jobs:
       issues: write
       contents: read
       actions: read
+      pull-requests: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,7 +32,14 @@ jobs:
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
 
           # Extract PR numbers using jq
-          PR_NUMBERS=$(jq -r '.pull_requests[].number' workflow_run.json)
+          PR_NUMBERS=$(jq -r '.pull_requests[]?.number' workflow_run.json)
+
+          # Fallback: Look up PR by head branch if payload is empty
+          if [ -z "$PR_NUMBERS" ]; then
+            HEAD_BRANCH=$(jq -r '.head_branch' workflow_run.json)
+            echo "No PRs found in payload. Looking up PRs for branch: $HEAD_BRANCH"
+            PR_NUMBERS=$(gh pr list --head "$HEAD_BRANCH" --state all --json number -q '.[].number')
+          fi
 
           if [ -z "$PR_NUMBERS" ]; then
             echo "No PRs associated with this run."
@@ -52,19 +60,18 @@ jobs:
           for PR_NUMBER in $PR_NUMBERS; do
             echo "Creating issue for PR #$PR_NUMBER"
 
-            # Construct body using heredoc and cat to file
-            cat <<EOF > issue_body.md
-The CI check failed for PR #$PR_NUMBER.
-
-**Log Snippet:**
-\`\`\`
-$LOG_SNIPPET
-\`\`\`
-
-[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)
-EOF
+            # Construct body using echo to avoid YAML indentation issues with heredoc
+            echo "The CI check failed for PR #$PR_NUMBER." > issue_body.md
+            echo "" >> issue_body.md
+            echo "**Log Snippet:**" >> issue_body.md
+            echo "\`\`\`" >> issue_body.md
+            cat snippet.txt >> issue_body.md
+            echo "\`\`\`" >> issue_body.md
+            echo "" >> issue_body.md
+            echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
             gh issue create \
+              --repo ${{ github.repository }} \
               --title "CI Failure: PR #$PR_NUMBER" \
               --body-file issue_body.md
           done
