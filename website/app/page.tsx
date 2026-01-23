@@ -10,10 +10,15 @@ import {
   Cpu
 } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '../components/theme-toggle';
 
 export default function Home() {
   return (
     <div className="min-h-screen pb-20">
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Mesh Gradient Background */}
       <div className="mesh-bg" />
 
@@ -32,19 +37,19 @@ export default function Home() {
             <span className="text-sm font-medium text-gray-600">Autonomous Agent Active</span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight text-gray-900">
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tight text-gray-900 dark:text-white">
             Jules <span className="text-gradient">Autonomy</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mb-10 leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mb-10 leading-relaxed">
             A self-healing, self-improving software engineering system powered by Google Jules and GitHub Actions.
           </p>
 
           <div className="flex gap-4">
-            <Link href="#adaptation" className="glass hover:bg-white/60 text-gray-900 px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
+            <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
               Adapt to Your Repo <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="#architecture" className="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="#architecture" className="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
               View Architecture
             </Link>
           </div>
@@ -52,15 +57,15 @@ export default function Home() {
 
         {/* System Overview */}
         <section id="architecture" className="mb-32">
-          <h2 className="text-3xl font-bold mb-12 text-center text-gray-800">System Architecture</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center text-gray-800 dark:text-gray-100">System Architecture</h2>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="glass-card">
               <div className="bg-blue-100/50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                 <Bot className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-800">Jules Bridge</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">Jules Bridge</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 A Python script (<code>jules.py</code>) that acts as the brain. It listens to GitHub events, maintains session context, and communicates with the Google Jules API to generate code and plans.
               </p>
             </div>
@@ -69,8 +74,8 @@ export default function Home() {
               <div className="bg-purple-100/50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                 <Workflow className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-800">Event Workflows</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">Event Workflows</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 GitHub Actions (<code>jules.yml</code>) trigger on <code>issues: opened</code> and comments. They boostrap the environment using <code>uv</code> and execute the bridge script.
               </p>
             </div>
@@ -79,8 +84,8 @@ export default function Home() {
               <div className="bg-pink-100/50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                 <GitMerge className="w-6 h-6 text-pink-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-800">Auto-Merge & Repair</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">Auto-Merge & Repair</h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 Trusted PRs are automatically merged via <code>auto_merge_jules.yml</code>. If a conflict occurs, the system self-reports by opening a new issue to request Jules&apos; help.
               </p>
             </div>
@@ -90,28 +95,28 @@ export default function Home() {
           <div className="mt-16 glass p-8 rounded-2xl hidden md:block">
             <div className="flex justify-between items-center text-center">
               <div className="flex flex-col items-center gap-2">
-                <div className="p-4 bg-white/40 rounded-xl"><Github className="w-8 h-8 text-gray-700"/></div>
-                <span className="text-sm font-semibold text-gray-600">Issue Opened</span>
+                <div className="p-4 bg-white/40 dark:bg-white/10 rounded-xl"><Github className="w-8 h-8 text-gray-700 dark:text-gray-300"/></div>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Issue Opened</span>
               </div>
               <ArrowRight className="w-6 h-6 text-gray-400" />
               <div className="flex flex-col items-center gap-2">
-                <div className="p-4 bg-blue-100/40 rounded-xl"><Workflow className="w-8 h-8 text-blue-600"/></div>
-                <span className="text-sm font-semibold text-gray-600">Action Triggered</span>
+                <div className="p-4 bg-blue-100/40 dark:bg-blue-900/40 rounded-xl"><Workflow className="w-8 h-8 text-blue-600 dark:text-blue-400"/></div>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Action Triggered</span>
               </div>
               <ArrowRight className="w-6 h-6 text-gray-400" />
               <div className="flex flex-col items-center gap-2">
-                <div className="p-4 bg-purple-100/40 rounded-xl"><Cpu className="w-8 h-8 text-purple-600"/></div>
-                <span className="text-sm font-semibold text-gray-600">Jules API</span>
+                <div className="p-4 bg-purple-100/40 dark:bg-purple-900/40 rounded-xl"><Cpu className="w-8 h-8 text-purple-600 dark:text-purple-400"/></div>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Jules API</span>
               </div>
               <ArrowRight className="w-6 h-6 text-gray-400" />
               <div className="flex flex-col items-center gap-2">
-                <div className="p-4 bg-green-100/40 rounded-xl"><Code className="w-8 h-8 text-green-600"/></div>
-                <span className="text-sm font-semibold text-gray-600">PR Created</span>
+                <div className="p-4 bg-green-100/40 dark:bg-green-900/40 rounded-xl"><Code className="w-8 h-8 text-green-600 dark:text-green-400"/></div>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">PR Created</span>
               </div>
               <ArrowRight className="w-6 h-6 text-gray-400" />
               <div className="flex flex-col items-center gap-2">
-                <div className="p-4 bg-pink-100/40 rounded-xl"><ShieldCheck className="w-8 h-8 text-pink-600"/></div>
-                <span className="text-sm font-semibold text-gray-600">Auto Merge</span>
+                <div className="p-4 bg-pink-100/40 dark:bg-pink-900/40 rounded-xl"><ShieldCheck className="w-8 h-8 text-pink-600 dark:text-pink-400"/></div>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Auto Merge</span>
               </div>
             </div>
           </div>
@@ -120,18 +125,18 @@ export default function Home() {
         {/* Adaptation Guide */}
         <section id="adaptation" className="max-w-4xl mx-auto">
           <div className="glass-card">
-            <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center gap-3">
-              <Terminal className="w-8 h-8 text-gray-700" />
+            <h2 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white flex items-center gap-3">
+              <Terminal className="w-8 h-8 text-gray-700 dark:text-gray-300" />
               Adaptation Guide
             </h2>
 
             <div className="space-y-8">
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold">1</div>
+                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">1</div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Copy Core Files</h3>
-                  <p className="text-gray-600 mb-3">Copy the following files to your repository:</p>
-                  <ul className="bg-white/30 p-4 rounded-xl font-mono text-sm text-gray-700 space-y-2">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Copy Core Files</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-3">Copy the following files to your repository:</p>
+                  <ul className="bg-white/30 dark:bg-white/5 p-4 rounded-xl font-mono text-sm text-gray-700 dark:text-gray-300 space-y-2">
                     <li>jules.py</li>
                     <li>setup.sh</li>
                     <li>pyproject.toml</li>
@@ -145,33 +150,33 @@ export default function Home() {
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold">2</div>
+                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">2</div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Configure Secrets</h3>
-                  <p className="text-gray-600">
-                    Add the <code className="bg-white/50 px-2 py-1 rounded border border-gray-200">GOOGLE_JULES_API</code> secret to your GitHub repository settings. This key authenticates requests to the Jules backend.
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Configure Secrets</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Add the <code className="bg-white/50 dark:bg-white/10 px-2 py-1 rounded border border-gray-200 dark:border-gray-700">GOOGLE_JULES_API</code> secret to your GitHub repository settings. This key authenticates requests to the Jules backend.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold">3</div>
+                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">3</div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Install Dependencies</h3>
-                  <p className="text-gray-600 mb-2">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Configure Permissions</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">
                     Ensure your repository allows GitHub Actions to create Pull Requests and Issues.
                   </p>
-                  <div className="bg-yellow-50/50 border border-yellow-200 p-4 rounded-xl text-sm text-yellow-800">
+                  <div className="glass p-4 rounded-xl text-sm border border-yellow-400/30 bg-yellow-500/5 text-yellow-900 dark:text-yellow-100">
                     <strong>Note:</strong> Go to Settings &gt; Actions &gt; General &gt; Workflow permissions and select &quot;Read and write permissions&quot;.
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold">4</div>
+                <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">4</div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">Connect to Jules Source</h3>
-                  <p className="text-gray-600">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Connect to Jules Source</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
                     Install the Jules GitHub App on your repository so the API can discover the &quot;Source&quot; (your codebase) and index it.
                   </p>
                 </div>
