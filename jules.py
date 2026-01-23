@@ -35,8 +35,12 @@ class JulesClient:
         # Structure: {"githubRepo": {"owner": "...", "repo": "..."}}
         for source in sources:
             gh_repo = source.get("githubRepo", {})
-            if (gh_repo.get("owner").lower() == repo_owner.lower() and
-                gh_repo.get("repo").lower() == repo_name.lower()):
+            owner = gh_repo.get("owner")
+            repo = gh_repo.get("repo")
+
+            if owner and repo and \
+               owner.lower() == repo_owner.lower() and \
+               repo.lower() == repo_name.lower():
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
@@ -212,7 +216,7 @@ def main():
 
             # Create Session
             print(f"Creating Session with Source: {source_name}")
-            session = client.create_session(source_name, prompt=body, title=title)
+            session = client.create_session(source_name, prompt=body or "", title=title)
             session_id = session.get("name") # e.g. "sessions/12345"
 
             # 4. Post Success Comment
