@@ -5,6 +5,11 @@
   --foreground: #171717;
 }
 
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -23,11 +28,11 @@ body {
 /* Liquid Glass Utilities */
 @layer utilities {
   .glass, .glass-card {
-    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-xl;
+    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-xl dark:bg-black/40 dark:border-white/10;
   }
 
   .glass-card {
-    @apply rounded-2xl p-6 transition-all duration-300 hover:bg-white/50 hover:scale-[1.02] hover:shadow-2xl;
+    @apply rounded-2xl p-6 transition-all duration-300 hover:bg-white/50 hover:scale-[1.02] hover:shadow-2xl dark:hover:bg-white/10;
   }
 
   .text-gradient {
@@ -53,6 +58,11 @@ body {
     radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%);
   filter: blur(60px);
   opacity: 0.8;
+}
+
+.dark .mesh-bg {
+  background-color: #000000;
+  opacity: 0.4;
 }
 
 /* Animation for floating elements */
