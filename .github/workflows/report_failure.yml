@@ -71,8 +71,16 @@ jobs:
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
-            gh issue create \
+            # Capture output
+            ISSUE_URL=$(gh issue create \
               --repo ${{ github.repository }} \
               --title "CI Failure: PR #$PR_NUMBER" \
-              --body-file issue_body.md
+              --body-file issue_body.md)
+
+            echo "Created issue: $ISSUE_URL"
+            # Extract number from URL (e.g., https://github.com/owner/repo/issues/123 -> 123)
+            ISSUE_NUMBER=${ISSUE_URL##*/}
+
+            echo "Triggering Jules for issue #$ISSUE_NUMBER..."
+            gh workflow run jules.yml -f issue_number="$ISSUE_NUMBER"
           done

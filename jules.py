@@ -35,8 +35,12 @@ class JulesClient:
         # Structure: {"githubRepo": {"owner": "...", "repo": "..."}}
         for source in sources:
             gh_repo = source.get("githubRepo", {})
-            if (gh_repo.get("owner").lower() == repo_owner.lower() and
-                gh_repo.get("repo").lower() == repo_name.lower()):
+            owner = gh_repo.get("owner")
+            repo = gh_repo.get("repo")
+
+            if owner and repo and \
+               owner.lower() == repo_owner.lower() and \
+               repo.lower() == repo_name.lower():
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
@@ -147,15 +151,40 @@ def main():
         print("No event data found. Exiting.")
         sys.exit(1)
 
-    action = event_data.get("action")
-    if action not in ["opened", "created"]:
-        print(f"Skipping action: {action}")
-        sys.exit(0)
+    # Handle workflow_dispatch (Manual Trigger)
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        print("Triggered via workflow_dispatch.")
+        issue_number = event_data.get("inputs", {}).get("issue_number")
+        if not issue_number:
+            print("Error: issue_number input is missing.")
+            sys.exit(1)
 
-    issue = event_data.get("issue", {})
-    issue_number = issue.get("number")
-    title = issue.get("title")
-    body = issue.get("body")
+        # Fetch issue details
+        print(f"Fetching details for Issue #{issue_number}...")
+        try:
+            cmd = ["gh", "issue", "view", str(issue_number), "--json", "title,body"]
+            output = run_command(cmd)
+            issue_data = json.loads(output)
+            title = issue_data.get("title")
+            body = issue_data.get("body")
+
+            # Simulate 'opened' action to trigger session creation
+            action = "opened"
+        except Exception as e:
+            print(f"Error fetching issue details: {e}")
+            sys.exit(1)
+
+    else:
+        # Standard Event Handling
+        action = event_data.get("action")
+        if action not in ["opened", "created"]:
+            print(f"Skipping action: {action}")
+            sys.exit(0)
+
+        issue = event_data.get("issue", {})
+        issue_number = issue.get("number")
+        title = issue.get("title")
+        body = issue.get("body")
     # user = issue.get("user", {}).get("login")
 
     # Get current repo info from Env (Standard GitHub Actions env var)
@@ -212,7 +241,7 @@ def main():
 
             # Create Session
             print(f"Creating Session with Source: {source_name}")
-            session = client.create_session(source_name, prompt=body, title=title)
+            session = client.create_session(source_name, prompt=body or "", title=title)
             session_id = session.get("name") # e.g. "sessions/12345"
 
             # 4. Post Success Comment
