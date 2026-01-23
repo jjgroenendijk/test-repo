@@ -151,15 +151,44 @@ def main():
         print("No event data found. Exiting.")
         sys.exit(1)
 
-    action = event_data.get("action")
-    if action not in ["opened", "created"]:
-        print(f"Skipping action: {action}")
-        sys.exit(0)
+    event_name = os.environ.get("GITHUB_EVENT_NAME")
 
-    issue = event_data.get("issue", {})
-    issue_number = issue.get("number")
-    title = issue.get("title")
-    body = issue.get("body")
+    if event_name == "workflow_dispatch":
+        print("Triggered by workflow_dispatch")
+        inputs = event_data.get("inputs", {})
+        issue_number = inputs.get("issue_number")
+        if not issue_number:
+            print("Error: issue_number input missing.")
+            sys.exit(1)
+
+        # Fetch issue details
+        print(f"Fetching details for issue #{issue_number}")
+        cmd = ["gh", "issue", "view", str(issue_number), "--json", "title,body,number"]
+        output = run_command(cmd)
+        if not output:
+             print(f"Error: Could not fetch details for issue #{issue_number}")
+             sys.exit(1)
+
+        try:
+             issue_data = json.loads(output)
+             title = issue_data.get("title")
+             body = issue_data.get("body")
+             # Ensure issue_number is int if needed, though we used string in cmd
+        except json.JSONDecodeError:
+             print("Error parsing issue details JSON")
+             sys.exit(1)
+
+        action = "opened" # Simulate opened event
+    else:
+        action = event_data.get("action")
+        if action not in ["opened", "created"]:
+            print(f"Skipping action: {action}")
+            sys.exit(0)
+
+        issue = event_data.get("issue", {})
+        issue_number = issue.get("number")
+        title = issue.get("title")
+        body = issue.get("body")
     # user = issue.get("user", {}).get("login")
 
     # Get current repo info from Env (Standard GitHub Actions env var)

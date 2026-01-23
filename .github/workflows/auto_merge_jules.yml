@@ -17,6 +17,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,6 +43,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          gh issue create \
+          ISSUE_URL=$(gh issue create \
             --title "Merge Conflict: PR #${PR_NUMBER}" \
-            --body "The auto-merge workflow failed to merge PR #${PR_NUMBER}. A Jules session is requested to resolve this."
+            --body "The auto-merge workflow failed to merge PR #${PR_NUMBER}. A Jules session is requested to resolve this.")
+
+          # Extract issue number from URL (last part)
+          ISSUE_NUMBER=${ISSUE_URL##*/}
+
+          echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
+          gh workflow run jules.yml -f issue_number="$ISSUE_NUMBER"

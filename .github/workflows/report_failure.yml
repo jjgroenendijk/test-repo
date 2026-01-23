@@ -15,7 +15,7 @@ jobs:
     permissions:
       issues: write
       contents: read
-      actions: read
+      actions: write
       pull-requests: read
     steps:
       - name: Checkout code
@@ -70,8 +70,14 @@ jobs:
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
-            gh issue create \
+            ISSUE_URL=$(gh issue create \
               --repo ${{ github.repository }} \
               --title "CI Failure: PR #$PR_NUMBER" \
-              --body-file issue_body.md
+              --body-file issue_body.md)
+
+            # Extract issue number from URL (last part)
+            ISSUE_NUMBER=${ISSUE_URL##*/}
+
+            echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
+            gh workflow run jules.yml -f issue_number="$ISSUE_NUMBER"
           done
