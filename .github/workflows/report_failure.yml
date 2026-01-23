@@ -23,16 +23,6 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Debug Permissions
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh auth status
-          echo "Checking repo access..."
-          gh repo view
-          echo "Checking issue read access..."
-          gh issue list --limit 1
-
       - name: Report Failure
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
