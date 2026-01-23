@@ -46,13 +46,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          ISSUE_URL=$(gh issue create \
-            --title "Merge Conflict: PR #${PR_NUMBER}" \
-            --body "The auto-merge workflow failed to merge PR #${PR_NUMBER}. A Jules session is requested to resolve this.")
-
-          # Extract issue number from URL (last part)
-          ISSUE_NUMBER=${ISSUE_URL##*/}
-
-          echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
-          gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER"
+        run: python3 .github/scripts/detect_merge_conflicts.py --pr-number "$PR_NUMBER"
