@@ -1,4 +1,4 @@
-name: Jules Agent
+name: Run Agent
 
 on:
   issues:
@@ -14,6 +14,7 @@ on:
 jobs:
   jules_respond:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       issues: write
       contents: read
