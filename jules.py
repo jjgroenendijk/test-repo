@@ -123,10 +123,11 @@ def find_session_id(issue_number):
     try:
         data = json.loads(output)
         comments = data.get("comments", [])
+        pattern = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
         for comment in comments:
             body = comment.get("body", "")
             # Look for "- **Session ID:** `sessions/12345`"
-            match = re.search(r"\*\*Session ID:\*\* `(sessions/[^`]+)`", body)
+            match = pattern.search(body)
             if match:
                 return match.group(1)
     except json.JSONDecodeError:
