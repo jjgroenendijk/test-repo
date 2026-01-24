@@ -16,7 +16,16 @@ import { ThemeToggle } from '../components/theme-toggle';
 export default function Home() {
   return (
     <div className="min-h-screen pb-20">
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-4">
+        <Link
+          href="https://github.com/jjgroenendijk/test-repo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer text-gray-700 dark:text-gray-200"
+          aria-label="View source on GitHub"
+        >
+          <Github className="h-5 w-5" />
+        </Link>
         <ThemeToggle />
       </div>
 
