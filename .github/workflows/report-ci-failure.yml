@@ -71,14 +71,27 @@ jobs:
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
+            # Create issue - capture both success and failure
             ISSUE_URL=$(gh issue create \
               --repo ${{ github.repository }} \
-              --title "CI Failure: PR #$PR_NUMBER" \
-              --body-file issue_body.md)
+              --title "$TITLE" \
+              --body-file issue_body.md 2>&1) || true
 
-            # Extract issue number from URL (last part)
-            ISSUE_NUMBER=${ISSUE_URL##*/}
-
-            echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
-            gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER"
+            # Check if issue was created (may succeed despite GraphQL error)
+            if [[ "$ISSUE_URL" == *"/issues/"* ]]; then
+              ISSUE_NUMBER=${ISSUE_URL##*/}
+              echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
+              gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER" || echo "Warning: Failed to trigger Jules workflow"
+            else
+              # Issue creation might have failed but issue could exist - search for it
+              sleep 2
+              CREATED_ISSUE=$(gh issue list --search "$TITLE in:title is:issue is:open" --json number -q '.[0].number')
+              if [ -n "$CREATED_ISSUE" ]; then
+                echo "Found issue #$CREATED_ISSUE (created despite error). Triggering Jules..."
+                gh workflow run run-agent.yml -f issue_number="$CREATED_ISSUE" || echo "Warning: Failed to trigger Jules workflow"
+              else
+                echo "::error::Failed to create or find issue for PR #$PR_NUMBER"
+                echo "Error output: $ISSUE_URL"
+              fi
+            fi
           done

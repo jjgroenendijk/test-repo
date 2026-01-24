@@ -85,16 +85,34 @@ def check_and_report_conflict(pr):
     cmd = f'gh issue create --title "{title_search}" --body "{body}"'
     issue_url = run_command(cmd)
 
-    if issue_url:
+    issue_number = None
+    if issue_url and '/issues/' in issue_url:
         # Extract issue number. URL format: https://github.com/owner/repo/issues/123
         issue_number = issue_url.strip().split('/')[-1]
         print(f"Created issue #{issue_number}. Triggering Jules...")
-
-        # Trigger run-agent.yml
-        trigger_cmd = f'gh workflow run run-agent.yml -f issue_number="{issue_number}"'
-        run_command(trigger_cmd)
+    elif issue_url is None:
+        # Issue creation may have failed but issue might exist - search for it
+        print("Issue creation command failed. Searching for recently created issue...")
+        time.sleep(2)
+        search_cmd = f'gh issue list --search "{title_search} in:title is:issue is:open" --json number -q ".[0].number"'
+        search_output = run_command(search_cmd)
+        if search_output:
+            issue_number = search_output.strip()
+            print(f"Found issue #{issue_number} (created despite error). Triggering Jules...")
+        else:
+            print(f"ERROR: Failed to create or find issue for PR #{number}")
+            return
     else:
-        print("Failed to create issue.")
+        print(f"Unexpected response from issue create: {issue_url}")
+        return
+
+    # Trigger run-agent.yml
+    trigger_cmd = f'gh workflow run run-agent.yml -f issue_number="{issue_number}"'
+    trigger_result = run_command(trigger_cmd)
+    if trigger_result is None:
+        print(f"Warning: Failed to trigger Jules workflow for issue #{issue_number}")
+    else:
+        print(f"Successfully triggered Jules workflow for issue #{issue_number}")
 
 def main():
     parser = argparse.ArgumentParser(description='Detect merge conflicts in PRs.')
