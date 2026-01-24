@@ -46,8 +46,8 @@ export default function Home() {
             A self-healing, self-improving software engineering system powered by Google Jules and GitHub Actions.
           </p>
 
-          <div className="flex gap-4">
-            <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
               Adapt to Your Repo <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="#architecture" className="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
@@ -134,10 +134,10 @@ export default function Home() {
             <div className="space-y-8">
               <div className="flex gap-4">
                 <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">1</div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Copy Core Files</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-3">Copy the following files to your repository:</p>
-                  <ul className="bg-white/30 dark:bg-white/5 p-4 rounded-xl font-mono text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                  <p className="text-gray-600 dark:text-gray-300 mb-3 break-words">Copy the following files to your repository:</p>
+                  <ul className="bg-white/30 dark:bg-white/5 p-4 rounded-xl font-mono text-sm text-gray-700 dark:text-gray-300 space-y-2 break-all w-full overflow-hidden">
                     <li>jules.py</li>
                     <li>setup.sh</li>
                     <li>pyproject.toml</li>
@@ -154,9 +154,9 @@ export default function Home() {
 
               <div className="flex gap-4">
                 <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">2</div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Configure Secrets</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-gray-600 dark:text-gray-300 break-words">
                     Add the <code className="bg-white/50 dark:bg-white/10 px-2 py-1 rounded border border-gray-200 dark:border-gray-700">GOOGLE_JULES_API</code> secret to your GitHub repository settings. This key authenticates requests to the Jules backend.
                   </p>
                 </div>
@@ -164,9 +164,9 @@ export default function Home() {
 
               <div className="flex gap-4">
                 <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">3</div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Configure Permissions</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-gray-600 dark:text-gray-300 mb-2 break-words">
                     Ensure your repository allows GitHub Actions to create Pull Requests and Issues.
                   </p>
                   <div className="glass p-4 rounded-xl flex gap-3 items-start">
@@ -182,9 +182,9 @@ export default function Home() {
 
               <div className="flex gap-4">
                 <div className="flex-none w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold dark:bg-white dark:text-black">4</div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Connect to Jules Source</h3>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-gray-600 dark:text-gray-300 break-words">
                     Install the Jules GitHub App on your repository so the API can discover the &quot;Source&quot; (your codebase) and index it.
                   </p>
                 </div>
