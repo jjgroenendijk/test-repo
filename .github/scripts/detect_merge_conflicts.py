@@ -4,6 +4,7 @@ import subprocess
 import time
 import sys
 import os
+import re
 
 def run_command(command):
     try:
@@ -96,6 +97,68 @@ def check_and_report_conflict(pr):
     else:
         print("Failed to create issue.")
 
+def cleanup_stale_issues():
+    print("Checking for stale conflict issues...")
+    # Search for all open issues with "Merge Conflict: PR #" in title
+    repo_qualifier = ""
+    if "GITHUB_REPOSITORY" in os.environ:
+        repo_qualifier = f"repo:{os.environ['GITHUB_REPOSITORY']} "
+
+    search_query = f'{repo_qualifier}"Merge Conflict: PR #" in:title is:issue is:open'
+    search_query_escaped = search_query.replace('"', '\\"')
+
+    cmd = f'gh issue list --search "{search_query_escaped}" --json number,title'
+    output = run_command(cmd)
+
+    if not output:
+        return
+
+    try:
+        issues = json.loads(output)
+    except json.JSONDecodeError:
+        print("Error parsing issue list json")
+        return
+
+    for issue in issues:
+        title = issue['title']
+        match = re.search(r"Merge Conflict: PR #(\d+)", title)
+        if match:
+            pr_number = match.group(1)
+            print(f"Checking status of PR #{pr_number} for Issue #{issue['number']}...")
+
+            # Check PR status
+            pr = get_pr_details(pr_number)
+
+            should_close = False
+            comment = ""
+
+            if not pr:
+                should_close = True
+                comment = "Closing this issue because the associated PR seems to be deleted or inaccessible."
+            else:
+                state = pr.get('state', 'UNKNOWN')
+                mergeable = pr.get('mergeable', 'UNKNOWN')
+
+                if state in ['MERGED', 'CLOSED']:
+                    should_close = True
+                    comment = f"Closing this issue because PR #{pr_number} is {state}."
+                else:
+                    # Retry UNKNOWN once
+                    if mergeable == 'UNKNOWN':
+                        time.sleep(2)
+                        updated_pr = get_pr_details(pr_number)
+                        if updated_pr:
+                            mergeable = updated_pr.get('mergeable', 'UNKNOWN')
+
+                    if mergeable != 'CONFLICTING' and mergeable != 'UNKNOWN':
+                        should_close = True
+                        comment = f"Closing this issue because PR #{pr_number} no longer has conflicts (Status: {mergeable})."
+
+            if should_close:
+                print(f"Closing Issue #{issue['number']}: {comment}")
+                run_command(f'gh issue comment {issue["number"]} --body "{comment}"')
+                run_command(f'gh issue close {issue["number"]}')
+
 def main():
     parser = argparse.ArgumentParser(description='Detect merge conflicts in PRs.')
     parser.add_argument('--pr-number', type=int, help='Specific PR number to check')
@@ -114,6 +177,8 @@ def main():
         prs = list_open_prs()
         for pr in prs:
             check_and_report_conflict(pr)
+
+        cleanup_stale_issues()
 
 if __name__ == "__main__":
     main()
