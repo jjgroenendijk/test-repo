@@ -33,26 +33,49 @@ class JulesClient:
         sources = self.list_sources()
         # Look for a match in the source metadata
         # Structure: {"githubRepo": {"owner": "...", "repo": "..."}}
+        target_owner = repo_owner.lower()
+        target_repo = repo_name.lower()
+
         for source in sources:
             gh_repo = source.get("githubRepo", {})
             owner = gh_repo.get("owner")
             repo = gh_repo.get("repo")
 
             if owner and repo and \
-               owner.lower() == repo_owner.lower() and \
-               repo.lower() == repo_name.lower():
+               owner.lower() == target_owner and \
+               repo.lower() == target_repo:
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
+    def get_default_branch(self):
+        """Get the default branch of the repository."""
+        print("Fetching default branch...")
+        cmd = ["gh", "repo", "view", "--json", "defaultBranchRef"]
+        output = run_command(cmd)
+        if output:
+            try:
+                data = json.loads(output)
+                branch = data.get("defaultBranchRef", {}).get("name")
+                if branch:
+                    print(f"Default branch identified: {branch}")
+                    return branch
+            except json.JSONDecodeError:
+                print("Error parsing default branch JSON")
+
+        print("Warning: Could not determine default branch. Defaulting to 'main'.")
+        return "main"
+
     def create_session(self, source_name, prompt, title):
         """Create a new Jules session."""
+        starting_branch = self.get_default_branch()
+
         url = f"{JULES_API_BASE}/sessions"
         payload = {
             "prompt": prompt,
             "sourceContext": {
                 "source": source_name,
                 "githubRepoContext": {
-                    "startingBranch": "main" # Defaulting to main for now
+                    "startingBranch": starting_branch
                 }
             },
             "automationMode": "AUTO_CREATE_PR",
@@ -61,13 +84,29 @@ class JulesClient:
 
         response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
+        session = response.json()
+
+        # Verify persistence
+        session_id = session.get("name")
+        if session_id:
+            print(f"Verifying session {session_id}...")
+            try:
+                self.get_session(session_id)
+                print("Session verification successful.")
+            except Exception as e:
+                print(f"Warning: Session created but verification failed: {e}")
+
+        return session
+
+    def get_session(self, session_id):
+        """Get session details."""
+        url = f"{JULES_API_BASE}/{session_id}"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
         return response.json()
 
     def send_message(self, session_id, message):
         """Send a message to an existing Jules session."""
-        # Endpoint verified from documentation:
-        # POST /v1alpha/{session=sessions/*}:sendMessage
-
         url = f"{JULES_API_BASE}/{session_id}:sendMessage"
         payload = {
             "prompt": message
@@ -115,10 +154,11 @@ def find_session_id(issue_number):
     try:
         data = json.loads(output)
         comments = data.get("comments", [])
+        pattern = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
         for comment in comments:
             body = comment.get("body", "")
             # Look for "- **Session ID:** `sessions/12345`"
-            match = re.search(r"\*\*Session ID:\*\* `(sessions/[^`]+)`", body)
+            match = pattern.search(body)
             if match:
                 return match.group(1)
     except json.JSONDecodeError:
@@ -221,6 +261,8 @@ def main():
             print("Comment forwarded successfully.")
         except Exception as e:
             print(f"Error forwarding comment: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response Text: {e.response.text}")
             sys.exit(1)
 
     elif action == "opened":
@@ -259,8 +301,17 @@ def main():
 
         except Exception as e:
             print(f"An error occurred: {e}")
+            # Capture response text for detailed logging
+            response_text = ""
+            if hasattr(e, 'response') and e.response is not None:
+                response_text = f"\nAPI Error: {e.response.text}"
+                print(f"Response Text: {e.response.text}")
+
             # Try to post error
-            run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}"])
+            try:
+                run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
+            except Exception as comment_err:
+                print(f"Error posting failure comment: {comment_err}")
             sys.exit(1)
 
 if __name__ == "__main__":

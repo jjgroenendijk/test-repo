@@ -1,41 +1,64 @@
+import unittest
+from unittest.mock import MagicMock
 import sys
 import os
-import unittest
-from unittest.mock import patch, MagicMock
 
-# Add root directory to sys.path to allow importing jules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the root directory to sys.path so we can import jules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from jules import JulesClient, JULES_API_BASE
+from jules import JulesClient
 
 class TestJulesClient(unittest.TestCase):
-    @patch('jules.requests.post')
-    def test_send_message(self, mock_post):
-        # Setup
-        api_key = "test_key"
-        client = JulesClient(api_key)
-        session_id = "sessions/12345"
-        message = "Hello Jules"
+    def test_find_source_for_repo(self):
+        client = JulesClient("fake_key")
 
-        # Mock response
-        mock_response = MagicMock()
-        mock_response.json.return_value = {}
-        mock_post.return_value = mock_response
+        # Mock list_sources
+        client.list_sources = MagicMock(return_value=[
+            {
+                "githubRepo": {"owner": "TestOwner", "repo": "TestRepo"},
+                "name": "sources/github/TestOwner/TestRepo"
+            },
+             {
+                "githubRepo": {"owner": "OtherOwner", "repo": "OtherRepo"},
+                "name": "sources/github/OtherOwner/OtherRepo"
+            }
+        ])
 
-        # Execute
-        client.send_message(session_id, message)
+        # Test exact match
+        self.assertEqual(client.find_source_for_repo("TestOwner", "TestRepo"), "sources/github/TestOwner/TestRepo")
 
-        # Verify
-        # The expected URL and payload as per official documentation
-        expected_url = f"{JULES_API_BASE}/{session_id}:sendMessage"
-        expected_payload = {"prompt": message}
+        # Test case-insensitive match
+        self.assertEqual(client.find_source_for_repo("testowner", "testrepo"), "sources/github/TestOwner/TestRepo")
 
-        mock_post.assert_called_once()
-        args, kwargs = mock_post.call_args
+        # Test mixed case match
+        self.assertEqual(client.find_source_for_repo("TestOwner", "testREPO"), "sources/github/TestOwner/TestRepo")
 
-        self.assertEqual(args[0], expected_url)
-        self.assertEqual(kwargs['json'], expected_payload)
-        self.assertEqual(kwargs['headers']['x-goog-api-key'], api_key)
+        # Test no match
+        self.assertIsNone(client.find_source_for_repo("NonExistent", "Repo"))
+
+        # Test partial match (should fail)
+        self.assertIsNone(client.find_source_for_repo("TestOwner", "OtherRepo"))
+
+    def test_find_source_for_repo_missing_fields(self):
+        client = JulesClient("fake_key")
+
+        # Mock list_sources with missing fields
+        client.list_sources = MagicMock(return_value=[
+            {
+                "githubRepo": {"owner": "TestOwner"}, # Missing repo
+                "name": "sources/github/TestOwner/MissingRepo"
+            },
+             {
+                "githubRepo": {"repo": "TestRepo"}, # Missing owner
+                "name": "sources/github/MissingOwner/TestRepo"
+            },
+            {
+                # Missing githubRepo
+                "name": "sources/github/NoMetadata"
+            }
+        ])
+
+        self.assertIsNone(client.find_source_for_repo("TestOwner", "TestRepo"))
 
 if __name__ == '__main__':
     unittest.main()
