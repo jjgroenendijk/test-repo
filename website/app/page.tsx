@@ -46,8 +46,8 @@ export default function Home() {
             A self-healing, self-improving software engineering system powered by Google Jules and GitHub Actions.
           </p>
 
-          <div className="flex gap-4">
-            <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
               Adapt to Your Repo <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="#architecture" className="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
@@ -137,7 +137,7 @@ export default function Home() {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Copy Core Files</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-3 break-words">Copy the following files to your repository:</p>
-                  <ul className="bg-white/30 dark:bg-white/5 p-4 rounded-xl font-mono text-sm text-gray-700 dark:text-gray-300 space-y-2 break-all">
+                  <ul className="bg-white/30 dark:bg-white/5 p-4 rounded-xl font-mono text-sm text-gray-700 dark:text-gray-300 space-y-2 break-all w-full overflow-hidden">
                     <li>jules.py</li>
                     <li>setup.sh</li>
                     <li>pyproject.toml</li>
