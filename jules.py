@@ -23,26 +23,10 @@ class JulesClient:
 
     def list_sources(self):
         """List all available sources."""
-        sources = []
         url = f"{JULES_API_BASE}/sources"
-        params = {}
-
-        while True:
-            response = requests.get(url, headers=self.headers, params=params.copy())
-            response.raise_for_status()
-            data = response.json()
-
-            page_sources = data.get("sources", [])
-            sources.extend(page_sources)
-            print(f"Fetched {len(page_sources)} sources.")
-
-            next_page_token = data.get("nextPageToken")
-            if not next_page_token:
-                break
-            params["pageToken"] = next_page_token
-
-        print(f"Total sources found: {len(sources)}")
-        return sources
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json().get("sources", [])
 
     def find_source_for_repo(self, repo_owner, repo_name):
         """Find the Jules source ID for a specific GitHub repo."""
@@ -63,42 +47,21 @@ class JulesClient:
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
-    def get_default_branch(self):
-        """Get the default branch of the repository."""
-        print("Fetching default branch...")
-        cmd = ["gh", "repo", "view", "--json", "defaultBranchRef"]
-        output = run_command(cmd)
-        if output:
-            try:
-                data = json.loads(output)
-                branch = data.get("defaultBranchRef", {}).get("name")
-                if branch:
-                    print(f"Default branch identified: {branch}")
-                    return branch
-            except json.JSONDecodeError:
-                print("Error parsing default branch JSON")
-
-        print("Warning: Could not determine default branch. Defaulting to 'main'.")
-        return "main"
-
     def create_session(self, source_name, prompt, title):
         """Create a new Jules session."""
-        starting_branch = self.get_default_branch()
-
         url = f"{JULES_API_BASE}/sessions"
         payload = {
             "prompt": prompt,
             "sourceContext": {
                 "source": source_name,
                 "githubRepoContext": {
-                    "startingBranch": starting_branch
+                    "startingBranch": "main" # Defaulting to main for now
                 }
             },
             "automationMode": "AUTO_CREATE_PR",
             "title": title
         }
 
-        print(f"Creating session with payload: {json.dumps(payload, indent=2)}")
         response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
         session = response.json()
@@ -325,10 +288,7 @@ def main():
                 print(f"Response Text: {e.response.text}")
 
             # Try to post error
-            try:
-                run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
-            except Exception as comment_err:
-                print(f"Error posting failure comment: {comment_err}")
+            run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
             sys.exit(1)
 
 if __name__ == "__main__":
