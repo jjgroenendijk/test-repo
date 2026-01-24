@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import MagicMock, patch
 import sys
 import os
-import json
 
 # Add root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -15,7 +14,10 @@ class TestJulesSession(unittest.TestCase):
 
     @patch('requests.post')
     @patch('requests.get')
-    def test_create_session(self, mock_get, mock_post):
+    @patch('jules.JulesClient.get_default_branch')
+    def test_create_session(self, mock_get_branch, mock_get, mock_post):
+        mock_get_branch.return_value = "main"
+
         # Mock create response
         mock_create_response = MagicMock()
         mock_create_response.json.return_value = {"name": "sessions/123"}

@@ -47,15 +47,35 @@ class JulesClient:
                 return source.get("name") # e.g., "sources/github/owner/repo"
         return None
 
+    def get_default_branch(self):
+        """Get the default branch of the repository."""
+        print("Fetching default branch...")
+        cmd = ["gh", "repo", "view", "--json", "defaultBranchRef"]
+        output = run_command(cmd)
+        if output:
+            try:
+                data = json.loads(output)
+                branch = data.get("defaultBranchRef", {}).get("name")
+                if branch:
+                    print(f"Default branch identified: {branch}")
+                    return branch
+            except json.JSONDecodeError:
+                print("Error parsing default branch JSON")
+
+        print("Warning: Could not determine default branch. Defaulting to 'main'.")
+        return "main"
+
     def create_session(self, source_name, prompt, title):
         """Create a new Jules session."""
+        starting_branch = self.get_default_branch()
+
         url = f"{JULES_API_BASE}/sessions"
         payload = {
             "prompt": prompt,
             "sourceContext": {
                 "source": source_name,
                 "githubRepoContext": {
-                    "startingBranch": "main" # Defaulting to main for now
+                    "startingBranch": starting_branch
                 }
             },
             "automationMode": "AUTO_CREATE_PR",
@@ -288,7 +308,10 @@ def main():
                 print(f"Response Text: {e.response.text}")
 
             # Try to post error
-            run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
+            try:
+                run_command(["gh", "issue", "comment", str(issue_number), "--body", f"❌ An error occurred while starting Jules: {e}{response_text}"])
+            except Exception as comment_err:
+                print(f"Error posting failure comment: {comment_err}")
             sys.exit(1)
 
 if __name__ == "__main__":
