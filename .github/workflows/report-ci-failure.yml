@@ -59,6 +59,25 @@ jobs:
           LOG_SNIPPET=$(cat snippet.txt)
 
           for PR_NUMBER in $PR_NUMBERS; do
+            TITLE="CI Failure: PR #$PR_NUMBER"
+            # Check for existing open issue
+            EXISTING_ISSUE=$(gh issue list --search "$TITLE in:title is:issue is:open" --json number -q '.[0].number')
+
+            if [ -n "$EXISTING_ISSUE" ]; then
+                echo "Issue #$EXISTING_ISSUE already exists for PR #$PR_NUMBER. Adding comment."
+                echo "CI failed again." > comment_body.md
+                echo "" >> comment_body.md
+                echo "**Log Snippet:**" >> comment_body.md
+                echo "\`\`\`" >> comment_body.md
+                cat snippet.txt >> comment_body.md
+                echo "\`\`\`" >> comment_body.md
+                echo "" >> comment_body.md
+                echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> comment_body.md
+
+                gh issue comment "$EXISTING_ISSUE" --body-file comment_body.md
+                continue
+            fi
+
             echo "Creating issue for PR #$PR_NUMBER"
 
             # Construct body using echo to avoid YAML indentation issues with heredoc
@@ -81,4 +100,52 @@ jobs:
 
             echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
             gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER"
+          done
+
+  close-on-success:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    permissions:
+      issues: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Close Failure Issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
+          PR_NUMBERS=$(jq -r '.pull_requests[]?.number' workflow_run.json)
+
+          # Fallback: Look up PR by head branch if payload is empty
+          if [ -z "$PR_NUMBERS" ]; then
+            HEAD_BRANCH=$(jq -r '.head_branch' workflow_run.json)
+            echo "No PRs found in payload. Looking up PRs for branch: $HEAD_BRANCH"
+            PR_NUMBERS=$(gh pr list --head "$HEAD_BRANCH" --state all --json number -q '.[].number')
+          fi
+
+          if [ -z "$PR_NUMBERS" ]; then
+            echo "No PRs associated with this run."
+            exit 0
+          fi
+
+          for PR_NUMBER in $PR_NUMBERS; do
+             TITLE="CI Failure: PR #$PR_NUMBER"
+             EXISTING_ISSUE=$(gh issue list --search "$TITLE in:title is:issue is:open" --json number -q '.[0].number')
+
+             if [ -n "$EXISTING_ISSUE" ]; then
+                 echo "Closing issue #$EXISTING_ISSUE for PR #$PR_NUMBER (CI passed)."
+                 gh issue comment "$EXISTING_ISSUE" --body "✅ CI passed! Closing this issue."
+                 gh issue close "$EXISTING_ISSUE"
+             else
+                 echo "No open failure issue found for PR #$PR_NUMBER."
+             fi
           done
