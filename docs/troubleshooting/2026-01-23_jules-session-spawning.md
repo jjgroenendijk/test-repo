@@ -58,3 +58,18 @@ Despite the above fixes, new sessions are still not being spawned.
 1. **Implemented Pagination**: Updated `jules.py` to loop through all pages of sources using `nextPageToken`.
 2. **Enhanced Logging**: Added logging for the `create_session` payload and the number of sources fetched.
 3. **Verified with Tests**: Added `test_list_sources_pagination` to `tests/test_jules_client.py` and verified it passes.
+
+## Update 2 (Testing & Verification)
+To address the persisting issue where sessions are not spawned, we performed a deep dive into the integration logic of `jules.py`.
+
+### Actions Taken
+1. **Created Integration Tests**: Added `tests/test_jules_integration.py` to verify the end-to-end logic of `jules.py` (mocking only the network calls).
+   - Validated the `opened` event flow: Parsing event JSON, finding source, calling `create_session`, and posting a success comment.
+   - Validated the `workflow_dispatch` event flow: Parsing inputs, fetching issue details, and proceeding with session creation.
+2. **Verified Logic**: The tests confirmed that `jules.py` correctly constructs the API payload (including `sourceContext` and `startingBranch`) and handles the API response as expected.
+3. **Hypothesis for Production Failure**: Since the logic and integration flow are verified correct via tests, any remaining failure in production is likely due to:
+   - Environment-specific issues (e.g., invalid `GOOGLE_JULES_API` key, network restrictions).
+   - Mismatch between the mocked API response structure and the actual API (though we aligned mocks with Discovery docs).
+   - Permissions issues with `GITHUB_TOKEN` preventing `gh` commands (though `gh auth status` is checked).
+
+The addition of `tests/test_jules_integration.py` provides a reproducible verification step to ensure the script's logic remains correct as we continue to troubleshoot the environment.
