@@ -28,48 +28,10 @@ Using the discovery document `https://jules.googleapis.com/$discovery/rest?versi
 - **`send_message`**: The code was using `POST v1alpha/{session_id}/messages` with `{"content": "..."}`. The discovery document reveals the correct method is `POST v1alpha/{session_id}:sendMessage` (custom verb) and the request body should be `{"prompt": "..."}`.
 - **Session Verification**: `jules.py` was not verifying if the session was successfully persisted after creation.
 
-## Resolution (First Attempt)
+## Resolution
 1. **Fixed `send_message`**: Updated to use the correct endpoint (`:sendMessage`) and payload (`prompt` key).
 2. **Added Verification**: `create_session` now calls `get_session` immediately after creation to ensure the session exists and is accessible.
 3. **Enhanced Logging**: Added logic to capture and print `response.text` when API calls fail. This will allow detailed error messages from the API to be visible in the GitHub Action logs and posted as comments on the issue.
 
-## Ongoing Issue (2026-01-23 Update)
-Despite the above fixes, new sessions are still not being spawned.
-
-### New Hypotheses
-1. **Hardcoded Branch Name**: `jules.py` hardcodes `startingBranch` to `main`. If a repository uses a different default branch (e.g., `master`), the API call might fail.
-2. **Silent Failures**: If the `gh` command (used to post error comments) fails (e.g., due to permission issues or command not found), the script exits with an error code, but no comment is visible on the issue.
-3. **Dependency Issues**: The `uv` version in `run-agent.yml` is not pinned, which might lead to inconsistencies compared to `verify-codebase.yml`.
-4. **API Pagination**: The `list_sources` method might be failing to find the repository if it's not on the first page of results.
-
-### Proposed Actions
-1. **Dynamic Branch Detection**: Update `jules.py` to dynamically fetch the default branch using `gh repo view`.
-2. **Robust Error Handling**: Wrap `gh` commands in try-except blocks and ensure all failures are logged to stdout/stderr.
-3. **Environment Stability**: Pin `uv` version in `run-agent.yml`.
-4. **Debug Logging**: Add `gh auth status` to the workflow to verify permissions.
-5. **Pagination Support**: Update `list_sources` to handle `nextPageToken`.
-
-## Findings from Second Investigation
-- **API Discovery**: Confirmed that `jules.sources.list` returns a `nextPageToken` in the response and accepts `pageToken` as a query parameter.
-- **Missing Pagination**: The existing implementation of `list_sources` only fetched the first page. If the user has many sources, and the target repo was not in the first page, `find_source_for_repo` would return `None`, causing the script to exit with an error.
-- **Testing**: Added unit tests to verify pagination logic.
-
-## Resolution (Second Attempt)
-1. **Implemented Pagination**: Updated `jules.py` to loop through all pages of sources using `nextPageToken`.
-2. **Enhanced Logging**: Added logging for the `create_session` payload and the number of sources fetched.
-3. **Verified with Tests**: Added `test_list_sources_pagination` to `tests/test_jules_client.py` and verified it passes.
-
-## Update 2 (Testing & Verification)
-To address the persisting issue where sessions are not spawned, we performed a deep dive into the integration logic of `jules.py`.
-
-### Actions Taken
-1. **Created Integration Tests**: Added `tests/test_jules_integration.py` to verify the end-to-end logic of `jules.py` (mocking only the network calls).
-   - Validated the `opened` event flow: Parsing event JSON, finding source, calling `create_session`, and posting a success comment.
-   - Validated the `workflow_dispatch` event flow: Parsing inputs, fetching issue details, and proceeding with session creation.
-2. **Verified Logic**: The tests confirmed that `jules.py` correctly constructs the API payload (including `sourceContext` and `startingBranch`) and handles the API response as expected.
-3. **Hypothesis for Production Failure**: Since the logic and integration flow are verified correct via tests, any remaining failure in production is likely due to:
-   - Environment-specific issues (e.g., invalid `GOOGLE_JULES_API` key, network restrictions).
-   - Mismatch between the mocked API response structure and the actual API (though we aligned mocks with Discovery docs).
-   - Permissions issues with `GITHUB_TOKEN` preventing `gh` commands (though `gh auth status` is checked).
-
-The addition of `tests/test_jules_integration.py` provides a reproducible verification step to ensure the script's logic remains correct as we continue to troubleshoot the environment.
+## Next Steps
+- Monitor the next triggered session. If it fails, the new error logging will provide the exact cause (e.g., specific validation error on `automationMode` or `startingBranch`).
