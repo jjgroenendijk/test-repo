@@ -23,10 +23,26 @@ class JulesClient:
 
     def list_sources(self):
         """List all available sources."""
+        sources = []
         url = f"{JULES_API_BASE}/sources"
-        response = requests.get(url, headers=self.headers)
-        response.raise_for_status()
-        return response.json().get("sources", [])
+        params = {}
+
+        while True:
+            response = requests.get(url, headers=self.headers, params=params.copy())
+            response.raise_for_status()
+            data = response.json()
+
+            page_sources = data.get("sources", [])
+            sources.extend(page_sources)
+            print(f"Fetched {len(page_sources)} sources.")
+
+            next_page_token = data.get("nextPageToken")
+            if not next_page_token:
+                break
+            params["pageToken"] = next_page_token
+
+        print(f"Total sources found: {len(sources)}")
+        return sources
 
     def find_source_for_repo(self, repo_owner, repo_name):
         """Find the Jules source ID for a specific GitHub repo."""
@@ -82,6 +98,7 @@ class JulesClient:
             "title": title
         }
 
+        print(f"Creating session with payload: {json.dumps(payload, indent=2)}")
         response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
         session = response.json()
