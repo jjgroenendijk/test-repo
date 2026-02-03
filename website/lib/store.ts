@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { generateWorld } from './generation';
 
 export type CubeType = 'dirt' | 'grass' | 'glass' | 'wood' | 'log';
 
@@ -20,16 +21,13 @@ interface GameState {
 
 export const useStore = create<GameState>((set) => ({
   texture: 'dirt',
-  cubes: [
-    { id: '1', pos: [1, 1, 1], texture: 'dirt' },
-    { id: '2', pos: [2, 1, 1], texture: 'grass' },
-  ],
+  cubes: generateWorld(20, 20),
   addCube: (x, y, z) =>
     set((state) => ({
       cubes: [
         ...state.cubes,
         {
-          id: Math.random().toString(36).substr(2, 9),
+          id: Math.random().toString(36).slice(2, 11),
           pos: [x, y, z],
           texture: state.texture,
         },
