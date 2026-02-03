@@ -1,6 +1,7 @@
 'use client';
 
 import { useBox } from '@react-three/cannon';
+import { Mesh } from 'three';
 import { useStore, CubeType } from '../../lib/store';
 import { useState } from 'react';
 
@@ -13,14 +14,14 @@ const colors: Record<CubeType, string> = {
 };
 
 export const Cube = ({ position, texture }: { position: [number, number, number]; texture: CubeType }) => {
-  const [ref] = useBox(() => ({ type: 'Static', position }));
+  const [ref] = useBox<Mesh>(() => ({ type: 'Static', position }));
   const addCube = useStore((state) => state.addCube);
   const removeCube = useStore((state) => state.removeCube);
   const [hover, setHover] = useState(false);
 
   return (
     <mesh
-      ref={ref as any}
+      ref={ref}
       onPointerMove={(e) => {
         e.stopPropagation();
         setHover(true);

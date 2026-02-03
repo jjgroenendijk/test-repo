@@ -3,14 +3,14 @@
 import { useSphere } from '@react-three/cannon';
 import { useThree, useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
-import { Vector3 } from 'three';
+import { Vector3, Mesh } from 'three';
 import { PointerLockControls } from '@react-three/drei';
 
 const SPEED = 5;
 
 export const Player = () => {
   const { camera } = useThree();
-  const [ref, api] = useSphere(() => ({ mass: 1, type: 'Dynamic', position: [0, 5, 0] }));
+  const [ref, api] = useSphere<Mesh>(() => ({ mass: 1, type: 'Dynamic', position: [0, 5, 0] }));
 
   const movement = useRef({ forward: false, backward: false, left: false, right: false });
   const velocity = useRef([0, 0, 0]);
@@ -66,7 +66,7 @@ export const Player = () => {
 
   return (
     <>
-      <mesh ref={ref as any} />
+      <mesh ref={ref} />
       <PointerLockControls />
     </>
   );
