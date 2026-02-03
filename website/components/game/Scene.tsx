@@ -2,7 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
-import { Physics } from '@react-three/cannon';
+import { Physics } from '@react-three/rapier';
 import { Player } from './Player';
 import { Ground } from './Ground';
 import { Cube } from './Cube';
@@ -18,7 +18,7 @@ export const Scene = () => {
         <Sky sunPosition={[100, 100, 20]} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
-        <Physics>
+        <Physics gravity={[0, -9.81, 0]}>
           <Player />
           <Ground />
           {cubes.map((cube) => (

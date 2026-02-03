@@ -23,6 +23,7 @@
 5.  **Testing**:
     - All new features must include unit tests and Playwright tests (if applicable).
     - Ensure everything can be tested by AI systems.
+    - **Visual Verification**: For any new feature or fix involving visual elements or gameplay, JULES must check if it works by creating a Playwright test that captures a screenshot of the verified state.
 
 6.  **Deployment & CI**:
     - The game must work as a static website hosted on GitHub Pages.

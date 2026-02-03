@@ -1,20 +1,18 @@
 'use client';
 
-import { useSphere } from '@react-three/cannon';
+import { RigidBody, RapierRigidBody } from '@react-three/rapier';
 import { useThree, useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
-import { Vector3, Mesh } from 'three';
+import { Vector3 } from 'three';
 import { PointerLockControls } from '@react-three/drei';
 
 const SPEED = 5;
 
 export const Player = () => {
   const { camera } = useThree();
-  const [ref, api] = useSphere<Mesh>(() => ({ mass: 1, type: 'Dynamic', position: [0, 5, 0] }));
+  const rigidBody = useRef<RapierRigidBody>(null);
 
   const movement = useRef({ forward: false, backward: false, left: false, right: false });
-  const velocity = useRef([0, 0, 0]);
-  useEffect(() => api.velocity.subscribe((v) => (velocity.current = v)), [api.velocity]);
 
   useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,8 +22,11 @@ export const Player = () => {
               case 'KeyA': movement.current.left = true; break;
               case 'KeyD': movement.current.right = true; break;
               case 'Space':
-                if (Math.abs(velocity.current[1]) < 0.05) {
-                    api.velocity.set(velocity.current[0], 4, velocity.current[2]);
+                if (rigidBody.current) {
+                    const vel = rigidBody.current.linvel();
+                    if (Math.abs(vel.y) < 0.1) {
+                        rigidBody.current.setLinvel({ x: vel.x, y: 5, z: vel.z }, true);
+                    }
                 }
                 break;
           }
@@ -44,12 +45,18 @@ export const Player = () => {
           document.removeEventListener('keydown', handleKeyDown);
           document.removeEventListener('keyup', handleKeyUp);
       }
-  }, [api.velocity]);
+  }, []);
 
   useFrame(() => {
-      if (!ref.current) return;
+      if (!rigidBody.current) return;
 
-      camera.position.copy(ref.current.position);
+      const pos = rigidBody.current.translation();
+      camera.position.set(pos.x, pos.y, pos.z);
+
+      // Expose position for testing
+      if (typeof window !== 'undefined') {
+        (window as any).__PLAYER_POSITION__ = [pos.x, pos.y, pos.z];
+      }
 
       const direction = new Vector3();
       const frontVector = new Vector3(0, 0, Number(movement.current.backward) - Number(movement.current.forward));
@@ -61,12 +68,26 @@ export const Player = () => {
         .multiplyScalar(SPEED)
         .applyEuler(camera.rotation);
 
-      api.velocity.set(direction.x, velocity.current[1], direction.z);
+      const vel = rigidBody.current.linvel();
+      rigidBody.current.setLinvel({ x: direction.x, y: vel.y, z: direction.z }, true);
   });
 
   return (
     <>
-      <mesh ref={ref} />
+      <RigidBody
+        ref={rigidBody}
+        colliders="ball"
+        mass={1}
+        type="dynamic"
+        position={[0, 5, 0]}
+        enabledRotations={[false, false, false]}
+        canSleep={false}
+      >
+        <mesh>
+            <sphereGeometry args={[0.5]} />
+            <meshStandardMaterial color="hotpink" visible={false} />
+        </mesh>
+      </RigidBody>
       <PointerLockControls />
     </>
   );
