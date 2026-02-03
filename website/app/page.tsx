@@ -8,7 +8,8 @@ import {
   Workflow,
   ShieldCheck,
   Cpu,
-  AlertCircle
+  AlertCircle,
+  Gamepad
 } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -58,6 +59,9 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="#adaptation" className="glass hover:bg-white/60 dark:hover:bg-white/10 text-gray-900 dark:text-white px-8 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
               Adapt to Your Repo <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link href="/game" className="glass bg-green-500/10 hover:bg-green-500/20 dark:bg-green-500/20 dark:hover:bg-green-500/30 text-green-700 dark:text-green-400 px-8 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 border border-green-500/20">
+              Play Demo <Gamepad className="w-5 h-5" />
             </Link>
             <Link href="#architecture" className="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
               View Architecture

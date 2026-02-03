@@ -42,3 +42,21 @@ Simply **open a new Issue** in this repository.
 ## Documentation
 
 For detailed requirements and architecture, see [docs/requirements.md](docs/requirements.md).
+
+## Interactive Demo
+
+This repository includes a 3D Minecraft-like exploration game to demonstrate web capabilities.
+
+![Minecraft Explorer Game](docs/screenshots/gameplay.png)
+
+### Features
+- **Voxel World:** Add and remove blocks (Dirt, Grass, Glass, Wood, Log).
+- **Physics:** Jumping and collision detection.
+- **First-Person Controls:** WASD to move, Space to jump.
+- **Tech Stack:** React Three Fiber, Cannon.js, Zustand, Next.js.
+
+To play locally:
+1. `cd website`
+2. `npm install`
+3. `npm run dev`
+4. Visit `http://localhost:3000/test-repo/game`
