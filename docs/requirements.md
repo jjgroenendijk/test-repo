@@ -38,3 +38,8 @@ This repository integrates **Google Jules** via its REST API. The goal is to all
 ## Future Scope
 *   Two-way sync: Forwarding comments from GitHub to the Jules Session.
 *   Polling: Automatically updating the GitHub issue when Jules completes the task or opens a PR.
+
+## Game Requirements
+*   **Static Website:** The game must be designed to work as a static website.
+*   **Deployment:** Must be hosted on GitHub Pages.
+*   **CI/CD:** Automated testing and publishing to GitHub Pages via GitHub Actions is required.

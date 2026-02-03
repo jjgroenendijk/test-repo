@@ -24,10 +24,14 @@
     - All new features must include unit tests and Playwright tests (if applicable).
     - Ensure everything can be tested by AI systems.
 
-6.  **Documentation**:
+6.  **Deployment & CI**:
+    - The game must work as a static website hosted on GitHub Pages.
+    - CI must be set up to automatically test and publish the game using GitHub Pages.
+
+7.  **Documentation**:
     - Keep README.md updated, including screenshots for visual features.
 
-7.  **Issue Encountered**:
+8.  **Issue Encountered**:
     - If an issue is encountered, you **MUST STOP ALL WORK**.
     - Do some quick research about the issue.
     - Create a GitHub issue for it.

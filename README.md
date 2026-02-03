@@ -49,6 +49,8 @@ This repository includes a 3D Minecraft-like exploration game to demonstrate web
 
 ![Minecraft Explorer Game](docs/screenshots/gameplay.png)
 
+**Play the game online at: [jjgroenendijk.nl/test-repo](https://jjgroenendijk.nl/test-repo)**
+
 ### Features
 - **Voxel World:** Add and remove blocks (Dirt, Grass, Glass, Wood, Log).
 - **Physics:** Jumping and collision detection.
