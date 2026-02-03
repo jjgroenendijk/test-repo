@@ -43,3 +43,4 @@ This repository integrates **Google Jules** via its REST API. The goal is to all
 *   **Static Website:** The game must be designed to work as a static website.
 *   **Deployment:** Must be hosted on GitHub Pages.
 *   **CI/CD:** Automated testing and publishing to GitHub Pages via GitHub Actions is required.
+*   **Procedural Generation:** The world has to be generated algorithmically, and the terrain has to look interesting.
