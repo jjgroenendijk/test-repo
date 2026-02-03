@@ -16,3 +16,9 @@
 
 4.  **Documentation**:
     - Keep README.md updated, including screenshots for visual features.
+
+5.  **Issue Encountered**:
+    - If an issue is encountered, you **MUST STOP ALL WORK**.
+    - Do some quick research about the issue.
+    - Create a GitHub issue for it.
+    - After the GitHub issue is created, you can continue with your original work.
