@@ -11,6 +11,7 @@ import { useStore } from '../../lib/store';
 
 export const Scene = () => {
   const cubes = useStore((state) => state.cubes);
+  const resetWorld = useStore((state) => state.resetWorld);
 
   return (
     <div className="w-full h-screen">
@@ -33,6 +34,12 @@ export const Scene = () => {
         <p>Click to Add Block</p>
         <p>Alt+Click to Remove Block</p>
         <p>1-5 to Select Texture (or click below)</p>
+        <button
+          className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-white font-bold pointer-events-auto"
+          onClick={resetWorld}
+        >
+          Reset World
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { generateWorld } from './generation';
 
 export type CubeType = 'dirt' | 'grass' | 'glass' | 'wood' | 'log';
@@ -19,28 +20,36 @@ interface GameState {
   resetWorld: () => void;
 }
 
-export const useStore = create<GameState>((set) => ({
-  texture: 'dirt',
-  cubes: generateWorld(20, 20),
-  addCube: (x, y, z) =>
-    set((state) => ({
-      cubes: [
-        ...state.cubes,
-        {
-          id: Math.random().toString(36).slice(2, 11),
-          pos: [x, y, z],
-          texture: state.texture,
-        },
-      ],
-    })),
-  removeCube: (x, y, z) =>
-    set((state) => ({
-      cubes: state.cubes.filter((cube) => {
-        const [cx, cy, cz] = cube.pos;
-        return cx !== x || cy !== y || cz !== z;
-      }),
-    })),
-  setTexture: (texture) => set(() => ({ texture })),
-  saveWorld: () => {},
-  resetWorld: () => set(() => ({ cubes: [] })),
-}));
+export const useStore = create<GameState>()(
+  persist(
+    (set) => ({
+      texture: 'dirt',
+      cubes: generateWorld(20, 20),
+      addCube: (x, y, z) =>
+        set((state) => ({
+          cubes: [
+            ...state.cubes,
+            {
+              id: Math.random().toString(36).slice(2, 11),
+              pos: [x, y, z],
+              texture: state.texture,
+            },
+          ],
+        })),
+      removeCube: (x, y, z) =>
+        set((state) => ({
+          cubes: state.cubes.filter((cube) => {
+            const [cx, cy, cz] = cube.pos;
+            return cx !== x || cy !== y || cz !== z;
+          }),
+        })),
+      setTexture: (texture) => set(() => ({ texture })),
+      saveWorld: () => {},
+      resetWorld: () => set(() => ({ cubes: generateWorld(20, 20) })),
+    }),
+    {
+      name: 'world-storage',
+      partialize: (state) => ({ cubes: state.cubes }),
+    }
+  )
+);

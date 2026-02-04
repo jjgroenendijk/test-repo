@@ -6,25 +6,27 @@ describe('Game Store', () => {
     useStore.getState().resetWorld();
   });
 
-  it('should start with empty world after reset', () => {
+  it('should regenerate world after reset', () => {
     const { cubes } = useStore.getState();
-    expect(cubes).toEqual([]);
+    expect(cubes.length).toBeGreaterThan(0);
   });
 
   it('should add a cube', () => {
     const { addCube } = useStore.getState();
-    addCube(1, 2, 3);
+    const initialCount = useStore.getState().cubes.length;
+    // Use coordinates far away from generated world
+    addCube(100, 200, 300);
     const { cubes } = useStore.getState();
-    expect(cubes).toHaveLength(1);
-    expect(cubes[0].pos).toEqual([1, 2, 3]);
+    expect(cubes).toHaveLength(initialCount + 1);
+    expect(cubes.find(c => c.pos[0] === 100 && c.pos[1] === 200 && c.pos[2] === 300)).toBeDefined();
   });
 
   it('should remove a cube', () => {
     const { addCube, removeCube } = useStore.getState();
-    addCube(1, 2, 3);
-    removeCube(1, 2, 3);
+    addCube(100, 200, 300);
+    removeCube(100, 200, 300);
     const { cubes } = useStore.getState();
-    expect(cubes).toHaveLength(0);
+    expect(cubes.find(c => c.pos[0] === 100 && c.pos[1] === 200 && c.pos[2] === 300)).toBeUndefined();
   });
 
   it('should set texture', () => {
