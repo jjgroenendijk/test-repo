@@ -21,9 +21,19 @@ describe('World Generation', () => {
 
   it('should generate valid textures', () => {
       const cubes = generateWorld(5, 5);
-      const validTextures = ['dirt', 'grass', 'glass', 'wood', 'log'];
+      const validTextures = ['dirt', 'grass', 'glass', 'wood', 'log', 'water'];
       cubes.forEach(cube => {
           expect(validTextures).toContain(cube.texture);
       });
+  });
+
+  it('should generate water at or below water level', () => {
+    const cubes = generateWorld(20, 20);
+    const waterCubes = cubes.filter(c => c.texture === 'water');
+
+    // If water is generated, it must be at y <= 2.
+    waterCubes.forEach(cube => {
+        expect(cube.pos[1]).toBeLessThanOrEqual(2);
+    });
   });
 });

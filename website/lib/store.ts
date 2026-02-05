@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateWorld } from './generation';
 
-export type CubeType = 'dirt' | 'grass' | 'glass' | 'wood' | 'log';
+export type CubeType = 'dirt' | 'grass' | 'glass' | 'wood' | 'log' | 'water';
 
 export interface Cube {
   id: string;

@@ -65,6 +65,17 @@ export const generateWorld = (width: number = 20, depth: number = 20): Cube[] =>
              }
         }
       }
+
+      const waterLevel = 2;
+      if (height < waterLevel) {
+        for (let y = height + 1; y <= waterLevel; y++) {
+          cubes.push({
+            id: Math.random().toString(36).slice(2, 11),
+            pos: [x, y, z],
+            texture: 'water',
+          });
+        }
+      }
     }
   }
   return cubes;
