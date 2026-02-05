@@ -11,6 +11,7 @@ const colors: Record<CubeType, string> = {
   glass: '#81d4fa',
   wood: '#795548',
   log: '#4e342e',
+  water: '#4fc3f7',
 };
 
 export const Cube = ({ position, texture }: { position: [number, number, number]; texture: CubeType }) => {
@@ -43,8 +44,8 @@ export const Cube = ({ position, texture }: { position: [number, number, number]
       <boxGeometry />
       <meshStandardMaterial
         color={hover ? 'lightgrey' : colors[texture]}
-        opacity={texture === 'glass' ? 0.6 : 1}
-        transparent={texture === 'glass'}
+        opacity={texture === 'glass' || texture === 'water' ? 0.6 : 1}
+        transparent={texture === 'glass' || texture === 'water'}
       />
     </mesh>
   );

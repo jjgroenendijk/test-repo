@@ -8,6 +8,7 @@ const images: Record<CubeType, string> = {
   glass: '#81d4fa',
   wood: '#795548',
   log: '#4e342e',
+  water: '#4fc3f7',
 };
 
 export const TextureSelector = () => {
