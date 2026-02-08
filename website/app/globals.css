@@ -1,77 +1,277 @@
-@import "tailwindcss";
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-base: #0a1118;
+  --bg-grid: rgba(255, 255, 255, 0.06);
+  --bg-card: rgba(10, 17, 24, 0.7);
+  --border-card: rgba(255, 255, 255, 0.14);
+  --text-main: #f4f8ff;
+  --text-muted: #9eb2c9;
+  --accent-main: #2fc7a1;
+  --accent-alt: #ffb03a;
+  --ok: #2fc7a1;
+  --fail: #ff7373;
 }
 
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
+  color: var(--text-main);
+  font-family: var(--font-space-grotesk), sans-serif;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(47, 199, 161, 0.24), transparent 30%),
+    radial-gradient(circle at 95% 10%, rgba(255, 176, 58, 0.2), transparent 35%),
+    linear-gradient(140deg, #070d14 0%, #091420 45%, #112136 100%);
 }
 
-/* Liquid Glass Utilities */
-@layer utilities {
-  .glass, .glass-card {
-    @apply bg-white/40 backdrop-blur-xl border border-white/50 shadow-xl dark:bg-black/40 dark:border-white/10;
-  }
-
-  .glass-card {
-    @apply rounded-2xl p-6 transition-all duration-300 hover:bg-white/50 hover:scale-[1.02] hover:shadow-2xl dark:hover:bg-white/10;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-linear-to-r from-violet-600 to-indigo-600;
-  }
+code {
+  font-family: var(--font-jetbrains-mono), monospace;
 }
 
-/* Mesh Gradient Background Animation */
-.mesh-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  background-color: #f0f0f2;
-  background-image:
-    radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
-    radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
-    radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%),
-    radial-gradient(at 80% 100%, hsla(242,100%,70%,1) 0px, transparent 50%),
-    radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%);
-  filter: blur(60px);
+.page-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2.5rem 1.2rem 3rem;
+}
+
+.hero-card {
+  border: 1px solid var(--border-card);
+  background: linear-gradient(
+    110deg,
+    rgba(16, 26, 39, 0.85) 5%,
+    rgba(15, 33, 55, 0.6) 60%,
+    rgba(31, 74, 116, 0.58) 100%
+  );
+  border-radius: 20px;
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--accent-main);
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.hero-card h1 {
+  margin: 0.8rem 0 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.05;
+}
+
+.hero-card p {
+  color: var(--text-muted);
+  margin: 0.8rem 0 0;
+  max-width: 70ch;
+  line-height: 1.5;
+}
+
+.panel-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.panel {
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 1.1rem;
+  backdrop-filter: blur(8px);
+}
+
+.panel h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1.1rem;
+}
+
+label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.65rem 0.72rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+input,
+select {
+  margin-bottom: 0.85rem;
+  color: var(--text-main);
+  background: rgba(3, 12, 20, 0.65);
+}
+
+input::placeholder {
+  color: #7f95ac;
+}
+
+input:focus,
+select:focus,
+button:focus {
+  outline: 2px solid rgba(47, 199, 161, 0.65);
+  outline-offset: 2px;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.checkbox-row input {
+  width: auto;
+  margin: 0;
+}
+
+button {
+  color: #03131b;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent-main), #8be6c7);
+}
+
+button:disabled {
+  cursor: progress;
   opacity: 0.8;
 }
 
-.dark .mesh-bg {
-  background-color: #000000;
-  opacity: 0.4;
+.status-text {
+  margin: 0.8rem 0 0;
+  min-height: 1.2rem;
+  color: var(--text-muted);
 }
 
-/* Animation for floating elements */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.stats-grid div {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stats-grid span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.stats-grid strong {
+  font-size: 1.15rem;
+}
+
+.stats-panel p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.history-panel {
+  margin-top: 1rem;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.history-item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.history-item header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.status-pill {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  border-radius: 99px;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid transparent;
+}
+
+.status-pill.completed {
+  color: var(--ok);
+  border-color: rgba(47, 199, 161, 0.4);
+}
+
+.status-pill.failed {
+  color: var(--fail);
+  border-color: rgba(255, 115, 115, 0.4);
+}
+
+.url-line {
+  margin: 0.45rem 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.file-list code {
+  color: #b6d0e7;
+  font-size: 0.82rem;
+}
+
+.empty-files {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 860px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-shell {
+    padding: 1.2rem 0.8rem 2rem;
+  }
+
+  .hero-card {
+    padding: 1.2rem;
+  }
 }

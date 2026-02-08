@@ -1,64 +1,66 @@
-# Google Jules Integration
+# Google Jules + YT-DLP Web Archive
 
-This repository is configured to work with **Google Jules**, an AI software engineering agent.
+This repository is configured for **Google Jules** autonomous development and includes a web interface for downloading and archiving online videos with `yt-dlp`.
 
-## Overview
+## What this repo provides
 
-Jules is integrated via GitHub Actions to automatically respond to new Issues. When you create an issue describing a task, Jules will:
-1.  Read the issue.
-2.  Start a new session in the Google Jules service.
-3.  Post a confirmation comment with the Session ID.
-4.  (In the future) Analyze the code and open a Pull Request.
+- A GitHub Actions + `jules.py` bridge that starts Jules sessions from GitHub Issues.
+- A Next.js web UI to submit download jobs and review archived history.
+- Server-side `yt-dlp` execution with persisted archive metadata.
+- A single container build for deployment.
 
-## Getting Started
+## Jules workflow
 
-### Prerequisites
+Open a new GitHub issue with the task you want Jules to perform.
 
-*   **GitHub CLI (`gh`):** Required for interacting with GitHub from the command line.
-*   **Python (with `uv`):** Used to run the bridge script.
-*   **API Keys:**
-    *   `GOOGLE_JULES_API`: Must be set in the repository secrets.
+The automation will:
 
-### Setup
+1. Read the issue.
+2. Resolve this repository as a Jules source.
+3. Start a Jules session.
+4. Comment back with the session ID.
 
-To prepare your local environment (e.g., for testing the scripts):
+Required secrets:
+
+- `GOOGLE_JULES_API`
+- `GITHUB_TOKEN` (provided by GitHub Actions)
+
+## Local development
+
+### Python bridge
 
 ```bash
-./setup.sh
+uv sync --all-groups
+uv run pytest
 ```
 
-This script installs the GitHub CLI if it is missing.
+### Web interface
 
-### Usage
+```bash
+cd website
+npm ci
+npm run dev
+```
 
-Simply **open a new Issue** in this repository.
+Open `http://localhost:3000`.
 
-1.  Go to the [Issues tab](../../issues).
-2.  Click "New Issue".
-3.  Provide a clear title and description of the task you want Jules to perform.
-4.  Submit the issue.
-5.  Wait for Jules to comment confirming receipt.
+Useful env vars:
 
-## Documentation
+- `DATA_DIR`: storage location for downloads/history (default `.data` in dev, `/data` in production).
+- `YT_DLP_BIN`: override path/name for `yt-dlp` binary.
 
-For detailed requirements and architecture, see [docs/requirements.md](docs/requirements.md).
+## Run in one container
 
-## Interactive Demo
+Build and run:
 
-This repository includes a 3D Minecraft-like exploration game to demonstrate web capabilities.
+```bash
+docker build -t jules-yt-dlp .
+docker run --rm -p 3000:3000 -v $(pwd)/data:/data jules-yt-dlp
+```
 
-![Minecraft Explorer Game](docs/screenshots/gameplay.png)
+The app will be available on `http://localhost:3000`.
 
-**Play the game online at: [jjgroenendijk.nl/test-repo](https://jjgroenendijk.nl/test-repo)**
+## CI/CD
 
-### Features
-- **Voxel World:** Add and remove blocks (Dirt, Grass, Glass, Wood, Log).
-- **Physics:** Jumping and collision detection.
-- **First-Person Controls:** WASD to move, Space to jump.
-- **Tech Stack:** React Three Fiber, Cannon.js, Zustand, Next.js.
-
-To play locally:
-1. `cd website`
-2. `npm install`
-3. `npm run dev`
-4. Visit `http://localhost:3000/test-repo/game`
+- `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
+- `Publish Container` builds and publishes the single runtime image to GHCR.

@@ -21,4 +21,4 @@ The merge conflict was already resolved by the subsequent merge of PR #92 which 
 No further action is required for PR #88.
 
 ## Follow-up Actions
--   Identified unrelated lint errors in `website/components/game/` which have been logged to the backlog.
+-   Repository direction has changed since this incident; this case remains closed for historical merge traceability.
