@@ -99,6 +99,24 @@ export function DownloaderDashboard() {
     }
   }
 
+  async function handleClearHistory() {
+    if (!confirm("Are you sure you want to clear the history? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/downloads", { method: "DELETE" });
+      if (response.ok) {
+        setHistory([]);
+        setFeedback("History cleared.");
+      } else {
+        setFeedback("Failed to clear history.");
+      }
+    } catch {
+      setFeedback("Error clearing history.");
+    }
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card">
@@ -178,7 +196,7 @@ export function DownloaderDashboard() {
       </section>
 
       <section className="panel history-panel">
-        <h2>Recent Jobs</h2>
+        <header className="flex justify-between items-center"><h2>Recent Jobs</h2>{history.length > 0 && (<button onClick={handleClearHistory} className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors">Clear History</button>)}</header>
         {history.length === 0 ? (
           <p>No downloads yet.</p>
         ) : (
