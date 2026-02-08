@@ -1,12 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  output: 'export',
-  basePath: '/test-repo',
-  images: {
-    unoptimized: true,
-  },
+  output: "standalone",
 };
 
 export default nextConfig;

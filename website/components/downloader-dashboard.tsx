@@ -1,0 +1,214 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type DownloadMode = "video" | "audio";
+type DownloadStatus = "completed" | "failed";
+
+interface DownloadRecord {
+  id: string;
+  createdAt: string;
+  url: string;
+  mode: DownloadMode;
+  includePlaylist: boolean;
+  status: DownloadStatus;
+  files: string[];
+  logTail: string;
+}
+
+interface ApiResponse {
+  record?: DownloadRecord;
+  records?: DownloadRecord[];
+  error?: string;
+}
+
+function formatTimestamp(value: string): string {
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return value;
+  }
+}
+
+export function DownloaderDashboard() {
+  const [url, setUrl] = useState("");
+  const [mode, setMode] = useState<DownloadMode>("video");
+  const [includePlaylist, setIncludePlaylist] = useState(false);
+  const [history, setHistory] = useState<DownloadRecord[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [feedback, setFeedback] = useState<string>("Idle");
+
+  async function loadHistory() {
+    const response = await fetch("/api/downloads", { method: "GET" });
+    const payload = (await response.json()) as ApiResponse;
+    setHistory(payload.records ?? []);
+  }
+
+  useEffect(() => {
+    void loadHistory();
+  }, []);
+
+  const completedCount = useMemo(
+    () => history.filter((record) => record.status === "completed").length,
+    [history],
+  );
+
+  const failedCount = useMemo(
+    () => history.filter((record) => record.status === "failed").length,
+    [history],
+  );
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsRunning(true);
+    setFeedback("Downloading...");
+
+    try {
+      const response = await fetch("/api/downloads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+          mode,
+          includePlaylist,
+        }),
+      });
+
+      const payload = (await response.json()) as ApiResponse;
+
+      if (!response.ok) {
+        setFeedback(payload.error ?? "Download failed.");
+        if (payload.record) {
+          setHistory((previous) => [payload.record!, ...previous]);
+        }
+        return;
+      }
+
+      if (payload.record) {
+        setHistory((previous) => [payload.record!, ...previous]);
+      }
+
+      setFeedback("Download complete.");
+      setUrl("");
+    } catch {
+      setFeedback("Request failed. Check network or server logs.");
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  return (
+    <main className="page-shell">
+      <section className="hero-card">
+        <p className="kicker">Google Jules + yt-dlp</p>
+        <h1>Video Archive Console</h1>
+        <p>
+          Submit a URL, choose media mode, and archive downloads with persistent
+          history.
+        </p>
+      </section>
+
+      <section className="panel-grid">
+        <form className="panel" onSubmit={onSubmit}>
+          <h2>Start Download</h2>
+
+          <label htmlFor="video-url">Video URL</label>
+          <input
+            id="video-url"
+            name="video-url"
+            type="url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            required
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+          />
+
+          <label htmlFor="mode">Mode</label>
+          <select
+            id="mode"
+            value={mode}
+            onChange={(event) => setMode(event.target.value as DownloadMode)}
+          >
+            <option value="video">Best Video + Audio</option>
+            <option value="audio">Audio (MP3)</option>
+          </select>
+
+          <label className="checkbox-row" htmlFor="playlist">
+            <input
+              id="playlist"
+              type="checkbox"
+              checked={includePlaylist}
+              onChange={(event) => setIncludePlaylist(event.target.checked)}
+            />
+            Download full playlist
+          </label>
+
+          <button type="submit" disabled={isRunning}>
+            {isRunning ? "Running yt-dlp..." : "Download and Archive"}
+          </button>
+
+          <p className="status-text" data-testid="status-text">
+            {feedback}
+          </p>
+        </form>
+
+        <aside className="panel stats-panel">
+          <h2>Archive Snapshot</h2>
+          <div className="stats-grid">
+            <div>
+              <span>Total Runs</span>
+              <strong>{history.length}</strong>
+            </div>
+            <div>
+              <span>Completed</span>
+              <strong>{completedCount}</strong>
+            </div>
+            <div>
+              <span>Failed</span>
+              <strong>{failedCount}</strong>
+            </div>
+          </div>
+          <p>
+            Downloads are written to <code>DATA_DIR/downloads</code> and archive
+            state is tracked with <code>download-archive.txt</code>.
+          </p>
+        </aside>
+      </section>
+
+      <section className="panel history-panel">
+        <h2>Recent Jobs</h2>
+        {history.length === 0 ? (
+          <p>No downloads yet.</p>
+        ) : (
+          <ul className="history-list" data-testid="history-list">
+            {history.map((record) => (
+              <li key={record.id} className="history-item">
+                <header>
+                  <span className={`status-pill ${record.status}`}>
+                    {record.status}
+                  </span>
+                  <span>{formatTimestamp(record.createdAt)}</span>
+                  <span>{record.mode}</span>
+                </header>
+                <p className="url-line">{record.url}</p>
+                {record.files.length > 0 ? (
+                  <ul className="file-list">
+                    {record.files.map((file) => (
+                      <li key={`${record.id}-${file}`}>
+                        <code>{file}</code>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="empty-files">No file paths reported.</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </main>
+  );
+}

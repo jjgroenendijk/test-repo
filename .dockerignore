@@ -1,0 +1,16 @@
+.git
+.gitignore
+.github
+.venv
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+
+website/.next
+website/node_modules
+website/test-results
+website/playwright-report
+website/dev.log
+
+docs/screenshots
