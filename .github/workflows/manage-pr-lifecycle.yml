@@ -1,22 +1,18 @@
 name: Manage PR Lifecycle
 
 on:
-  pull_request_target:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Verify Codebase"]
     types:
-      - opened
-      - synchronize
-      - reopened
+      - completed
 
 jobs:
   auto-merge:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    if: >-
-      github.event.pull_request.user.login == 'jjgroenendijk' ||
-      github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
-      github.event.pull_request.user.login == 'dependabot[bot]'
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write
@@ -26,24 +22,57 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Approve and Merge
+      - name: Merge Passed PRs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
-          # Approve the PR to satisfy branch protection rules if any
-          # We ignore errors here because approval might fail if the user is not allowed to approve
-          # or if the PR is already approved.
-          gh pr review "$PR_URL" --approve || echo "Approval step skipped or failed."
+          set -euo pipefail
+          echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
 
-          # Enable auto-merge for the PR using a merge commit
-          # This will wait for checks to pass before merging.
-          # If enabling auto-merge fails (e.g. conflicts), we catch it.
-          gh pr merge "$PR_URL" --auto --merge --delete-branch || echo "MERGE_FAILED=true" >> $GITHUB_ENV
+          PR_NUMBERS=$(jq -r '.pull_requests[]?.number' workflow_run.json)
+          if [ -z "$PR_NUMBERS" ]; then
+            HEAD_BRANCH=$(jq -r '.head_branch // empty' workflow_run.json)
+            if [ -n "$HEAD_BRANCH" ]; then
+              echo "No PRs in payload. Looking up open PRs for branch: $HEAD_BRANCH"
+              PR_NUMBERS=$(gh pr list \
+                --repo "${{ github.repository }}" \
+                --head "$HEAD_BRANCH" \
+                --state open \
+                --json number \
+                -q '.[].number')
+            fi
+          fi
 
-      - name: Report Merge Conflict
-        if: env.MERGE_FAILED == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: python3 .github/scripts/detect_merge_conflicts.py --pr-number "$PR_NUMBER"
+          if [ -z "$PR_NUMBERS" ]; then
+            echo "No open PRs found for Verify Codebase run $RUN_ID."
+            exit 0
+          fi
+
+          for PR_NUMBER in $PR_NUMBERS; do
+            echo "Processing PR #$PR_NUMBER"
+
+            PR_STATE=$(gh pr view "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --json state \
+              -q '.state')
+            if [ "$PR_STATE" != "OPEN" ]; then
+              echo "PR #$PR_NUMBER is $PR_STATE. Skipping."
+              continue
+            fi
+
+            gh pr review "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --approve || echo "Approval step skipped or failed."
+
+            if gh pr merge "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --merge \
+              --delete-branch; then
+              echo "Merged PR #$PR_NUMBER"
+              continue
+            fi
+
+            echo "Merge failed for PR #$PR_NUMBER. Checking for conflicts."
+            python3 .github/scripts/detect_merge_conflicts.py --pr-number "$PR_NUMBER"
+          done

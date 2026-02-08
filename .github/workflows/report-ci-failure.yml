@@ -54,12 +54,9 @@ jobs:
           # Extract snippet
           python3 .github/scripts/extract_log.py failed.log > snippet.txt
 
-          # Read snippet into a variable.
-          # We use EOF to handle multi-line strings safely in bash
-          LOG_SNIPPET=$(cat snippet.txt)
-
           for PR_NUMBER in $PR_NUMBERS; do
             echo "Creating issue for PR #$PR_NUMBER"
+            TITLE="CI Failure: PR #$PR_NUMBER"
 
             # Construct body using echo to avoid YAML indentation issues with heredoc
             echo "The CI check failed for PR #$PR_NUMBER." > issue_body.md
@@ -71,27 +68,29 @@ jobs:
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
-            # Create issue - capture both success and failure
-            ISSUE_URL=$(gh issue create \
-              --repo ${{ github.repository }} \
-              --title "$TITLE" \
-              --body-file issue_body.md 2>&1) || true
+            # Create issue using REST API to avoid GraphQL permission edge cases
+            ISSUE_NUMBER=$(jq -Rs --arg title "$TITLE" '{title: $title, body: .}' issue_body.md \
+              | gh api \
+                  --method POST \
+                  "repos/${{ github.repository }}/issues" \
+                  --input - \
+                  -q '.number' 2>/tmp/issue_create_error.log || true)
 
-            # Check if issue was created (may succeed despite GraphQL error)
-            if [[ "$ISSUE_URL" == *"/issues/"* ]]; then
-              ISSUE_NUMBER=${ISSUE_URL##*/}
+            if [ -n "$ISSUE_NUMBER" ]; then
               echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
               gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER" || echo "Warning: Failed to trigger Jules workflow"
             else
               # Issue creation might have failed but issue could exist - search for it
               sleep 2
-              CREATED_ISSUE=$(gh issue list --search "$TITLE in:title is:issue is:open" --json number -q '.[0].number')
+              CREATED_ISSUE=$(gh api "repos/${{ github.repository }}/issues?state=open&per_page=100" \
+                | jq -r --arg title "$TITLE" '.[] | select((has("pull_request") | not) and .title == $title) | .number' \
+                | head -n 1)
               if [ -n "$CREATED_ISSUE" ]; then
                 echo "Found issue #$CREATED_ISSUE (created despite error). Triggering Jules..."
                 gh workflow run run-agent.yml -f issue_number="$CREATED_ISSUE" || echo "Warning: Failed to trigger Jules workflow"
               else
                 echo "::error::Failed to create or find issue for PR #$PR_NUMBER"
-                echo "Error output: $ISSUE_URL"
+                echo "Error output: $(cat /tmp/issue_create_error.log 2>/dev/null || true)"
               fi
             fi
           done
