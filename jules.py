@@ -220,13 +220,17 @@ def main():
 
     if action == "created" and "comment" in event_data:
         # Handle New Comment
+        if event_data.get("issue", {}).get("pull_request"):
+            print("Ignoring comment on pull request.")
+            sys.exit(0)
+
         comment = event_data.get("comment", {})
         comment_body = comment.get("body")
         sender = event_data.get("sender", {}).get("login")
 
         print(f"Processing Comment on Issue #{issue_number} by {sender}")
 
-        if sender == "github-actions[bot]":
+        if sender and sender.endswith("[bot]"):
             print("Ignoring comment from bot.")
             sys.exit(0)
 
