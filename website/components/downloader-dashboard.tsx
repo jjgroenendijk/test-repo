@@ -215,7 +215,7 @@ export function DownloaderDashboard() {
                   <ul className="file-list">
                     {record.files.map((file) => (
                       <li key={`${record.id}-${file}`}>
-                        <code>{file}</code>
+                        <a href={`/api/files/${file}`} download className="text-blue-600 hover:underline"><code>{file}</code></a>
                       </li>
                     ))}
                   </ul>
