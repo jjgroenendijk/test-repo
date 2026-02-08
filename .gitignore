@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 uv.lock
 data/
+verification/
+dev_server.log
+website/playwright-report/
+website/test-results/

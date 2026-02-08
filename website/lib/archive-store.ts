@@ -51,6 +51,11 @@ export async function readHistory(paths: DataPaths): Promise<DownloadRecord[]> {
   }
 }
 
+export async function clearHistory(paths: DataPaths): Promise<void> {
+  await ensureDataStorage(paths);
+  await fs.writeFile(paths.historyFile, "[]\n", "utf8");
+}
+
 export async function appendHistory(
   paths: DataPaths,
   record: DownloadRecord,

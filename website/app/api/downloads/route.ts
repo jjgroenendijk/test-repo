@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 import {
   appendHistory,
+  clearHistory,
   ensureDataStorage,
   readHistory,
   type DownloadRecord,
@@ -154,4 +155,11 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+export async function DELETE() {
+  const dataDir = resolveDataDir();
+  const paths = getDataPaths(dataDir);
+  await clearHistory(paths);
+  return NextResponse.json({ success: true });
 }
