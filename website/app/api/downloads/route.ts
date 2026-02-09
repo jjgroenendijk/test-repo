@@ -8,6 +8,7 @@ import {
   clearHistory,
   ensureDataStorage,
   readHistory,
+  getStorageUsage,
   type DownloadRecord,
 } from "@/lib/archive-store";
 import {
@@ -61,8 +62,9 @@ export async function GET() {
   const paths = getDataPaths(dataDir);
   await ensureDataStorage(paths);
   const records = await readHistory(paths);
+  const storageUsage = await getStorageUsage(paths.downloadsDir);
 
-  return NextResponse.json({ records });
+  return NextResponse.json({ records, storageUsage });
 }
 
 export async function POST(request: Request) {

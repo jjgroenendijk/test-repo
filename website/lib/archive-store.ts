@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 
 import { type DataPaths } from "./ytdlp";
 
@@ -65,4 +66,26 @@ export async function appendHistory(
 
   const limited = history.slice(0, 200);
   await fs.writeFile(paths.historyFile, `${JSON.stringify(limited, null, 2)}\n`, "utf8");
+}
+
+export async function getStorageUsage(dir: string): Promise<number> {
+  let totalSize = 0;
+
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        totalSize += await getStorageUsage(fullPath);
+      } else if (entry.isFile()) {
+        const stats = await fs.stat(fullPath);
+        totalSize += stats.size;
+      }
+    }
+  } catch {
+    return 0;
+  }
+
+  return totalSize;
 }

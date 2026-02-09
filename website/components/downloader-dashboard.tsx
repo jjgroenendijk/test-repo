@@ -19,7 +19,16 @@ interface DownloadRecord {
 interface ApiResponse {
   record?: DownloadRecord;
   records?: DownloadRecord[];
+  storageUsage?: number;
   error?: string;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 function formatTimestamp(value: string): string {
@@ -35,6 +44,7 @@ export function DownloaderDashboard() {
   const [mode, setMode] = useState<DownloadMode>("video");
   const [includePlaylist, setIncludePlaylist] = useState(false);
   const [history, setHistory] = useState<DownloadRecord[]>([]);
+  const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [feedback, setFeedback] = useState<string>("Idle");
 
@@ -42,6 +52,9 @@ export function DownloaderDashboard() {
     const response = await fetch("/api/downloads", { method: "GET" });
     const payload = (await response.json()) as ApiResponse;
     setHistory(payload.records ?? []);
+    if (typeof payload.storageUsage === "number") {
+      setStorageUsage(payload.storageUsage);
+    }
   }
 
   useEffect(() => {
@@ -92,6 +105,7 @@ export function DownloaderDashboard() {
 
       setFeedback("Download complete.");
       setUrl("");
+      void loadHistory();
     } catch {
       setFeedback("Request failed. Check network or server logs.");
     } finally {
@@ -186,6 +200,10 @@ export function DownloaderDashboard() {
             <div>
               <span>Failed</span>
               <strong>{failedCount}</strong>
+            </div>
+            <div>
+              <span>Total Usage</span>
+              <strong data-testid="storage-usage">{formatBytes(storageUsage)}</strong>
             </div>
           </div>
           <p>
