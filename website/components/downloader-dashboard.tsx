@@ -20,6 +20,19 @@ interface ApiResponse {
   record?: DownloadRecord;
   records?: DownloadRecord[];
   error?: string;
+  storageUsage?: number;
+}
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return "0 B";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
 function formatTimestamp(value: string): string {
@@ -35,6 +48,7 @@ export function DownloaderDashboard() {
   const [mode, setMode] = useState<DownloadMode>("video");
   const [includePlaylist, setIncludePlaylist] = useState(false);
   const [history, setHistory] = useState<DownloadRecord[]>([]);
+  const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [feedback, setFeedback] = useState<string>("Idle");
 
@@ -42,6 +56,9 @@ export function DownloaderDashboard() {
     const response = await fetch("/api/downloads", { method: "GET" });
     const payload = (await response.json()) as ApiResponse;
     setHistory(payload.records ?? []);
+    if (typeof payload.storageUsage === "number") {
+      setStorageUsage(payload.storageUsage);
+    }
   }
 
   useEffect(() => {
@@ -186,6 +203,10 @@ export function DownloaderDashboard() {
             <div>
               <span>Failed</span>
               <strong>{failedCount}</strong>
+            </div>
+            <div>
+              <span>Storage Usage</span>
+              <strong>{formatBytes(storageUsage)}</strong>
             </div>
           </div>
           <p>
