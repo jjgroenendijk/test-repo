@@ -63,4 +63,5 @@ The app will be available on `http://localhost:3000`.
 ## CI/CD
 
 - `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
+- `Nightly PR Reconciliation` runs every midnight UTC to merge healthy open PRs, create issues for blocked PRs, and recover missing Jules sessions.
 - `Publish Container` builds and publishes the single runtime image to GHCR.
