@@ -19,7 +19,20 @@ interface DownloadRecord {
 interface ApiResponse {
   record?: DownloadRecord;
   records?: DownloadRecord[];
+  storageUsage?: number;
   error?: string;
+}
+
+function formatBytes(bytes: number, decimals = 2): string {
+  if (!+bytes) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
 function formatTimestamp(value: string): string {
@@ -35,6 +48,7 @@ export function DownloaderDashboard() {
   const [mode, setMode] = useState<DownloadMode>("video");
   const [includePlaylist, setIncludePlaylist] = useState(false);
   const [history, setHistory] = useState<DownloadRecord[]>([]);
+  const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [feedback, setFeedback] = useState<string>("Idle");
 
@@ -42,6 +56,9 @@ export function DownloaderDashboard() {
     const response = await fetch("/api/downloads", { method: "GET" });
     const payload = (await response.json()) as ApiResponse;
     setHistory(payload.records ?? []);
+    if (payload.storageUsage !== undefined) {
+      setStorageUsage(payload.storageUsage);
+    }
   }
 
   useEffect(() => {
@@ -175,6 +192,10 @@ export function DownloaderDashboard() {
         <aside className="panel stats-panel">
           <h2>Archive Snapshot</h2>
           <div className="stats-grid">
+            <div>
+              <span>Storage Used</span>
+              <strong>{formatBytes(storageUsage)}</strong>
+            </div>
             <div>
               <span>Total Runs</span>
               <strong>{history.length}</strong>
