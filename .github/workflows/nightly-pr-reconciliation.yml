@@ -1,0 +1,30 @@
+name: Nightly PR Reconciliation
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-pr-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile-prs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Reconcile open PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 .github/scripts/reconcile_prs.py
