@@ -103,6 +103,7 @@ export function DownloaderDashboard() {
 
       setFeedback("Download complete.");
       setUrl("");
+      void loadHistory();
     } catch {
       setFeedback("Request failed. Check network or server logs.");
     } finally {
@@ -200,7 +201,7 @@ export function DownloaderDashboard() {
             </div>
             <div>
               <span>Storage Used</span>
-              <strong>{formatBytes(storageUsage)}</strong>
+              <strong data-testid="storage-usage">{formatBytes(storageUsage)}</strong>
             </div>
           </div>
           <p>

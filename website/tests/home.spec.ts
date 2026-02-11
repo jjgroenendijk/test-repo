@@ -28,6 +28,16 @@ test("renders downloader dashboard", async ({ page }) => {
 
 test("submits a download and displays history", async ({ page }) => {
   let requestBody: Record<string, unknown> | null = null;
+  const postedRecord = {
+    id: "run-1",
+    createdAt: "2026-02-08T10:00:00.000Z",
+    url: "https://example.com/watch?v=123",
+    mode: "audio",
+    includePlaylist: true,
+    status: "completed",
+    files: ["creator/2026-02-08/example.mp3"],
+    logTail: "done",
+  };
 
   await page.route("**/api/downloads", async (route) => {
     const method = route.request().method();
@@ -36,7 +46,7 @@ test("submits a download and displays history", async ({ page }) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ records: [] }),
+        body: JSON.stringify({ records: requestBody ? [postedRecord] : [] }),
       });
       return;
     }
@@ -46,16 +56,7 @@ test("submits a download and displays history", async ({ page }) => {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        record: {
-          id: "run-1",
-          createdAt: "2026-02-08T10:00:00.000Z",
-          url: "https://example.com/watch?v=123",
-          mode: "audio",
-          includePlaylist: true,
-          status: "completed",
-          files: ["creator/2026-02-08/example.mp3"],
-          logTail: "done",
-        },
+        record: postedRecord,
       }),
     });
   });
