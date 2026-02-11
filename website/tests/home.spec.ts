@@ -6,7 +6,7 @@ test("renders downloader dashboard", async ({ page }) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ records: [] }),
+        body: JSON.stringify({ records: [], storageUsage: 123456789 }),
       });
       return;
     }
@@ -21,6 +21,9 @@ test("renders downloader dashboard", async ({ page }) => {
   await expect(page.getByLabel("Video URL")).toBeVisible();
   await expect(page.getByRole("button", { name: "Download and Archive" })).toBeVisible();
   await expect(page.getByText("No downloads yet.")).toBeVisible();
+
+  await expect(page.getByText("Storage Used")).toBeVisible();
+  await expect(page.getByText("117.74 MB")).toBeVisible();
 });
 
 test("submits a download and displays history", async ({ page }) => {
