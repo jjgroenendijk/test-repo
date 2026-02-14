@@ -2,7 +2,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 
-import { getStorageUsage } from "../lib/archive-store";
+import {
+  getStorageUsage,
+  deleteRecord,
+  appendHistory,
+  readHistory,
+  ensureDataStorage,
+  type DownloadRecord,
+} from "../lib/archive-store";
 import { DataPaths } from "../lib/ytdlp";
 
 describe("getStorageUsage", () => {
@@ -44,5 +51,63 @@ describe("getStorageUsage", () => {
 
     const size = await getStorageUsage(mockPaths);
     expect(size).toBe(3);
+  });
+});
+
+describe("deleteRecord", () => {
+  const testRoot = path.join(process.cwd(), "test-data-delete");
+  const downloadsDir = path.join(testRoot, "downloads");
+
+  const mockPaths: DataPaths = {
+    root: testRoot,
+    downloadsDir: downloadsDir,
+    archiveFile: path.join(testRoot, "archive.txt"),
+    historyFile: path.join(testRoot, "history.json"),
+  };
+
+  beforeEach(async () => {
+    await fs.mkdir(testRoot, { recursive: true });
+    await ensureDataStorage(mockPaths);
+  });
+
+  afterEach(async () => {
+    await fs.rm(testRoot, { recursive: true, force: true });
+  });
+
+  it("should delete record and files", async () => {
+    const record: DownloadRecord = {
+      id: "test-id",
+      createdAt: new Date().toISOString(),
+      url: "http://example.com",
+      mode: "video",
+      includePlaylist: false,
+      status: "completed",
+      files: ["video.mp4"],
+      logTail: "",
+    };
+
+    // Create file
+    await fs.writeFile(path.join(downloadsDir, "video.mp4"), "data", "utf8");
+
+    // Add to history
+    await appendHistory(mockPaths, record);
+
+    // Verify it's there
+    let history = await readHistory(mockPaths);
+    expect(history).toHaveLength(1);
+
+    // Delete
+    await deleteRecord(mockPaths, "test-id");
+
+    // Check history
+    history = await readHistory(mockPaths);
+    expect(history).toHaveLength(0);
+
+    // Check file
+    const fileExists = await fs
+      .access(path.join(downloadsDir, "video.mp4"))
+      .then(() => true)
+      .catch(() => false);
+    expect(fileExists).toBe(false);
   });
 });

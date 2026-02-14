@@ -129,6 +129,29 @@ export function DownloaderDashboard() {
     }
   }
 
+  async function handleDeleteRecord(id: string) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this record? This will also delete the downloaded files.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/downloads/${id}`, { method: "DELETE" });
+      if (response.ok) {
+        setHistory((prev) => prev.filter((record) => record.id !== id));
+        void loadHistory();
+        setFeedback("Record deleted.");
+      } else {
+        setFeedback("Failed to delete record.");
+      }
+    } catch {
+      setFeedback("Error deleting record.");
+    }
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card">
@@ -225,6 +248,13 @@ export function DownloaderDashboard() {
                   </span>
                   <span>{formatTimestamp(record.createdAt)}</span>
                   <span>{record.mode}</span>
+                  <button
+                    onClick={() => handleDeleteRecord(record.id)}
+                    className="text-xs text-red-500 hover:text-red-700 ml-auto"
+                    title="Delete record and files"
+                  >
+                    Delete
+                  </button>
                 </header>
                 <p className="url-line">{record.url}</p>
                 {record.files.length > 0 ? (

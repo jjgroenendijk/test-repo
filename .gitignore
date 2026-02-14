@@ -5,6 +5,8 @@ uv.lock
 data/
 verification/
 dev_server.log
+server.log
+test-results/
 website/playwright-report/
 website/test-results/
 node_modules/

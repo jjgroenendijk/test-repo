@@ -2,10 +2,12 @@
 
 This repository is configured for **Google Jules** autonomous development and includes a web interface for downloading and archiving online videos with `yt-dlp`.
 
+![Web Archive Dashboard](docs/images/dashboard.png)
+
 ## What this repo provides
 
 - A GitHub Actions + `jules.py` bridge that starts Jules sessions from GitHub Issues.
-- A Next.js web UI to submit download jobs and review archived history.
+- A Next.js web UI to submit download jobs and review/delete archived history.
 - Server-side `yt-dlp` execution with persisted archive metadata.
 - A single container build for deployment.
 

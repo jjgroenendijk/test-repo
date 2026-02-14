@@ -99,3 +99,44 @@ export async function getStorageUsage(paths: DataPaths): Promise<number> {
   await ensureDataStorage(paths);
   return calculateDirectorySize(paths.downloadsDir);
 }
+
+export async function deleteRecord(
+  paths: DataPaths,
+  recordId: string,
+): Promise<void> {
+  const history = await readHistory(paths);
+  const recordIndex = history.findIndex((r) => r.id === recordId);
+
+  if (recordIndex === -1) {
+    return;
+  }
+
+  const record = history[recordIndex];
+
+  // Delete files
+  if (record.files && record.files.length > 0) {
+    const absoluteDownloadsDir = path.resolve(paths.downloadsDir);
+    for (const file of record.files) {
+      const absoluteFilePath = path.resolve(paths.downloadsDir, file);
+
+      // Prevent directory traversal
+      if (!absoluteFilePath.startsWith(absoluteDownloadsDir)) {
+        continue;
+      }
+
+      try {
+        await fs.unlink(absoluteFilePath);
+      } catch {
+        // Ignore if file doesn't exist
+      }
+    }
+  }
+
+  // Remove from history
+  history.splice(recordIndex, 1);
+  await fs.writeFile(
+    paths.historyFile,
+    `${JSON.stringify(history, null, 2)}\n`,
+    "utf8",
+  );
+}
