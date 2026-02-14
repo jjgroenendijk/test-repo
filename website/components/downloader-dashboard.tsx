@@ -119,8 +119,8 @@ export function DownloaderDashboard() {
     try {
       const response = await fetch("/api/downloads", { method: "DELETE" });
       if (response.ok) {
-        setHistory([]);
         setFeedback("History cleared.");
+        void loadHistory();
       } else {
         setFeedback("Failed to clear history.");
       }

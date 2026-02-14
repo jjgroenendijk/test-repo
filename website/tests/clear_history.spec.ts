@@ -1,26 +1,31 @@
 import { test, expect } from '@playwright/test';
 
 test('should clear history', async ({ page }) => {
-  // Mock initial history
+  let historyRecords = [
+    {
+      id: '1',
+      createdAt: new Date().toISOString(),
+      url: 'https://youtube.com/watch?v=123',
+      mode: 'video',
+      includePlaylist: false,
+      status: 'completed',
+      files: ['video.mp4'],
+      logTail: 'done'
+    }
+  ];
+
+  // Mock API behavior
   await page.route('**/api/downloads', async route => {
-    if (route.request().method() === 'GET') {
+    const method = route.request().method();
+    if (method === 'GET') {
       await route.fulfill({
         json: {
-          records: [
-            {
-              id: '1',
-              createdAt: new Date().toISOString(),
-              url: 'https://youtube.com/watch?v=123',
-              mode: 'video',
-              includePlaylist: false,
-              status: 'completed',
-              files: ['video.mp4'],
-              logTail: 'done'
-            }
-          ]
+          records: historyRecords,
+          storageUsage: 1024 // Mock some usage
         }
       });
-    } else if (route.request().method() === 'DELETE') {
+    } else if (method === 'DELETE') {
+        historyRecords = []; // Clear server state
         await route.fulfill({ json: { success: true } });
     } else {
         await route.continue();
@@ -39,5 +44,6 @@ test('should clear history', async ({ page }) => {
   await page.getByText('Clear History').click();
 
   // Verify history is cleared
+  // This implicitly verifies that loadHistory() was called and returned empty list
   await expect(page.getByText('No downloads yet.')).toBeVisible();
 });
