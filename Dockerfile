@@ -8,7 +8,7 @@ RUN apt-get update \
 
 WORKDIR /app/website
 
-COPY website/package.json ./
+COPY website/package.json website/package-lock.json ./
 RUN npm install
 
 COPY website/ ./
