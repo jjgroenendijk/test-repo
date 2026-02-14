@@ -24,12 +24,9 @@ export async function GET(
      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!fs.existsSync(absolutePath)) {
-    return NextResponse.json({ error: "File not found" }, { status: 404 });
-  }
-
   try {
-    const stat = fs.statSync(absolutePath);
+    const stat = await fs.promises.stat(absolutePath);
+
     if (!stat.isFile()) {
       return NextResponse.json({ error: "Not a file" }, { status: 400 });
     }
@@ -56,7 +53,10 @@ export async function GET(
         "Content-Length": stat.size.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
     console.error("File download error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
