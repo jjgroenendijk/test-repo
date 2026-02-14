@@ -237,6 +237,21 @@ button:disabled {
   border-color: rgba(255, 115, 115, 0.4);
 }
 
+.retry-btn {
+  margin-left: auto;
+  width: auto;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  background: transparent;
+  color: var(--accent-main);
+  border: 1px solid rgba(47, 199, 161, 0.4);
+  border-radius: 6px;
+}
+
+.retry-btn:hover {
+  background: rgba(47, 199, 161, 0.1);
+}
+
 .url-line {
   margin: 0.45rem 0;
   font-size: 0.9rem;

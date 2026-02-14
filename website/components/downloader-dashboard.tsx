@@ -48,6 +48,13 @@ export function DownloaderDashboard() {
   const [isRunning, setIsRunning] = useState(false);
   const [feedback, setFeedback] = useState<string>("Idle");
 
+  function handleRetry(record: DownloadRecord) {
+    setUrl(record.url);
+    setMode(record.mode);
+    setIncludePlaylist(record.includePlaylist);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function loadHistory() {
     const response = await fetch("/api/downloads", { method: "GET" });
     const payload = (await response.json()) as ApiResponse;
@@ -225,6 +232,14 @@ export function DownloaderDashboard() {
                   </span>
                   <span>{formatTimestamp(record.createdAt)}</span>
                   <span>{record.mode}</span>
+                  <button
+                    type="button"
+                    className="retry-btn"
+                    onClick={() => handleRetry(record)}
+                    title="Retry this download"
+                  >
+                    Retry
+                  </button>
                 </header>
                 <p className="url-line">{record.url}</p>
                 {record.files.length > 0 ? (
