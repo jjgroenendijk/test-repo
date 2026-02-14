@@ -129,6 +129,13 @@ export function DownloaderDashboard() {
     }
   }
 
+  function handleRetry(record: DownloadRecord) {
+    setUrl(record.url);
+    setMode(record.mode);
+    setIncludePlaylist(record.includePlaylist);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card">
@@ -225,6 +232,13 @@ export function DownloaderDashboard() {
                   </span>
                   <span>{formatTimestamp(record.createdAt)}</span>
                   <span>{record.mode}</span>
+                  <button
+                    onClick={() => handleRetry(record)}
+                    className="ml-auto text-sm text-blue-600 hover:underline"
+                    type="button"
+                  >
+                    Retry
+                  </button>
                 </header>
                 <p className="url-line">{record.url}</p>
                 {record.files.length > 0 ? (
