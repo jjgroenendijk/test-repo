@@ -99,3 +99,44 @@ export async function getStorageUsage(paths: DataPaths): Promise<number> {
   await ensureDataStorage(paths);
   return calculateDirectorySize(paths.downloadsDir);
 }
+
+function isPathSafe(base: string, target: string): boolean {
+  const relative = path.relative(base, target);
+  return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
+export async function deleteRecord(
+  paths: DataPaths,
+  id: string,
+): Promise<boolean> {
+  const history = await readHistory(paths);
+  const recordIndex = history.findIndex((r) => r.id === id);
+
+  if (recordIndex === -1) {
+    return false;
+  }
+
+  const record = history[recordIndex];
+
+  // Delete files
+  for (const file of record.files) {
+    const fullPath = path.resolve(paths.downloadsDir, file);
+    if (isPathSafe(paths.downloadsDir, fullPath)) {
+      try {
+        await fs.unlink(fullPath);
+      } catch {
+        // Ignore errors if file doesn't exist or permissions issue
+      }
+    }
+  }
+
+  // Remove from history
+  history.splice(recordIndex, 1);
+  await fs.writeFile(
+    paths.historyFile,
+    `${JSON.stringify(history, null, 2)}\n`,
+    "utf8",
+  );
+
+  return true;
+}
