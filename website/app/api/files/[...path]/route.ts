@@ -53,8 +53,8 @@ export async function GET(
         "Content-Length": stat.size.toString(),
       },
     });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (error instanceof Error && (error as { code?: string }).code === 'ENOENT') {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
     console.error("File download error:", error);
