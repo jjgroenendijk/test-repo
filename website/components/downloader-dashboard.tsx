@@ -93,6 +93,7 @@ export function DownloaderDashboard() {
         setFeedback(payload.error ?? "Download failed.");
         if (payload.record) {
           setHistory((previous) => [payload.record!, ...previous]);
+          void loadHistory();
         }
         return;
       }
