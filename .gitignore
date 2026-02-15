@@ -8,3 +8,4 @@ dev_server.log
 website/playwright-report/
 website/test-results/
 node_modules/
+next_output.log
