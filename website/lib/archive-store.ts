@@ -99,3 +99,42 @@ export async function getStorageUsage(paths: DataPaths): Promise<number> {
   await ensureDataStorage(paths);
   return calculateDirectorySize(paths.downloadsDir);
 }
+
+export async function deleteRecord(paths: DataPaths, id: string): Promise<boolean> {
+  const history = await readHistory(paths);
+  const recordIndex = history.findIndex((r) => r.id === id);
+
+  if (recordIndex === -1) {
+    return false;
+  }
+
+  const record = history[recordIndex];
+
+  // Delete associated files
+  for (const file of record.files) {
+    // Resolve absolute path
+    const absolutePath = path.resolve(paths.downloadsDir, file);
+
+    // Security check: Ensure the path is still within the downloads directory
+    const resolvedDownloadsDir = path.resolve(paths.downloadsDir);
+    if (!absolutePath.startsWith(resolvedDownloadsDir + path.sep)) {
+      console.error(`Security Warning: Attempted to delete file outside downloads directory: ${absolutePath}`);
+      continue;
+    }
+
+    try {
+      await fs.unlink(absolutePath);
+    } catch (error: unknown) {
+      // Ignore ENOENT (file not found), log others
+      if (error instanceof Error && (error as { code?: string }).code !== "ENOENT") {
+        console.error(`Failed to delete file ${absolutePath}:`, error);
+      }
+    }
+  }
+
+  // Remove the record from history
+  history.splice(recordIndex, 1);
+  await fs.writeFile(paths.historyFile, `${JSON.stringify(history, null, 2)}\n`, "utf8");
+
+  return true;
+}

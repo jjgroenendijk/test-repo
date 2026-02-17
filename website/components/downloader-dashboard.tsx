@@ -136,6 +136,25 @@ export function DownloaderDashboard() {
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this download and its files? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/downloads/${id}`, { method: "DELETE" });
+      if (response.ok) {
+        setFeedback("Item deleted.");
+        setHistory((previous) => previous.filter((record) => record.id !== id));
+        void loadHistory();
+      } else {
+        setFeedback("Failed to delete item.");
+      }
+    } catch {
+      setFeedback("Error deleting item.");
+    }
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card">
@@ -239,6 +258,14 @@ export function DownloaderDashboard() {
                     title="Retry this download"
                   >
                     Retry
+                  </button>
+                  <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => handleDelete(record.id)}
+                    title="Delete this download"
+                  >
+                    Delete
                   </button>
                 </header>
                 <p className="url-line">{record.url}</p>
