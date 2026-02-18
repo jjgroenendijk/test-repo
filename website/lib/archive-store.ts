@@ -68,6 +68,35 @@ export async function appendHistory(
   await fs.writeFile(paths.historyFile, `${JSON.stringify(limited, null, 2)}\n`, "utf8");
 }
 
+export async function deleteRecord(paths: DataPaths, id: string): Promise<boolean> {
+  const history = await readHistory(paths);
+  const index = history.findIndex((record) => record.id === id);
+
+  if (index === -1) {
+    return false;
+  }
+
+  const record = history[index];
+
+  for (const file of record.files) {
+    const safePath = path.normalize(file).replace(/^(\.\.(\/|\\|$))+/, "");
+    const absolutePath = path.join(paths.downloadsDir, safePath);
+
+    if (absolutePath.startsWith(paths.downloadsDir)) {
+      try {
+        await fs.unlink(absolutePath);
+      } catch {
+        // Ignore errors (e.g. file already deleted)
+      }
+    }
+  }
+
+  history.splice(index, 1);
+  await fs.writeFile(paths.historyFile, JSON.stringify(history, null, 2) + "\n", "utf8");
+
+  return true;
+}
+
 async function calculateDirectorySize(dirPath: string): Promise<number> {
   let totalSize = 0;
   let entries;

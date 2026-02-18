@@ -252,6 +252,21 @@ button:disabled {
   background: rgba(47, 199, 161, 0.1);
 }
 
+.delete-btn {
+  margin-left: 0.6rem;
+  width: auto;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  background: transparent;
+  color: var(--fail);
+  border: 1px solid rgba(255, 115, 115, 0.4);
+  border-radius: 6px;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 115, 115, 0.1);
+}
+
 .url-line {
   margin: 0.45rem 0;
   font-size: 0.9rem;
