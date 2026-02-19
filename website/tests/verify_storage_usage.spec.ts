@@ -9,7 +9,9 @@ const createDummyFile = (filePath: string, sizeInBytes: number) => {
 };
 
 test.describe('Disk Usage', () => {
-  const dataDir = path.join(process.cwd(), '.data');
+  const dataDir = process.env.DATA_DIR
+    ? path.resolve(process.env.DATA_DIR)
+    : path.join(process.cwd(), '.data');
   const downloadsDir = path.join(dataDir, 'downloads');
   const dummyFile = path.join(downloadsDir, 'test-file-5mb.bin');
   const fileSize = 5 * 1024 * 1024; // 5 MB
