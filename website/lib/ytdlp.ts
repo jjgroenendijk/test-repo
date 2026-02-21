@@ -6,6 +6,7 @@ export interface DownloadRequest {
   url: string;
   mode: DownloadMode;
   includePlaylist: boolean;
+  resolution?: string;
 }
 
 export interface DataPaths {
@@ -83,7 +84,18 @@ export function buildYtDlpArgs(
   if (request.mode === "audio") {
     args.push("--extract-audio", "--audio-format", "mp3", "--audio-quality", "0");
   } else {
-    args.push("--format", "bv*+ba/b");
+    let format = "bv*+ba/b";
+
+    if (request.resolution) {
+      const height = request.resolution.replace("p", "");
+      if (request.resolution === "4k") {
+        format = "bestvideo[height<=2160]+bestaudio/best[height<=2160]";
+      } else if (!isNaN(Number(height))) {
+        format = `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`;
+      }
+    }
+
+    args.push("--format", format);
   }
 
   args.push(request.url);
