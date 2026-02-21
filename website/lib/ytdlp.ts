@@ -5,6 +5,7 @@ export type DownloadMode = "video" | "audio";
 export interface DownloadRequest {
   url: string;
   mode: DownloadMode;
+  resolution?: string;
   includePlaylist: boolean;
 }
 
@@ -82,6 +83,12 @@ export function buildYtDlpArgs(
 
   if (request.mode === "audio") {
     args.push("--extract-audio", "--audio-format", "mp3", "--audio-quality", "0");
+  } else if (request.resolution && request.resolution !== "best") {
+    const res = request.resolution.replace("p", "");
+    args.push(
+      "--format",
+      `bestvideo[height<=${res}]+bestaudio/best[height<=${res}]`,
+    );
   } else {
     args.push("--format", "bv*+ba/b");
   }

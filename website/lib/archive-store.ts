@@ -8,6 +8,7 @@ export interface DownloadRecord {
   createdAt: string;
   url: string;
   mode: "video" | "audio";
+  resolution?: string;
   includePlaylist: boolean;
   status: "completed" | "failed";
   files: string[];
@@ -78,18 +79,20 @@ export async function deleteRecord(paths: DataPaths, id: string): Promise<boolea
 
   const record = history[index];
 
-  for (const file of record.files) {
-    const safePath = path.normalize(file).replace(/^(\.\.(\/|\\|$))+/, "");
-    const absolutePath = path.join(paths.downloadsDir, safePath);
+  await Promise.all(
+    record.files.map(async (file) => {
+      const safePath = path.normalize(file).replace(/^(\.\.(\/|\\|$))+/, "");
+      const absolutePath = path.join(paths.downloadsDir, safePath);
 
-    if (absolutePath.startsWith(paths.downloadsDir)) {
-      try {
-        await fs.unlink(absolutePath);
-      } catch {
-        // Ignore errors (e.g. file already deleted)
+      if (absolutePath.startsWith(paths.downloadsDir)) {
+        try {
+          await fs.unlink(absolutePath);
+        } catch {
+          // Ignore errors (e.g. file already deleted)
+        }
       }
-    }
-  }
+    }),
+  );
 
   history.splice(index, 1);
   await fs.writeFile(paths.historyFile, JSON.stringify(history, null, 2) + "\n", "utf8");
