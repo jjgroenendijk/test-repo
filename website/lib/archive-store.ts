@@ -9,6 +9,7 @@ export interface DownloadRecord {
   url: string;
   mode: "video" | "audio";
   includePlaylist: boolean;
+  resolution?: string;
   status: "completed" | "failed";
   files: string[];
   logTail: string;

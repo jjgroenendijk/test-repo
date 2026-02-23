@@ -11,6 +11,7 @@ interface DownloadRecord {
   url: string;
   mode: DownloadMode;
   includePlaylist: boolean;
+  resolution?: string;
   status: DownloadStatus;
   files: string[];
   logTail: string;
@@ -42,6 +43,7 @@ function formatTimestamp(value: string): string {
 export function DownloaderDashboard() {
   const [url, setUrl] = useState("");
   const [mode, setMode] = useState<DownloadMode>("video");
+  const [resolution, setResolution] = useState<string>("best");
   const [includePlaylist, setIncludePlaylist] = useState(false);
   const [history, setHistory] = useState<DownloadRecord[]>([]);
   const [storageUsage, setStorageUsage] = useState<number>(0);
@@ -52,6 +54,7 @@ export function DownloaderDashboard() {
     setUrl(record.url);
     setMode(record.mode);
     setIncludePlaylist(record.includePlaylist);
+    setResolution(record.resolution || "best");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -91,6 +94,7 @@ export function DownloaderDashboard() {
           url,
           mode,
           includePlaylist,
+          resolution,
         }),
       });
 
@@ -110,6 +114,7 @@ export function DownloaderDashboard() {
 
       setFeedback("Download complete.");
       setUrl("");
+      setResolution("best");
       void loadHistory();
     } catch {
       setFeedback("Request failed. Check network or server logs.");
@@ -193,6 +198,23 @@ export function DownloaderDashboard() {
             <option value="video">Best Video + Audio</option>
             <option value="audio">Audio (MP3)</option>
           </select>
+
+          {mode === "video" && (
+            <>
+              <label htmlFor="resolution">Resolution Limit</label>
+              <select
+                id="resolution"
+                value={resolution}
+                onChange={(event) => setResolution(event.target.value)}
+              >
+                <option value="best">Best Available</option>
+                <option value="2160p">4K (2160p)</option>
+                <option value="1440p">QHD (1440p)</option>
+                <option value="1080p">FHD (1080p)</option>
+                <option value="720p">HD (720p)</option>
+              </select>
+            </>
+          )}
 
           <label className="checkbox-row" htmlFor="playlist">
             <input
