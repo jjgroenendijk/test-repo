@@ -71,6 +71,7 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     url?: string;
     mode?: unknown;
+    resolution?: unknown;
     includePlaylist?: unknown;
   };
 
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
   }
 
   const mode = parseMode(body.mode);
+  const resolution = typeof body.resolution === "string" ? body.resolution : undefined;
   const includePlaylist = parsePlaylistFlag(body.includePlaylist);
 
   const dataDir = resolveDataDir();
@@ -99,6 +101,7 @@ export async function POST(request: Request) {
     {
       url: validatedUrl,
       mode,
+      resolution,
       includePlaylist,
     },
     paths,
@@ -118,6 +121,7 @@ export async function POST(request: Request) {
       createdAt: startedAt,
       url: validatedUrl,
       mode,
+      resolution,
       includePlaylist,
       status: code === 0 ? "completed" : "failed",
       files,
@@ -140,6 +144,7 @@ export async function POST(request: Request) {
       createdAt: startedAt,
       url: validatedUrl,
       mode,
+      resolution,
       includePlaylist,
       status: "failed",
       files: [],
