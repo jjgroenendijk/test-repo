@@ -74,5 +74,6 @@ test("submits a download and displays history", async ({ page }) => {
     url: "https://example.com/watch?v=123",
     mode: "audio",
     includePlaylist: true,
+    resolution: "best",
   });
 });

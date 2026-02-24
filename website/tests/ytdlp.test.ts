@@ -54,6 +54,42 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("--no-playlist");
   });
+
+  it("builds video flags with resolution limit", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        resolution: "1080p",
+      },
+      paths,
+    );
+
+    const formatIndex = args.indexOf("--format");
+    expect(formatIndex).toBeGreaterThan(-1);
+    expect(args[formatIndex + 1]).toBe(
+      "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+    );
+  });
+
+  it("builds video flags with default resolution (best)", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        resolution: "best",
+      },
+      paths,
+    );
+
+    const formatIndex = args.indexOf("--format");
+    expect(formatIndex).toBeGreaterThan(-1);
+    expect(args[formatIndex + 1]).toBe("bv*+ba/b");
+  });
 });
 
 describe("downloaded file parsing", () => {
