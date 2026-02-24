@@ -54,6 +54,24 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("--no-playlist");
   });
+
+  it("builds video flags with resolution limit", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        resolution: "1080p",
+      },
+      paths,
+    );
+
+    expect(args).toContain(
+      "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+    );
+    expect(args).toContain("--no-playlist");
+  });
 });
 
 describe("downloaded file parsing", () => {
