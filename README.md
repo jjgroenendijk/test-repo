@@ -22,10 +22,32 @@ The automation will:
 4. Queue the issue automatically when another Jules session for this repo is still running.
 5. Comment back with the session ID once the issue starts.
 
+Issue-triggered Jules entry stays owner-only even if you configure extra trusted PR actors.
+
+## Trusted automation model
+
+Privileged `workflow_run` follow-up automation only acts on trusted pull requests:
+
+- The PR must come from the same repository, not a fork.
+- The PR head repository owner must match the current repository owner.
+- The PR author must be trusted.
+
+Trusted actors are resolved dynamically:
+
+- The current repository owner is always trusted by default.
+- You can optionally add more trusted GitHub logins with the repository variable `JULES_TRUSTED_ACTORS`.
+- `JULES_TRUSTED_ACTORS` accepts a comma- or whitespace-separated list of logins.
+
+This trust model is used for privileged PR follow-up like CI failure issue creation and auto-merge. The Jules issue bridge itself remains gated to owner-authored issues and owner comments, and the repository still enforces a single active Jules session at a time.
+
 Required secrets:
 
 - `GOOGLE_JULES_API`
 - `GITHUB_TOKEN` (provided by GitHub Actions)
+
+Optional repository variables:
+
+- `JULES_TRUSTED_ACTORS`
 
 ## Local development
 

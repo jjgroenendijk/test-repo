@@ -288,7 +288,7 @@ def get_issue_from_dispatch(issue_number):
     return issue_data
 
 
-def resolve_issue_for_event(event_name, event_data, full_repo):
+def resolve_issue_for_event(event_name, event_data, full_repo, repo_owner):
     """Resolve the issue payload that should be handled for this invocation."""
     if event_name == "workflow_dispatch":
         print("Triggered by workflow_dispatch")
@@ -301,7 +301,7 @@ def resolve_issue_for_event(event_name, event_data, full_repo):
 
     if event_name == "schedule":
         print("Triggered by schedule")
-        pending_issue = find_next_pending_issue(full_repo, full_repo.split("/")[0])
+        pending_issue = find_next_pending_issue(full_repo, repo_owner)
         if not pending_issue:
             print("No queued issues without Jules sessions were found.")
             return None, None
@@ -406,7 +406,7 @@ def main():
 
     owner, repo_name = full_repo.split("/")
     event_name = os.environ.get("GITHUB_EVENT_NAME")
-    action, issue_data = resolve_issue_for_event(event_name, event_data, full_repo)
+    action, issue_data = resolve_issue_for_event(event_name, event_data, full_repo, owner)
     if action is None:
         sys.exit(0)
     if not issue_data:
