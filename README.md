@@ -12,7 +12,7 @@ This repository is configured for **Google Jules** autonomous development and in
 ## Jules workflow
 
 Open a new GitHub issue with the task you want Jules to perform.
-Only issues opened by the repository owner automatically start or queue a Jules session.
+By default, only issues opened by the repository owner automatically start or queue a Jules session.
 
 The automation will:
 
@@ -26,6 +26,10 @@ Required secrets:
 
 - `GOOGLE_JULES_API`
 - `GITHUB_TOKEN` (provided by GitHub Actions)
+
+Optional repository variable:
+
+- `JULES_TRUSTED_ACTORS`: JSON array of extra trusted logins for privileged PR follow-up automation, such as `["app/google-jules"]`
 
 ## Local development
 
