@@ -12,7 +12,7 @@ This repository is configured for **Google Jules** autonomous development and in
 ## Jules workflow
 
 Open a new GitHub issue with the task you want Jules to perform.
-Only issues opened by the repository owner automatically start or queue a Jules session.
+By default, only issues opened by the repository owner automatically start or queue a Jules session.
 
 The automation will:
 
@@ -36,7 +36,7 @@ Trusted actors are resolved dynamically:
 
 - The current repository owner is always trusted by default.
 - You can optionally add more trusted GitHub logins with the repository variable `JULES_TRUSTED_ACTORS`.
-- `JULES_TRUSTED_ACTORS` accepts a comma- or whitespace-separated list of logins.
+- `JULES_TRUSTED_ACTORS` accepts either a JSON array or a comma-/whitespace-separated list of logins.
 
 This trust model is used for privileged PR follow-up like CI failure issue creation and auto-merge. The Jules issue bridge itself remains gated to owner-authored issues and owner comments, and the repository still enforces a single active Jules session at a time.
 
@@ -45,9 +45,9 @@ Required secrets:
 - `GOOGLE_JULES_API`
 - `GITHUB_TOKEN` (provided by GitHub Actions)
 
-Optional repository variables:
+Optional repository variable:
 
-- `JULES_TRUSTED_ACTORS`
+- `JULES_TRUSTED_ACTORS`: extra trusted logins for privileged PR follow-up automation, for example `["app/google-jules"]` or `app/google-jules teammate`
 
 ## Local development
 

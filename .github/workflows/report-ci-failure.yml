@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_OWNER: ${{ github.repository_owner }}
-          EXTRA_TRUSTED_ACTORS: ${{ vars.JULES_TRUSTED_ACTORS }}
+          TRUSTED_ACTORS: ${{ vars.JULES_TRUSTED_ACTORS }}
         run: |
           set -euo pipefail
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
@@ -61,7 +61,7 @@ jobs:
 
             if printf '%s' "$PR_JSON" | python3 automation_trust.py pr \
               --repo-owner "$REPO_OWNER" \
-              --extra-trusted-actors "$EXTRA_TRUSTED_ACTORS" \
+              --trusted-actors "$TRUSTED_ACTORS" \
               --pr-file -; then
               TRUSTED_PR_NUMBERS="${TRUSTED_PR_NUMBERS}${TRUSTED_PR_NUMBERS:+ }$PR_NUMBER"
             else
@@ -78,7 +78,6 @@ jobs:
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
-          # Save payload to file
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
 
           PR_NUMBERS='${{ steps.trusted_prs.outputs.trusted_pr_numbers }}'
@@ -88,18 +87,13 @@ jobs:
             exit 0
           fi
 
-          # Download logs
-          # We use || true to prevent failure if logs are missing or retrieval fails
           gh run view "$RUN_ID" --log-failed > failed.log 2>&1 || echo "Failed to retrieve logs" > failed.log
-
-          # Extract snippet
           python3 .github/scripts/extract_log.py failed.log > snippet.txt
 
           for PR_NUMBER in $PR_NUMBERS; do
             echo "Creating issue for PR #$PR_NUMBER"
             TITLE="CI Failure: PR #$PR_NUMBER"
 
-            # Construct body using echo to avoid YAML indentation issues with heredoc
             echo "The CI check failed for PR #$PR_NUMBER." > issue_body.md
             echo "" >> issue_body.md
             echo "**Log Snippet:**" >> issue_body.md
@@ -109,7 +103,6 @@ jobs:
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
 
-            # Create issue using REST API to avoid GraphQL permission edge cases
             ISSUE_NUMBER=$(jq -Rs --arg title "$TITLE" '{title: $title, body: .}' issue_body.md \
               | gh api \
                   --method POST \
@@ -121,7 +114,6 @@ jobs:
               echo "Created issue #$ISSUE_NUMBER. Triggering Jules..."
               gh workflow run run-agent.yml -f issue_number="$ISSUE_NUMBER" || echo "Warning: Failed to trigger Jules workflow"
             else
-              # Issue creation might have failed but issue could exist - search for it
               sleep 2
               CREATED_ISSUE=$(gh api "repos/${{ github.repository }}/issues?state=open&per_page=100" \
                 | jq -r --arg title "$TITLE" '.[] | select((has("pull_request") | not) and .title == $title) | .number' \

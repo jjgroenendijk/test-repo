@@ -18,8 +18,8 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Single Active Session:** Only one non-terminal Jules session may be active for this repository at a time.
 - **Queued Retry:** When a new issue arrives while Jules is busy, the issue is queued and retried automatically until it starts.
 - **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
-- **Trusted PR Follow-Up:** Privileged PR automation only acts on trusted same-repository PRs.
-- **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra trusted logins may be provided via `JULES_TRUSTED_ACTORS`.
+- **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
+- **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.

@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_OWNER: ${{ github.repository_owner }}
-          EXTRA_TRUSTED_ACTORS: ${{ vars.JULES_TRUSTED_ACTORS }}
+          TRUSTED_ACTORS: ${{ vars.JULES_TRUSTED_ACTORS }}
         run: |
           set -euo pipefail
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
@@ -61,7 +61,7 @@ jobs:
 
             if printf '%s' "$PR_JSON" | python3 automation_trust.py pr \
               --repo-owner "$REPO_OWNER" \
-              --extra-trusted-actors "$EXTRA_TRUSTED_ACTORS" \
+              --trusted-actors "$TRUSTED_ACTORS" \
               --pr-file -; then
               TRUSTED_PR_NUMBERS="${TRUSTED_PR_NUMBERS}${TRUSTED_PR_NUMBERS:+ }$PR_NUMBER"
             else
