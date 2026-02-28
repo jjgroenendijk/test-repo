@@ -15,20 +15,23 @@ jobs:
       github.event.workflow_run.event == 'pull_request'
     permissions:
       issues: write
-      contents: read
       actions: write
       pull-requests: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
 
       - name: Report Failure
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
+          TRUSTED_ACTORS: ${{ vars.JULES_TRUSTED_ACTORS }}
         run: |
+          set -euo pipefail
+
           # Save payload to file
           echo '${{ toJSON(github.event.workflow_run) }}' > workflow_run.json
 
@@ -55,6 +58,28 @@ jobs:
           python3 .github/scripts/extract_log.py failed.log > snippet.txt
 
           for PR_NUMBER in $PR_NUMBERS; do
+            PR_DATA=$(gh pr view "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --json author,isCrossRepository,headRepositoryOwner,state)
+            PR_STATE=$(echo "$PR_DATA" | jq -r '.state')
+            if [ "$PR_STATE" != "OPEN" ]; then
+              echo "PR #$PR_NUMBER is $PR_STATE. Skipping."
+              continue
+            fi
+
+            PR_AUTHOR=$(echo "$PR_DATA" | jq -r '.author.login // empty')
+            PR_IS_CROSS=$(echo "$PR_DATA" | jq -r '.isCrossRepository')
+            PR_HEAD_OWNER=$(echo "$PR_DATA" | jq -r '.headRepositoryOwner.login // empty')
+            if ! python3 automation_trust.py pr \
+              --author "$PR_AUTHOR" \
+              --head-owner "$PR_HEAD_OWNER" \
+              --is-cross "$PR_IS_CROSS" \
+              --repo-owner "${{ github.repository_owner }}" \
+              --trusted-actors "$TRUSTED_ACTORS"; then
+              echo "PR #$PR_NUMBER is not a trusted same-repo PR. Skipping."
+              continue
+            fi
+
             echo "Creating issue for PR #$PR_NUMBER"
             TITLE="CI Failure: PR #$PR_NUMBER"
 

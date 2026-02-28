@@ -24,11 +24,6 @@ def test_is_session_busy_only_for_non_terminal_states():
     assert not jules.is_session_busy({"state": "FAILED"})
 
 
-def test_is_repo_owner_matches_case_insensitively():
-    assert jules.is_repo_owner("JjGroenendijk", "jjgroenendijk")
-    assert not jules.is_repo_owner("someone-else", "jjgroenendijk")
-
-
 @patch("jules.post_issue_comment")
 @patch("jules.issue_has_queue_comment", return_value=False)
 def test_queue_issue_posts_single_queue_comment(mock_has_queue_comment, mock_post_issue_comment):
