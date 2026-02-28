@@ -12,6 +12,7 @@ This repository is configured for **Google Jules** autonomous development and in
 ## Jules workflow
 
 Open a new GitHub issue with the task you want Jules to perform.
+Only issues opened by the repository owner automatically start or queue a Jules session.
 
 The automation will:
 

@@ -16,6 +16,7 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Session Creation:** New issues create Jules sessions with `AUTO_CREATE_PR`.
 - **Single Active Session:** Only one non-terminal Jules session may be active for this repository at a time.
 - **Queued Retry:** When a new issue arrives while Jules is busy, the issue is queued and retried automatically until it starts.
+- **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.

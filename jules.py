@@ -242,14 +242,30 @@ def list_open_issues(full_repo):
     if not isinstance(issues, list):
         return []
 
-    return [issue for issue in issues if "pull_request" not in issue]
+    return [
+        {
+            "number": issue.get("number"),
+            "title": issue.get("title"),
+            "body": issue.get("body"),
+            "author_login": issue.get("user", {}).get("login"),
+        }
+        for issue in issues
+        if "pull_request" not in issue
+    ]
 
 
-def find_next_pending_issue(full_repo):
-    """Return the oldest open issue without a Jules session comment."""
+def is_repo_owner(login, repo_owner):
+    """Return True when a GitHub login matches the repository owner."""
+    return bool(login) and login.lower() == repo_owner.lower()
+
+
+def find_next_pending_issue(full_repo, repo_owner):
+    """Return the oldest owner-authored open issue without a Jules session comment."""
     for issue in list_open_issues(full_repo):
         issue_number = issue.get("number")
         if not issue_number:
+            continue
+        if not is_repo_owner(issue.get("author_login"), repo_owner):
             continue
         if find_session_id(issue_number):
             continue
@@ -257,6 +273,7 @@ def find_next_pending_issue(full_repo):
             "number": issue_number,
             "title": issue.get("title"),
             "body": issue.get("body"),
+            "author_login": issue.get("author_login"),
         }
     return None
 
@@ -264,7 +281,7 @@ def find_next_pending_issue(full_repo):
 def get_issue_from_dispatch(issue_number):
     """Load title and body for a workflow-dispatched issue."""
     print(f"Fetching details for issue #{issue_number}")
-    issue_data = load_issue(issue_number, fields="title,body,number")
+    issue_data = load_issue(issue_number, fields="title,body,number,author")
     if not issue_data:
         print(f"Error: Could not fetch details for issue #{issue_number}")
         return None
@@ -284,7 +301,7 @@ def resolve_issue_for_event(event_name, event_data, full_repo):
 
     if event_name == "schedule":
         print("Triggered by schedule")
-        pending_issue = find_next_pending_issue(full_repo)
+        pending_issue = find_next_pending_issue(full_repo, full_repo.split("/")[0])
         if not pending_issue:
             print("No queued issues without Jules sessions were found.")
             return None, None
@@ -301,6 +318,7 @@ def resolve_issue_for_event(event_name, event_data, full_repo):
         "number": issue.get("number"),
         "title": issue.get("title"),
         "body": issue.get("body"),
+        "author_login": issue.get("user", {}).get("login"),
     }
 
 
@@ -397,6 +415,7 @@ def main():
     issue_number = issue_data.get("number")
     title = issue_data.get("title")
     body = issue_data.get("body")
+    issue_author_login = issue_data.get("author_login")
 
     client = JulesClient(jules_api_key)
 
@@ -415,6 +434,10 @@ def main():
             print("Ignoring comment from bot.")
             sys.exit(0)
 
+        if not is_repo_owner(sender, owner):
+            print(f"Ignoring comment from non-owner account: {sender}")
+            sys.exit(0)
+
         session_id = find_session_id(issue_number)
         if not session_id:
             print("No active Jules session found for this issue.")
@@ -431,6 +454,9 @@ def main():
             sys.exit(1)
 
     if action == "opened":
+        if event_name == "issues" and not is_repo_owner(issue_author_login, owner):
+            print(f"Ignoring issue #{issue_number} from non-owner account: {issue_author_login}")
+            sys.exit(0)
         sys.exit(start_issue_session(client, issue_number, title, body, owner, repo_name, full_repo))
 
 

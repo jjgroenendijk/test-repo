@@ -24,6 +24,11 @@ def test_is_session_busy_only_for_non_terminal_states():
     assert not jules.is_session_busy({"state": "FAILED"})
 
 
+def test_is_repo_owner_matches_case_insensitively():
+    assert jules.is_repo_owner("JjGroenendijk", "jjgroenendijk")
+    assert not jules.is_repo_owner("someone-else", "jjgroenendijk")
+
+
 @patch("jules.post_issue_comment")
 @patch("jules.issue_has_queue_comment", return_value=False)
 def test_queue_issue_posts_single_queue_comment(mock_has_queue_comment, mock_post_issue_comment):
@@ -47,13 +52,19 @@ def test_queue_issue_posts_single_queue_comment(mock_has_queue_comment, mock_pos
 @patch(
     "jules.list_open_issues",
     return_value=[
-        {"number": 1, "title": "Has session", "body": "body"},
-        {"number": 2, "title": "Next pending", "body": "body"},
+        {"number": 1, "title": "Foreign issue", "body": "body", "author_login": "someone-else"},
+        {"number": 2, "title": "Has session", "body": "body", "author_login": "owner"},
+        {"number": 3, "title": "Next pending", "body": "body", "author_login": "owner"},
     ],
 )
 def test_find_next_pending_issue_skips_issues_with_existing_sessions(mock_list_open_issues, mock_find_session_id):
-    issue = jules.find_next_pending_issue("owner/repo")
+    issue = jules.find_next_pending_issue("owner/repo", "owner")
 
-    assert issue == {"number": 2, "title": "Next pending", "body": "body"}
+    assert issue == {
+        "number": 3,
+        "title": "Next pending",
+        "body": "body",
+        "author_login": "owner",
+    }
     mock_list_open_issues.assert_called_once_with("owner/repo")
     assert mock_find_session_id.call_count == 2

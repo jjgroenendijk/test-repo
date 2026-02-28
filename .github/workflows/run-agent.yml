@@ -19,7 +19,14 @@ concurrency:
 
 jobs:
   jules_respond:
-    if: ${{ github.event_name != 'issue_comment' || github.event.issue.pull_request == null }}
+    if: >
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' &&
+       github.event.issue.user.login == github.repository_owner) ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request == null &&
+       github.event.sender.login == github.repository_owner)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
