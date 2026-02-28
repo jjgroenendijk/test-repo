@@ -329,7 +329,6 @@ class PrReconciler:
     def _ensure_issue_and_session(self, pr: dict, reasons: list[str], blocked: list[dict]):
         title = issue_title_for_pr(int(pr["number"]))
         issue_number = self.client.find_open_issue_by_title(title)
-        created_new_issue = False
 
         if issue_number is None:
             body = build_issue_body(pr, reasons, blocked)
@@ -338,15 +337,8 @@ class PrReconciler:
                 print(f"Failed to create issue for PR #{pr['number']}")
                 self.stats.errors += 1
                 return
-            created_new_issue = True
             self.stats.issues_created += 1
             print(f"Created issue #{issue_number} for PR #{pr['number']}")
-
-        if created_new_issue:
-            print(
-                f"Issue #{issue_number} is new. Skipping manual Jules trigger to avoid duplicate sessions from issue-open events."
-            )
-            return
 
         if self.client.issue_has_jules_session(issue_number):
             print(f"Issue #{issue_number} already has a Jules session.")

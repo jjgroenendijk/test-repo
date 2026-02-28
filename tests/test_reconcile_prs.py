@@ -88,8 +88,9 @@ def test_conflicting_pr_creates_issue():
     reconciler.reconcile_pr(42)
 
     assert reconciler.stats.issues_created == 1
+    assert reconciler.stats.sessions_triggered == 1
     assert client.created_issues
-    assert not client.triggered_sessions
+    assert client.triggered_sessions == [999]
 
 
 def test_existing_issue_without_session_triggers_jules():

@@ -17,8 +17,9 @@ The automation will:
 
 1. Read the issue.
 2. Resolve this repository as a Jules source.
-3. Start a Jules session.
-4. Comment back with the session ID.
+3. Start a Jules session immediately when the repo has no active Jules work.
+4. Queue the issue automatically when another Jules session for this repo is still running.
+5. Comment back with the session ID once the issue starts.
 
 Required secrets:
 
@@ -63,5 +64,6 @@ The app will be available on `http://localhost:3000`.
 ## CI/CD
 
 - `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
+- `Run Agent` reacts to new issues/comments and also polls every 15 minutes to drain queued issues when the repo's active Jules session finishes.
 - `Nightly PR Reconciliation` runs every midnight UTC to merge healthy open PRs, create issues for blocked PRs, and recover missing Jules sessions.
 - `Publish Container` builds and publishes the single runtime image to GHCR.

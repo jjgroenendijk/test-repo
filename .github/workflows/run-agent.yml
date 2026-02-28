@@ -5,11 +5,17 @@ on:
     types: [opened]
   issue_comment:
     types: [created]
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       issue_number:
         description: 'Issue Number'
         required: true
+
+concurrency:
+  group: run-agent-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   jules_respond:

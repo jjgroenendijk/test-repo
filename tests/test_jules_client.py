@@ -60,5 +60,36 @@ class TestJulesClient(unittest.TestCase):
 
         self.assertIsNone(client.find_source_for_repo("TestOwner", "TestRepo"))
 
+    def test_find_busy_session_for_source(self):
+        client = JulesClient("fake_key")
+        client.list_sessions = MagicMock(
+            return_value=[
+                {
+                    "name": "sessions/completed",
+                    "state": "COMPLETED",
+                    "sourceContext": {"source": "sources/github/owner/repo"},
+                },
+                {
+                    "name": "sessions/busy",
+                    "state": "IN_PROGRESS",
+                    "sourceContext": {"source": "sources/github/owner/repo"},
+                },
+                {
+                    "name": "sessions/other",
+                    "state": "IN_PROGRESS",
+                    "sourceContext": {"source": "sources/github/other/repo"},
+                },
+            ]
+        )
+
+        self.assertEqual(
+            client.find_busy_session_for_source("sources/github/owner/repo"),
+            {
+                "name": "sessions/busy",
+                "state": "IN_PROGRESS",
+                "sourceContext": {"source": "sources/github/owner/repo"},
+            },
+        )
+
 if __name__ == '__main__':
     unittest.main()

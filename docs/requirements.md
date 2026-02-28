@@ -14,6 +14,8 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Authentication:** Uses `GOOGLE_JULES_API` key stored in repository secrets.
 - **Source Resolution:** Maps `owner/repo` to Jules Source ID.
 - **Session Creation:** New issues create Jules sessions with `AUTO_CREATE_PR`.
+- **Single Active Session:** Only one non-terminal Jules session may be active for this repository at a time.
+- **Queued Retry:** When a new issue arrives while Jules is busy, the issue is queued and retried automatically until it starts.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.
