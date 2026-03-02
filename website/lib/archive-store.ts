@@ -78,7 +78,7 @@ export async function deleteRecord(paths: DataPaths, id: string): Promise<boolea
 
   const record = history[index];
 
-  for (const file of record.files) {
+  await Promise.all(record.files.map(async (file) => {
     const safePath = path.normalize(file).replace(/^(\.\.(\/|\\|$))+/, "");
     const absolutePath = path.join(paths.downloadsDir, safePath);
 
@@ -89,7 +89,7 @@ export async function deleteRecord(paths: DataPaths, id: string): Promise<boolea
         // Ignore errors (e.g. file already deleted)
       }
     }
-  }
+  }));
 
   history.splice(index, 1);
   await fs.writeFile(paths.historyFile, JSON.stringify(history, null, 2) + "\n", "utf8");
