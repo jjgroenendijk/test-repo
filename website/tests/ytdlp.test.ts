@@ -54,6 +54,23 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("--no-playlist");
   });
+
+  it("builds custom filename flag", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=custom",
+        mode: "video",
+        includePlaylist: false,
+        customFilename: "custom-template-%(id)s.%(ext)s",
+      },
+      paths,
+    );
+
+    const outputIndex = args.indexOf("--output");
+    expect(outputIndex).toBeGreaterThan(-1);
+    expect(args[outputIndex + 1]).toBe("custom-template-%(id)s.%(ext)s");
+  });
 });
 
 describe("downloaded file parsing", () => {
