@@ -54,6 +54,38 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("--no-playlist");
   });
+
+  it("builds explicit resolution format for video", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        resolution: "1080p",
+      },
+      paths,
+    );
+
+    expect(args).toContain("--format");
+    expect(args).toContain("bestvideo[height<=1080]+bestaudio/best[height<=1080]");
+  });
+
+  it("uses default format if resolution is 'best'", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        resolution: "best",
+      },
+      paths,
+    );
+
+    expect(args).toContain("--format");
+    expect(args).toContain("bv*+ba/b");
+  });
 });
 
 describe("downloaded file parsing", () => {
