@@ -1,8 +1,8 @@
-#/// script
+# /// script
 # dependencies = [
 #   "requests",
 # ]
-#///
+# ///
 
 import json
 import os
@@ -33,6 +33,7 @@ def is_session_busy(session):
 class JulesClient:
     def __init__(self, api_key):
         self.api_key = api_key
+        self._sources_cache = None
         self.headers = {
             "x-goog-api-key": self.api_key,
             "Content-Type": "application/json",
@@ -40,10 +41,14 @@ class JulesClient:
 
     def list_sources(self):
         """List all available sources."""
+        if self._sources_cache is not None:
+            return self._sources_cache
+
         url = f"{JULES_API_BASE}/sources"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
-        return response.json().get("sources", [])
+        self._sources_cache = response.json().get("sources", [])
+        return self._sources_cache
 
     def list_sessions(self, filter_expression="archived = false", page_size=100):
         """List available Jules sessions."""
@@ -66,7 +71,12 @@ class JulesClient:
             owner = gh_repo.get("owner")
             repo = gh_repo.get("repo")
 
-            if owner and repo and owner.lower() == target_owner and repo.lower() == target_repo:
+            if (
+                owner
+                and repo
+                and owner.lower() == target_owner
+                and repo.lower() == target_repo
+            ):
                 return source.get("name")
         return None
 
@@ -328,7 +338,9 @@ def start_issue_session(client, issue_number, title, body, owner, repo_name, ful
 
     existing_session_id = find_session_id(issue_number)
     if existing_session_id:
-        print(f"Issue #{issue_number} already has a Jules session: {existing_session_id}")
+        print(
+            f"Issue #{issue_number} already has a Jules session: {existing_session_id}"
+        )
         return 0
 
     try:
@@ -336,7 +348,9 @@ def start_issue_session(client, issue_number, title, body, owner, repo_name, ful
         source_name = client.find_source_for_repo(owner, repo_name)
 
         if not source_name:
-            print(f"Error: No Jules source found for {full_repo}. Has the Jules GitHub App been installed?")
+            print(
+                f"Error: No Jules source found for {full_repo}. Has the Jules GitHub App been installed?"
+            )
             err_msg = (
                 f"⚠️ I could not start a session because this repository (`{full_repo}`) "
                 f"is not connected to Jules."
@@ -391,7 +405,11 @@ def main():
         print("Error: GOOGLE_JULES_API is not set.")
         sys.exit(1)
 
-    if "GITHUB_TOKEN" not in os.environ and "GH_TOKEN" not in os.environ and "GITHUB_PAT" in os.environ:
+    if (
+        "GITHUB_TOKEN" not in os.environ
+        and "GH_TOKEN" not in os.environ
+        and "GITHUB_PAT" in os.environ
+    ):
         os.environ["GITHUB_TOKEN"] = os.environ["GITHUB_PAT"]
 
     event_data = get_event_data()
@@ -406,7 +424,9 @@ def main():
 
     owner, repo_name = full_repo.split("/")
     event_name = os.environ.get("GITHUB_EVENT_NAME")
-    action, issue_data = resolve_issue_for_event(event_name, event_data, full_repo, owner)
+    action, issue_data = resolve_issue_for_event(
+        event_name, event_data, full_repo, owner
+    )
     if action is None:
         sys.exit(0)
     if not issue_data:
@@ -455,9 +475,15 @@ def main():
 
     if action == "opened":
         if event_name == "issues" and not is_repo_owner(issue_author_login, owner):
-            print(f"Ignoring issue #{issue_number} from non-owner account: {issue_author_login}")
+            print(
+                f"Ignoring issue #{issue_number} from non-owner account: {issue_author_login}"
+            )
             sys.exit(0)
-        sys.exit(start_issue_session(client, issue_number, title, body, owner, repo_name, full_repo))
+        sys.exit(
+            start_issue_session(
+                client, issue_number, title, body, owner, repo_name, full_repo
+            )
+        )
 
 
 if __name__ == "__main__":
