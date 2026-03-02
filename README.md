@@ -88,5 +88,7 @@ The app will be available on `http://localhost:3000`.
 
 - `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
 - `Run Agent` reacts to new issues/comments and also polls hourly to drain queued issues when the repo's active Jules session finishes.
-- `Nightly PR Reconciliation` runs every midnight UTC to merge healthy open PRs, create issues for blocked PRs, and recover missing Jules sessions.
+- `PR Reconciliation` runs hourly to merge healthy open PRs, retry queued Jules automation issues, deduplicate stale automation tickets, recover missing Jules sessions, and close linked automation issues after successful merges.
+- `Manage PR Lifecycle` closes linked merge/conflict automation issues immediately after an automated merge succeeds.
+- `Close PR Automation Issues` runs on merged PR close events to close linked automation issues for manual merges.
 - `Publish Container` builds and publishes the single runtime image to GHCR.

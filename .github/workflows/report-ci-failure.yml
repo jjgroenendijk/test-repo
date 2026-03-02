@@ -102,6 +102,8 @@ jobs:
             echo "\`\`\`" >> issue_body.md
             echo "" >> issue_body.md
             echo "[View Full Logs](https://github.com/${{ github.repository }}/actions/runs/$RUN_ID)" >> issue_body.md
+            echo "" >> issue_body.md
+            echo "<!-- pr-automation:pr=$PR_NUMBER -->" >> issue_body.md
 
             ISSUE_NUMBER=$(jq -Rs --arg title "$TITLE" '{title: $title, body: .}' issue_body.md \
               | gh api \

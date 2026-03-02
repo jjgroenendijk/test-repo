@@ -110,7 +110,10 @@ def check_and_report_conflict(pr, repo_full_name):
         return
 
     print(f"Creating conflict issue for PR #{number}...")
-    body = f"The PR #{number} has merge conflicts. A Jules session is requested to resolve this."
+    body = (
+        f"The PR #{number} has merge conflicts. A Jules session is requested to resolve this.\n\n"
+        f"<!-- pr-automation:pr={number} -->"
+    )
     issue_number = create_conflict_issue(repo_full_name, title_search, body)
 
     if issue_number:
