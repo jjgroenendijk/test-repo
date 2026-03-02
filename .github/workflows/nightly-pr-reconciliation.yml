@@ -1,8 +1,8 @@
-name: Nightly PR Reconciliation
+name: PR Reconciliation
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "15 * * * *"
   workflow_dispatch:
 
 concurrency:
