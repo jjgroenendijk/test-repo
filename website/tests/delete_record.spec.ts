@@ -9,6 +9,7 @@ test.describe("Delete Record", () => {
         url: "http://example.com/video",
         mode: "video",
         includePlaylist: false,
+        resolution: "best",
         status: "completed",
         files: ["video.mp4"],
         logTail: "Success",

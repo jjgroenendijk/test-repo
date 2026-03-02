@@ -34,6 +34,7 @@ test("submits a download and displays history", async ({ page }) => {
     url: "https://example.com/watch?v=123",
     mode: "audio",
     includePlaylist: true,
+    resolution: undefined,
     status: "completed",
     files: ["creator/2026-02-08/example.mp3"],
     logTail: "done",

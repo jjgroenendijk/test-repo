@@ -69,6 +69,7 @@ describe("Archive Store Tests", () => {
         url: "http://example.com",
         mode: "video",
         includePlaylist: false,
+        resolution: "best",
         status: "completed",
         files: [fileName],
         logTail: "log",
@@ -103,6 +104,7 @@ describe("Archive Store Tests", () => {
         url: "http://example.com",
         mode: "video",
         includePlaylist: false,
+        resolution: "best",
         status: "completed",
         files: ["missing.mp4"],
         logTail: "log",
@@ -128,6 +130,7 @@ describe("Archive Store Tests", () => {
         url: "http://example.com",
         mode: "video",
         includePlaylist: false,
+        resolution: "best",
         status: "completed",
         files: ["../outside.txt"], // Malicious path
         logTail: "log",
