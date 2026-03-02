@@ -25,6 +25,7 @@ class GitHubCLI:
         self.repo = repo
         self.dry_run = dry_run
         self._issues_cache = None
+        self._issues_by_title = None
 
     def run(self, command: list[str], check: bool = True):
         result = subprocess.run(command, capture_output=True, text=True)
@@ -154,7 +155,9 @@ class GitHubCLI:
         if self._issues_cache is not None:
             return self._issues_cache
 
-        data = self.run_json(["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"])
+        data = self.run_json(
+            ["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"]
+        )
         if not isinstance(data, list):
             self._issues_cache = []
             return self._issues_cache
@@ -163,10 +166,13 @@ class GitHubCLI:
         return self._issues_cache
 
     def find_open_issue_by_title(self, title: str):
-        for issue in self._list_open_issues():
-            if issue.get("title") == title:
-                return int(issue["number"])
-        return None
+        if self._issues_by_title is None:
+            self._issues_by_title = {}
+            for issue in self._list_open_issues():
+                issue_title = issue.get("title")
+                if issue_title is not None:
+                    self._issues_by_title[issue_title] = int(issue["number"])
+        return self._issues_by_title.get(title)
 
     def create_issue(self, title: str, body: str):
         if self.dry_run:
@@ -199,6 +205,8 @@ class GitHubCLI:
         issue_number = int(issue_number_text)
         if self._issues_cache is not None:
             self._issues_cache.append({"number": issue_number, "title": title})
+        if self._issues_by_title is not None:
+            self._issues_by_title[title] = issue_number
         return issue_number
 
     def issue_has_jules_session(self, issue_number: int):
@@ -326,7 +334,9 @@ class PrReconciler:
 
         return mergeable
 
-    def _ensure_issue_and_session(self, pr: dict, reasons: list[str], blocked: list[dict]):
+    def _ensure_issue_and_session(
+        self, pr: dict, reasons: list[str], blocked: list[dict]
+    ):
         title = issue_title_for_pr(int(pr["number"]))
         issue_number = self.client.find_open_issue_by_title(title)
 
@@ -344,7 +354,9 @@ class PrReconciler:
             print(f"Issue #{issue_number} already has a Jules session.")
             return
 
-        print(f"Issue #{issue_number} has no Jules session. Triggering run-agent workflow.")
+        print(
+            f"Issue #{issue_number} has no Jules session. Triggering run-agent workflow."
+        )
         if self.client.trigger_jules_session(issue_number):
             self.stats.sessions_triggered += 1
             return
@@ -364,7 +376,9 @@ class PrReconciler:
             print(f"PR #{pr_number} is {pr.get('state')}. Skipping.")
             return
 
-        mergeable = self._resolve_mergeable(pr_number, str(pr.get("mergeable") or "UNKNOWN"))
+        mergeable = self._resolve_mergeable(
+            pr_number, str(pr.get("mergeable") or "UNKNOWN")
+        )
         checks = self.client.get_pr_checks(pr_number)
         blocked = blocking_checks(checks)
 
@@ -400,7 +414,9 @@ class PrReconciler:
         if not fallback_reasons:
             fallback_reasons.append("Automatic merge failed for an unknown reason.")
 
-        self._ensure_issue_and_session(refreshed_pr, fallback_reasons, refreshed_blocked)
+        self._ensure_issue_and_session(
+            refreshed_pr, fallback_reasons, refreshed_blocked
+        )
 
 
 def resolve_repo(args_repo: str | None):
@@ -423,10 +439,16 @@ def resolve_repo(args_repo: str | None):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Reconcile open PRs and recover Jules sessions.")
-    parser.add_argument("--pr-number", type=int, help="Optional single PR number to reconcile")
+    parser = argparse.ArgumentParser(
+        description="Reconcile open PRs and recover Jules sessions."
+    )
+    parser.add_argument(
+        "--pr-number", type=int, help="Optional single PR number to reconcile"
+    )
     parser.add_argument("--repo", help="GitHub repo in owner/name format")
-    parser.add_argument("--dry-run", action="store_true", help="Print intended changes only")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print intended changes only"
+    )
     return parser.parse_args()
 
 
