@@ -11,6 +11,7 @@ interface DownloadRecord {
   url: string;
   mode: DownloadMode;
   includePlaylist: boolean;
+  customFilename?: string;
   status: DownloadStatus;
   files: string[];
   logTail: string;
@@ -43,6 +44,7 @@ export function DownloaderDashboard() {
   const [url, setUrl] = useState("");
   const [mode, setMode] = useState<DownloadMode>("video");
   const [includePlaylist, setIncludePlaylist] = useState(false);
+  const [customFilename, setCustomFilename] = useState("");
   const [history, setHistory] = useState<DownloadRecord[]>([]);
   const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -52,6 +54,7 @@ export function DownloaderDashboard() {
     setUrl(record.url);
     setMode(record.mode);
     setIncludePlaylist(record.includePlaylist);
+    setCustomFilename(record.customFilename ?? "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -91,6 +94,7 @@ export function DownloaderDashboard() {
           url,
           mode,
           includePlaylist,
+          customFilename,
         }),
       });
 
@@ -193,6 +197,16 @@ export function DownloaderDashboard() {
             <option value="video">Best Video + Audio</option>
             <option value="audio">Audio (MP3)</option>
           </select>
+
+          <label htmlFor="custom-filename">Custom Filename Pattern (Optional)</label>
+          <input
+            id="custom-filename"
+            name="custom-filename"
+            type="text"
+            placeholder="e.g., %(title)s.%(ext)s"
+            value={customFilename}
+            onChange={(event) => setCustomFilename(event.target.value)}
+          />
 
           <label className="checkbox-row" htmlFor="playlist">
             <input

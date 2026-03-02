@@ -6,6 +6,7 @@ export interface DownloadRequest {
   url: string;
   mode: DownloadMode;
   includePlaylist: boolean;
+  customFilename?: string;
 }
 
 export interface DataPaths {
@@ -58,6 +59,10 @@ export function buildYtDlpArgs(
   request: DownloadRequest,
   paths: DataPaths,
 ): string[] {
+  const outputTemplate = request.customFilename && request.customFilename.trim() !== ""
+    ? request.customFilename.trim()
+    : "%(uploader|unknown_uploader)s/%(upload_date>%Y-%m-%d,unknown_date)s/%(title).160B [%(id)s].%(ext)s";
+
   const args = [
     "--newline",
     "--no-warnings",
@@ -66,7 +71,7 @@ export function buildYtDlpArgs(
     "--paths",
     paths.downloadsDir,
     "--output",
-    "%(uploader|unknown_uploader)s/%(upload_date>%Y-%m-%d,unknown_date)s/%(title).160B [%(id)s].%(ext)s",
+    outputTemplate,
     "--print",
     "after_move:filepath",
     "--write-info-json",

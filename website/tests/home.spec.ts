@@ -65,6 +65,7 @@ test("submits a download and displays history", async ({ page }) => {
   await page.getByLabel("Video URL").fill("https://example.com/watch?v=123");
   await page.getByLabel("Mode").selectOption("audio");
   await page.getByLabel("Download full playlist").check();
+  await page.getByLabel("Custom Filename Pattern (Optional)").fill("%(title)s.%(ext)s");
   await page.getByRole("button", { name: "Download and Archive" }).click();
 
   await expect(page.getByTestId("status-text")).toHaveText("Download complete.");
@@ -74,5 +75,6 @@ test("submits a download and displays history", async ({ page }) => {
     url: "https://example.com/watch?v=123",
     mode: "audio",
     includePlaylist: true,
+    customFilename: "%(title)s.%(ext)s",
   });
 });

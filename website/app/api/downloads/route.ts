@@ -72,6 +72,7 @@ export async function POST(request: Request) {
     url?: string;
     mode?: unknown;
     includePlaylist?: unknown;
+    customFilename?: string;
   };
 
   if (!body.url) {
@@ -91,6 +92,17 @@ export async function POST(request: Request) {
   const mode = parseMode(body.mode);
   const includePlaylist = parsePlaylistFlag(body.includePlaylist);
 
+  let customFilename: string | undefined = undefined;
+  if (typeof body.customFilename === "string" && body.customFilename.trim() !== "") {
+    customFilename = body.customFilename.trim();
+    if (customFilename.startsWith("/") || customFilename.startsWith("\\") || customFilename.includes("..")) {
+      return NextResponse.json(
+        { error: "Invalid custom filename pattern." },
+        { status: 400 },
+      );
+    }
+  }
+
   const dataDir = resolveDataDir();
   const paths = getDataPaths(dataDir);
   await ensureDataStorage(paths);
@@ -100,6 +112,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      customFilename,
     },
     paths,
   );
@@ -119,6 +132,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      customFilename,
       status: code === 0 ? "completed" : "failed",
       files,
       logTail: output.slice(-6000),
@@ -141,6 +155,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      customFilename,
       status: "failed",
       files: [],
       logTail: error instanceof Error ? error.message : "Unknown error",
