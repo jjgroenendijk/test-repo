@@ -72,6 +72,7 @@ export async function POST(request: Request) {
     url?: string;
     mode?: unknown;
     includePlaylist?: unknown;
+    resolution?: unknown;
   };
 
   if (!body.url) {
@@ -91,6 +92,15 @@ export async function POST(request: Request) {
   const mode = parseMode(body.mode);
   const includePlaylist = parsePlaylistFlag(body.includePlaylist);
 
+  let resolution: string | undefined = undefined;
+  if (mode === "video") {
+    if (typeof body.resolution === "string" && (body.resolution === "best" || /^(\d+p)$/.test(body.resolution))) {
+      resolution = body.resolution;
+    } else {
+      resolution = "best";
+    }
+  }
+
   const dataDir = resolveDataDir();
   const paths = getDataPaths(dataDir);
   await ensureDataStorage(paths);
@@ -100,6 +110,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      resolution,
     },
     paths,
   );
@@ -119,6 +130,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      resolution,
       status: code === 0 ? "completed" : "failed",
       files,
       logTail: output.slice(-6000),
@@ -141,6 +153,7 @@ export async function POST(request: Request) {
       url: validatedUrl,
       mode,
       includePlaylist,
+      resolution,
       status: "failed",
       files: [],
       logTail: error instanceof Error ? error.message : "Unknown error",
