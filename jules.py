@@ -34,6 +34,7 @@ class JulesClient:
     def __init__(self, api_key):
         self.api_key = api_key
         self._sources_cache = None
+        self._source_map = None
         self.headers = {
             "x-goog-api-key": self.api_key,
             "Content-Type": "application/json",
@@ -62,23 +63,17 @@ class JulesClient:
 
     def find_source_for_repo(self, repo_owner, repo_name):
         """Find the Jules source ID for a specific GitHub repo."""
-        sources = self.list_sources()
-        target_owner = repo_owner.lower()
-        target_repo = repo_name.lower()
+        if self._source_map is None:
+            self._source_map = {}
+            for source in self.list_sources():
+                gh_repo = source.get("githubRepo", {})
+                owner = gh_repo.get("owner")
+                repo = gh_repo.get("repo")
 
-        for source in sources:
-            gh_repo = source.get("githubRepo", {})
-            owner = gh_repo.get("owner")
-            repo = gh_repo.get("repo")
+                if owner and repo:
+                    self._source_map[(owner.lower(), repo.lower())] = source.get("name")
 
-            if (
-                owner
-                and repo
-                and owner.lower() == target_owner
-                and repo.lower() == target_repo
-            ):
-                return source.get("name")
-        return None
+        return self._source_map.get((repo_owner.lower(), repo_name.lower()))
 
     def find_busy_session_for_source(self, source_name):
         """Return the first non-terminal session for this repository source."""
