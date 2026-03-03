@@ -237,6 +237,16 @@ button:disabled {
   border-color: rgba(255, 115, 115, 0.4);
 }
 
+.resolution-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+}
+
 .retry-btn {
   margin-left: auto;
   width: auto;
