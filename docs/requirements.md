@@ -20,6 +20,7 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
 - **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
 - **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
+- **Transient Check Handling:** PR reconciliation must wait for non-terminal check states instead of treating them as Jules blockers.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.
