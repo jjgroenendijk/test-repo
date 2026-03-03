@@ -24,6 +24,8 @@ The automation will:
 
 Issue-triggered Jules entry stays owner-only even if you configure extra trusted PR actors.
 
+For recurring autonomous work, use the repository workflow in `.github/workflows/scheduled-autonomous-pr.yml`, not a schedule configured inside Jules. The workflow reuses a canonical GitHub issue and dispatches `run-agent.yml`, which keeps the session on the `AUTO_CREATE_PR` path this repository already reconciles.
+
 ## Trusted automation model
 
 Privileged `workflow_run` follow-up automation only acts on trusted pull requests:
@@ -87,6 +89,7 @@ The app will be available on `http://localhost:3000`.
 ## CI/CD
 
 - `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
+- `Scheduled Autonomous PR` runs daily to create or reuse the canonical autonomous-development issue and trigger an issue-backed Jules session when the repo is idle.
 - `Run Agent` reacts to new issues/comments and also polls hourly to drain queued issues when the repo's active Jules session finishes.
 - `PR Reconciliation` runs hourly to merge healthy open PRs, wait on non-terminal CI states, retry queued Jules automation issues, deduplicate stale automation tickets, recover missing Jules sessions, and close linked automation issues after successful merges.
 - `Manage PR Lifecycle` closes linked merge/conflict automation issues immediately after an automated merge succeeds.
