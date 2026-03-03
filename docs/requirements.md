@@ -10,6 +10,7 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - It listens for GitHub issue events.
 - It executes `jules.py` to process the event and call the Jules API.
 - Public issue/comment entry stays gated to the dynamic repository owner.
+- Scheduled autonomous development must also enter through GitHub-managed workflows so sessions stay issue-backed and PR-capable.
 
 ### 2. Google Jules API Integration
 - **Authentication:** Uses `GOOGLE_JULES_API` key stored in repository secrets.
@@ -20,6 +21,7 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
 - **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
 - **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
+- **Scheduled Recovery:** Recurring autonomous runs must reuse the same issue-backed flow instead of relying on Jules-native scheduling.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.
