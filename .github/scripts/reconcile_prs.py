@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 PASSING_CHECK_STATES = {"SUCCESS", "PASS", "SKIPPED", "SKIP", "NEUTRAL"}
+PENDING_CHECK_STATES = {"QUEUED", "IN_PROGRESS", "PENDING", "WAITING", "REQUESTED"}
 SESSION_ID_PATTERN = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
 PR_AUTOMATION_MARKER_PATTERN = re.compile(r"<!--\s*pr-automation:pr=(\d+)\s*-->")
 QUEUE_MARKER_PATTERN = re.compile(r"<!--\s*jules-queue\s*-->")
@@ -404,11 +405,19 @@ def is_passing_check_state(state: str):
     return state.upper() in PASSING_CHECK_STATES
 
 
+def is_pending_check_state(state: str):
+    return state.upper() in PENDING_CHECK_STATES
+
+
+def pending_checks(checks: list[dict]):
+    return [c for c in checks if is_pending_check_state(normalize_check_state(c))]
+
+
 def blocking_checks(checks: list[dict]):
     blocked = []
     for check in checks:
         state = normalize_check_state(check)
-        if not is_passing_check_state(state):
+        if not is_passing_check_state(state) and not is_pending_check_state(state):
             blocked.append(check)
     return blocked
 
@@ -602,6 +611,7 @@ class PrReconciler:
         mergeable = self._resolve_mergeable(pr_number, str(pr.get("mergeable") or "UNKNOWN"))
         checks = self.client.get_pr_checks(pr_number)
         blocked = blocking_checks(checks)
+        pending = pending_checks(checks)
 
         reasons = []
         if str(mergeable).upper() == "CONFLICTING":
@@ -612,6 +622,10 @@ class PrReconciler:
 
         if reasons:
             self._ensure_issue_and_session(pr, reasons, blocked)
+            return
+
+        if pending:
+            print(f"PR #{pr_number} has pending checks. Skipping.")
             return
 
         if self.client.merge_pr(pr_number):

@@ -89,7 +89,41 @@ def test_blocking_checks_detects_non_passing_states():
 
     blocked = reconcile_prs.blocking_checks(checks)
 
-    assert [check["name"] for check in blocked] == ["tests", "e2e"]
+    assert [check["name"] for check in blocked] == ["tests"]
+
+
+def test_pending_checks_detects_pending_states():
+    checks = [
+        {"name": "lint", "state": "SUCCESS"},
+        {"name": "tests", "state": "FAILURE"},
+        {"name": "e2e", "state": "PENDING"},
+        {"name": "build", "state": "QUEUED"},
+    ]
+
+    pending = reconcile_prs.pending_checks(checks)
+
+    assert [check["name"] for check in pending] == ["e2e", "build"]
+
+
+def test_pending_pr_is_skipped():
+    client = FakeClient(
+        pr={
+            "number": 10,
+            "title": "Pending checks",
+            "url": "https://example/pr/10",
+            "mergeable": "MERGEABLE",
+            "isDraft": False,
+            "state": "OPEN",
+        },
+        checks=[{"name": "ci", "state": "QUEUED"}],
+    )
+
+    reconciler = reconcile_prs.PrReconciler(client)
+    reconciler.reconcile_pr(10)
+
+    assert reconciler.stats.merged == 0
+    assert not client.created_issues
+    assert not client.triggered_sessions
 
 
 def test_conflicting_pr_creates_issue_and_triggers_jules():
