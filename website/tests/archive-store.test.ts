@@ -146,4 +146,40 @@ describe("Archive Store Tests", () => {
       await expect(fs.access(outsideFile)).resolves.toBeUndefined();
     });
   });
+
+  describe("deleteRecord Performance Benchmark", () => {
+    it("should delete many files efficiently", async () => {
+      const numFiles = 1000;
+      const files = [];
+      for (let i = 0; i < numFiles; i++) {
+        const fileName = `dummy_file_${i}.txt`;
+        const filePath = path.join(downloadsDir, fileName);
+        await fs.writeFile(filePath, "dummy content");
+        files.push(fileName);
+      }
+
+      const record: DownloadRecord = {
+        id: "perf1",
+        createdAt: new Date().toISOString(),
+        url: "http://example.com",
+        mode: "video",
+        includePlaylist: true,
+        status: "completed",
+        files: files,
+        logTail: "log",
+      };
+
+      await appendHistory(mockPaths, record);
+
+      const start = performance.now();
+      await deleteRecord(mockPaths, "perf1");
+      const end = performance.now();
+
+      const duration = end - start;
+      console.log(`Deleting ${numFiles} files took ${duration.toFixed(2)}ms`);
+
+      const history = await readHistory(mockPaths);
+      expect(history).toHaveLength(0);
+    });
+  });
 });
