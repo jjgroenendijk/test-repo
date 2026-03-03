@@ -80,16 +80,30 @@ class FakeClient:
         return None
 
 
-def test_blocking_checks_detects_non_passing_states():
+def test_blocking_checks_ignores_transient_states():
     checks = [
         {"name": "lint", "state": "SUCCESS"},
         {"name": "tests", "state": "FAILURE"},
         {"name": "e2e", "state": "PENDING"},
+        {"name": "build", "state": "QUEUED"},
     ]
 
     blocked = reconcile_prs.blocking_checks(checks)
 
-    assert [check["name"] for check in blocked] == ["tests", "e2e"]
+    assert [check["name"] for check in blocked] == ["tests"]
+
+
+def test_waiting_checks_detects_non_terminal_states():
+    checks = [
+        {"name": "queued", "state": "QUEUED"},
+        {"name": "running", "state": "IN_PROGRESS"},
+        {"name": "passed", "state": "SUCCESS"},
+        {"name": "failed", "state": "FAILURE"},
+    ]
+
+    waiting = reconcile_prs.waiting_checks(checks)
+
+    assert [check["name"] for check in waiting] == ["queued", "running"]
 
 
 def test_conflicting_pr_creates_issue_and_triggers_jules():
@@ -183,6 +197,34 @@ def test_mergeable_and_passing_pr_is_merged():
     assert reconciler.stats.merged == 1
     assert client.merged == [9]
     assert not client.created_issues
+
+
+def test_waiting_checks_do_not_trigger_jules_or_merge():
+    client = FakeClient(
+        pr={
+            "number": 10,
+            "title": "Wait for CI",
+            "url": "https://example/pr/10",
+            "mergeable": "MERGEABLE",
+            "isDraft": False,
+            "state": "OPEN",
+        },
+        checks=[
+            {"name": "python-ci", "state": "QUEUED"},
+            {"name": "website-ci", "state": "IN_PROGRESS"},
+        ],
+        merge_result=True,
+    )
+
+    reconciler = reconcile_prs.PrReconciler(client)
+    reconciler.reconcile_pr(10)
+
+    assert reconciler.stats.merged == 0
+    assert reconciler.stats.issues_created == 0
+    assert reconciler.stats.sessions_triggered == 0
+    assert client.merged == []
+    assert client.created_issues == []
+    assert client.triggered_sessions == []
 
 
 def test_merge_success_closes_linked_issues():

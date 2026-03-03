@@ -22,6 +22,7 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
 - **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
 - **Scheduled Recovery:** Recurring autonomous runs must reuse the same issue-backed flow instead of relying on Jules-native scheduling.
+- **Transient Check Handling:** PR reconciliation must wait for non-terminal check states instead of treating them as Jules blockers.
 
 ### 3. Web Downloader Interface
 - Users submit one or more video URLs via a web UI.

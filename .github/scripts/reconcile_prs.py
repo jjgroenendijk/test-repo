@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 PASSING_CHECK_STATES = {"SUCCESS", "PASS", "SKIPPED", "SKIP", "NEUTRAL"}
+WAITING_CHECK_STATES = {"PENDING", "QUEUED", "IN_PROGRESS", "WAITING", "REQUESTED"}
 SESSION_ID_PATTERN = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
 PR_AUTOMATION_MARKER_PATTERN = re.compile(r"<!--\s*pr-automation:pr=(\d+)\s*-->")
 QUEUE_MARKER_PATTERN = re.compile(r"<!--\s*jules-queue\s*-->")
@@ -404,12 +405,26 @@ def is_passing_check_state(state: str):
     return state.upper() in PASSING_CHECK_STATES
 
 
+def is_waiting_check_state(state: str):
+    return state.upper() in WAITING_CHECK_STATES
+
+
+def waiting_checks(checks: list[dict]):
+    waiting = []
+    for check in checks:
+        state = normalize_check_state(check)
+        if is_waiting_check_state(state):
+            waiting.append(check)
+    return waiting
+
+
 def blocking_checks(checks: list[dict]):
     blocked = []
     for check in checks:
         state = normalize_check_state(check)
-        if not is_passing_check_state(state):
-            blocked.append(check)
+        if is_passing_check_state(state) or is_waiting_check_state(state):
+            continue
+        blocked.append(check)
     return blocked
 
 
@@ -601,6 +616,7 @@ class PrReconciler:
 
         mergeable = self._resolve_mergeable(pr_number, str(pr.get("mergeable") or "UNKNOWN"))
         checks = self.client.get_pr_checks(pr_number)
+        waiting = waiting_checks(checks)
         blocked = blocking_checks(checks)
 
         reasons = []
@@ -612,6 +628,10 @@ class PrReconciler:
 
         if reasons:
             self._ensure_issue_and_session(pr, reasons, blocked)
+            return
+
+        if waiting:
+            print(f"PR #{pr_number} still has non-terminal checks; waiting for CI to finish.")
             return
 
         if self.client.merge_pr(pr_number):
@@ -629,7 +649,12 @@ class PrReconciler:
             pr_number, str(refreshed_pr.get("mergeable") or "UNKNOWN")
         )
         refreshed_checks = self.client.get_pr_checks(pr_number)
+        refreshed_waiting = waiting_checks(refreshed_checks)
         refreshed_blocked = blocking_checks(refreshed_checks)
+
+        if refreshed_waiting and str(refreshed_mergeable).upper() != "CONFLICTING" and not refreshed_blocked:
+            print(f"PR #{pr_number} has non-terminal checks after merge attempt; waiting for CI to finish.")
+            return
 
         fallback_reasons = []
         if str(refreshed_mergeable).upper() == "CONFLICTING":
