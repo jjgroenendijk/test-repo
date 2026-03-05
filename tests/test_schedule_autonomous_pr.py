@@ -78,12 +78,13 @@ def test_skips_when_open_prs_exist():
 
 
 def test_reuses_existing_issue_when_outside_cooldown():
+    past_time = datetime.now(timezone.utc) - timedelta(hours=24)
     client = FakeClient(
         issue_number=808,
         comments=[
             {
                 "body": "- **Session ID:** `sessions/123`",
-                "created_at": "2026-03-01T06:00:00Z",
+                "created_at": past_time.isoformat(),
             }
         ],
     )
@@ -92,9 +93,7 @@ def test_reuses_existing_issue_when_outside_cooldown():
         client=client,
         cooldown=timedelta(hours=18),
     )
-    should_skip = scheduler.should_skip_for_cooldown(
-        808, now=datetime(2026, 3, 3, 6, 0, tzinfo=timezone.utc)
-    )
+    should_skip = scheduler.should_skip_for_cooldown(808)
 
     assert not should_skip
 
@@ -106,12 +105,13 @@ def test_reuses_existing_issue_when_outside_cooldown():
 
 
 def test_skips_when_recent_session_comment_exists():
+    recent_time = datetime.now(timezone.utc) - timedelta(hours=2)
     client = FakeClient(
         issue_number=909,
         comments=[
             {
                 "body": "- **Session ID:** `sessions/999`",
-                "created_at": "2026-03-03T01:30:00Z",
+                "created_at": recent_time.isoformat(),
             }
         ],
     )
@@ -120,9 +120,7 @@ def test_skips_when_recent_session_comment_exists():
         client=client,
         cooldown=timedelta(hours=18),
     )
-    should_skip = scheduler.should_skip_for_cooldown(
-        909, now=datetime(2026, 3, 3, 6, 0, tzinfo=timezone.utc)
-    )
+    should_skip = scheduler.should_skip_for_cooldown(909)
 
     assert should_skip
 
@@ -134,12 +132,13 @@ def test_skips_when_recent_session_comment_exists():
 
 
 def test_force_bypasses_cooldown():
+    recent_time = datetime.now(timezone.utc) - timedelta(hours=2)
     client = FakeClient(
         issue_number=1001,
         comments=[
             {
                 "body": "- **Session ID:** `sessions/1001`",
-                "created_at": "2026-03-03T05:30:00Z",
+                "created_at": recent_time.isoformat(),
             }
         ],
     )
