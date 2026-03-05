@@ -224,7 +224,7 @@ class AutonomousScheduler:
         current_time = now or datetime.now(timezone.utc)
         return current_time - latest < self.cooldown
 
-    def run(self):
+    def run(self, now: datetime | None = None):
         open_prs = self.client.list_open_pr_numbers()
         if open_prs:
             self.stats.skipped_for_open_prs += 1
@@ -235,7 +235,7 @@ class AutonomousScheduler:
         if issue_number is None:
             return self.stats
 
-        if self.should_skip_for_cooldown(issue_number):
+        if self.should_skip_for_cooldown(issue_number, now=now):
             self.stats.skipped_for_cooldown += 1
             print(f"Skipping scheduled autonomy because issue #{issue_number} is inside cooldown.")
             return self.stats
