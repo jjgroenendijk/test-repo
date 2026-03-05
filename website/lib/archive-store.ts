@@ -10,6 +10,7 @@ export interface DownloadRecord {
   mode: "video" | "audio";
   includePlaylist: boolean;
   resolution?: string;
+  customFilename?: string;
   status: "completed" | "failed";
   files: string[];
   logTail: string;

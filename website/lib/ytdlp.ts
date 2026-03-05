@@ -7,6 +7,7 @@ export interface DownloadRequest {
   mode: DownloadMode;
   includePlaylist: boolean;
   resolution?: string;
+  customFilename?: string;
 }
 
 export interface DataPaths {
@@ -67,7 +68,7 @@ export function buildYtDlpArgs(
     "--paths",
     paths.downloadsDir,
     "--output",
-    "%(uploader|unknown_uploader)s/%(upload_date>%Y-%m-%d,unknown_date)s/%(title).160B [%(id)s].%(ext)s",
+    request.customFilename ? request.customFilename : "%(uploader|unknown_uploader)s/%(upload_date>%Y-%m-%d,unknown_date)s/%(title).160B [%(id)s].%(ext)s",
     "--print",
     "after_move:filepath",
     "--write-info-json",

@@ -70,6 +70,23 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("bestvideo[height<=720]+bestaudio/best[height<=720]");
   });
+
+  it("builds flags with custom filename", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        customFilename: "custom_%(title)s.%(ext)s",
+      },
+      paths,
+    );
+
+    const outputIndex = args.indexOf("--output");
+    expect(outputIndex).toBeGreaterThan(-1);
+    expect(args[outputIndex + 1]).toBe("custom_%(title)s.%(ext)s");
+  });
 });
 
 describe("downloaded file parsing", () => {
