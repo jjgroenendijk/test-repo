@@ -73,6 +73,7 @@ export async function POST(request: Request) {
     mode?: unknown;
     includePlaylist?: unknown;
     resolution?: unknown;
+    customFilename?: unknown;
   };
 
   if (!body.url) {
@@ -101,6 +102,17 @@ export async function POST(request: Request) {
     }
   }
 
+  let customFilename: string | undefined = undefined;
+  if (typeof body.customFilename === "string" && body.customFilename.trim() !== "") {
+    customFilename = body.customFilename.trim();
+    if (customFilename.includes("..") || customFilename.includes("/") || customFilename.includes("\\") || customFilename.startsWith(".")) {
+      return NextResponse.json(
+        { error: "Invalid custom filename. Directory traversal characters or absolute paths are not allowed." },
+        { status: 400 }
+      );
+    }
+  }
+
   const dataDir = resolveDataDir();
   const paths = getDataPaths(dataDir);
   await ensureDataStorage(paths);
@@ -111,6 +123,7 @@ export async function POST(request: Request) {
       mode,
       includePlaylist,
       resolution,
+      customFilename,
     },
     paths,
   );
@@ -131,6 +144,7 @@ export async function POST(request: Request) {
       mode,
       includePlaylist,
       resolution,
+      customFilename,
       status: code === 0 ? "completed" : "failed",
       files,
       logTail: output.slice(-6000),
@@ -154,6 +168,7 @@ export async function POST(request: Request) {
       mode,
       includePlaylist,
       resolution,
+      customFilename,
       status: "failed",
       files: [],
       logTail: error instanceof Error ? error.message : "Unknown error",
