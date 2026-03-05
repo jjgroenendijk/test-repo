@@ -247,6 +247,16 @@ button:disabled {
   color: var(--text-muted);
 }
 
+.custom-filename-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  background: rgba(139, 230, 199, 0.15);
+  border: 1px solid rgba(47, 199, 161, 0.3);
+  color: var(--accent-main);
+}
+
 .retry-btn {
   margin-left: auto;
   width: auto;

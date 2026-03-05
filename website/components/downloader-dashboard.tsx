@@ -12,6 +12,7 @@ interface DownloadRecord {
   mode: DownloadMode;
   includePlaylist: boolean;
   resolution?: string;
+  customFilename?: string;
   status: DownloadStatus;
   files: string[];
   logTail: string;
@@ -45,6 +46,7 @@ export function DownloaderDashboard() {
   const [mode, setMode] = useState<DownloadMode>("video");
   const [includePlaylist, setIncludePlaylist] = useState(false);
   const [resolution, setResolution] = useState<string>("best");
+  const [customFilename, setCustomFilename] = useState("");
   const [history, setHistory] = useState<DownloadRecord[]>([]);
   const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -58,6 +60,11 @@ export function DownloaderDashboard() {
       setResolution(record.resolution);
     } else {
       setResolution("best");
+    }
+    if (record.customFilename) {
+      setCustomFilename(record.customFilename);
+    } else {
+      setCustomFilename("");
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -99,6 +106,7 @@ export function DownloaderDashboard() {
           mode,
           includePlaylist,
           resolution: mode === "video" ? resolution : undefined,
+          customFilename: customFilename.trim() !== "" ? customFilename : undefined,
         }),
       });
 
@@ -219,6 +227,16 @@ export function DownloaderDashboard() {
             </>
           )}
 
+          <label htmlFor="custom-filename">Custom Filename (Optional)</label>
+          <input
+            id="custom-filename"
+            name="custom-filename"
+            type="text"
+            placeholder="e.g. MyVideo.%(ext)s"
+            value={customFilename}
+            onChange={(event) => setCustomFilename(event.target.value)}
+          />
+
           <label className="checkbox-row" htmlFor="playlist">
             <input
               id="playlist"
@@ -281,6 +299,9 @@ export function DownloaderDashboard() {
                   <span>{record.mode}</span>
                   {record.mode === "video" && record.resolution && record.resolution !== "best" && (
                     <span className="resolution-badge">{record.resolution}</span>
+                  )}
+                  {record.customFilename && (
+                    <span className="custom-filename-badge">Custom Name</span>
                   )}
                   <button
                     type="button"

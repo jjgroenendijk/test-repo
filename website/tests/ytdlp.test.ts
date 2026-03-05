@@ -70,6 +70,38 @@ describe("buildYtDlpArgs", () => {
     expect(args).toContain("--format");
     expect(args).toContain("bestvideo[height<=720]+bestaudio/best[height<=720]");
   });
+
+  it("builds args with custom filename", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        customFilename: "MyCustomName.%(ext)s",
+      },
+      paths,
+    );
+
+    const outputIndex = args.indexOf("--output");
+    expect(args[outputIndex + 1]).toBe("MyCustomName.%(ext)s");
+  });
+
+  it("sanitizes custom filename to prevent directory traversal", () => {
+    const paths = getDataPaths("/tmp/archive");
+    const args = buildYtDlpArgs(
+      {
+        url: "https://example.com/watch?v=video",
+        mode: "video",
+        includePlaylist: false,
+        customFilename: "../../etc/passwd",
+      },
+      paths,
+    );
+
+    const outputIndex = args.indexOf("--output");
+    expect(args[outputIndex + 1]).toBe("etc/passwd");
+  });
 });
 
 describe("downloaded file parsing", () => {
