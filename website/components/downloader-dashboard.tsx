@@ -48,6 +48,7 @@ export function DownloaderDashboard() {
   const [resolution, setResolution] = useState<string>("best");
   const [customFilename, setCustomFilename] = useState("");
   const [history, setHistory] = useState<DownloadRecord[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [storageUsage, setStorageUsage] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(false);
   const [feedback, setFeedback] = useState<string>("Idle");
@@ -174,6 +175,20 @@ export function DownloaderDashboard() {
     }
   }
 
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return history;
+    }
+    const lowerQuery = searchQuery.toLowerCase();
+    return history.filter((record) => {
+      if (record.url.toLowerCase().includes(lowerQuery)) return true;
+      if (record.customFilename && record.customFilename.toLowerCase().includes(lowerQuery)) return true;
+      if (record.status.toLowerCase().includes(lowerQuery)) return true;
+      if (record.files.some((file) => file.toLowerCase().includes(lowerQuery))) return true;
+      return false;
+    });
+  }, [history, searchQuery]);
+
   return (
     <main className="page-shell">
       <section className="hero-card">
@@ -284,12 +299,28 @@ export function DownloaderDashboard() {
       </section>
 
       <section className="panel history-panel">
-        <header className="flex justify-between items-center"><h2>Recent Jobs</h2>{history.length > 0 && (<button onClick={handleClearHistory} className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors">Clear History</button>)}</header>
+        <header className="flex justify-between items-center"><h2>Recent Jobs</h2>{history.length > 0 && (<button onClick={handleClearHistory} className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors" data-testid="clear-history-button">Clear History</button>)}</header>
+
+        {history.length > 0 && (
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search history by URL, filename, or status..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+              data-testid="search-input"
+            />
+          </div>
+        )}
+
         {history.length === 0 ? (
           <p>No downloads yet.</p>
+        ) : filteredHistory.length === 0 ? (
+          <p>No matches found.</p>
         ) : (
           <ul className="history-list" data-testid="history-list">
-            {history.map((record) => (
+            {filteredHistory.map((record) => (
               <li key={record.id} className="history-item">
                 <header>
                   <span className={`status-pill ${record.status}`}>
