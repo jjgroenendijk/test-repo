@@ -102,7 +102,6 @@ export async function deleteRecord(paths: DataPaths, id: string): Promise<boolea
 }
 
 async function calculateDirectorySize(dirPath: string): Promise<number> {
-  let totalSize = 0;
   let entries;
 
   try {
@@ -111,21 +110,23 @@ async function calculateDirectorySize(dirPath: string): Promise<number> {
     return 0;
   }
 
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
-    try {
-      if (entry.isDirectory()) {
-        totalSize += await calculateDirectorySize(fullPath);
-      } else {
-        const stats = await fs.stat(fullPath);
-        totalSize += stats.size;
+  const sizes = await Promise.all(
+    entries.map(async (entry) => {
+      const fullPath = path.join(dirPath, entry.name);
+      try {
+        if (entry.isDirectory()) {
+          return await calculateDirectorySize(fullPath);
+        } else {
+          const stats = await fs.stat(fullPath);
+          return stats.size;
+        }
+      } catch {
+        return 0;
       }
-    } catch {
-      continue;
-    }
-  }
+    }),
+  );
 
-  return totalSize;
+  return sizes.reduce((acc, size) => acc + size, 0);
 }
 
 export async function getStorageUsage(paths: DataPaths): Promise<number> {
