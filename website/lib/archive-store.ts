@@ -111,18 +111,14 @@ async function calculateDirectorySize(dirPath: string): Promise<number> {
   }
 
   const sizes = await Promise.all(
-    entries.map(async (entry) => {
+    entries.map((entry) => {
       const fullPath = path.join(dirPath, entry.name);
-      try {
-        if (entry.isDirectory()) {
-          return await calculateDirectorySize(fullPath);
-        } else {
-          const stats = await fs.stat(fullPath);
-          return stats.size;
-        }
-      } catch {
-        return 0;
+      if (entry.isDirectory()) {
+        return calculateDirectorySize(fullPath).catch(() => 0);
       }
+      return fs.stat(fullPath)
+        .then((stats) => stats.size)
+        .catch(() => 0);
     }),
   );
 
