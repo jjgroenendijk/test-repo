@@ -5,6 +5,8 @@ import subprocess
 import sys
 import time
 
+_open_issues_cache = {}
+
 
 def run_command(command):
     try:
@@ -22,7 +24,9 @@ def get_repo_full_name():
     repo = os.environ.get("GITHUB_REPOSITORY")
     if repo:
         return repo
-    output = run_command(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"])
+    output = run_command(
+        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]
+    )
     if output:
         return output
     return None
@@ -30,7 +34,14 @@ def get_repo_full_name():
 
 def get_pr_details(pr_number):
     output = run_command(
-        ["gh", "pr", "view", str(pr_number), "--json", "number,mergeable,url,title,author"]
+        [
+            "gh",
+            "pr",
+            "view",
+            str(pr_number),
+            "--json",
+            "number,mergeable,url,title,author",
+        ]
     )
     if output:
         return json.loads(output)
@@ -39,22 +50,39 @@ def get_pr_details(pr_number):
 
 def list_open_prs():
     output = run_command(
-        ["gh", "pr", "list", "--state", "open", "--json", "number,mergeable,url,title,author", "--limit", "100"]
+        [
+            "gh",
+            "pr",
+            "list",
+            "--state",
+            "open",
+            "--json",
+            "number,mergeable,url,title,author",
+            "--limit",
+            "100",
+        ]
     )
     if output:
         return json.loads(output)
     return []
 
 
-def list_open_issues(repo_full_name):
-    output = run_command(["gh", "api", f"repos/{repo_full_name}/issues?state=open&per_page=100"])
+def list_open_issues(repo_full_name, force_refresh=False):
+    if not force_refresh and repo_full_name in _open_issues_cache:
+        return _open_issues_cache[repo_full_name]
+
+    output = run_command(
+        ["gh", "api", f"repos/{repo_full_name}/issues?state=open&per_page=100"]
+    )
     if output:
-        return json.loads(output)
+        issues = json.loads(output)
+        _open_issues_cache[repo_full_name] = issues
+        return issues
     return []
 
 
-def find_existing_conflict_issue(repo_full_name, title_search):
-    for issue in list_open_issues(repo_full_name):
+def find_existing_conflict_issue(repo_full_name, title_search, force_refresh=False):
+    for issue in list_open_issues(repo_full_name, force_refresh=force_refresh):
         if "pull_request" in issue:
             continue
         if issue.get("title") == title_search:
@@ -106,7 +134,9 @@ def check_and_report_conflict(pr, repo_full_name):
     title_search = f"Merge Conflict: PR #{number}"
     existing_issue = find_existing_conflict_issue(repo_full_name, title_search)
     if existing_issue:
-        print(f"Open issue already exists for PR #{number} (Issue #{existing_issue}). Skipping.")
+        print(
+            f"Open issue already exists for PR #{number} (Issue #{existing_issue}). Skipping."
+        )
         return
 
     print(f"Creating conflict issue for PR #{number}...")
@@ -121,9 +151,13 @@ def check_and_report_conflict(pr, repo_full_name):
     else:
         print("Issue creation command failed. Searching for recently created issue...")
         time.sleep(2)
-        issue_number = find_existing_conflict_issue(repo_full_name, title_search)
+        issue_number = find_existing_conflict_issue(
+            repo_full_name, title_search, force_refresh=True
+        )
         if issue_number:
-            print(f"Found issue #{issue_number} (created despite error). Triggering Jules...")
+            print(
+                f"Found issue #{issue_number} (created despite error). Triggering Jules..."
+            )
         else:
             print(f"ERROR: Failed to create or find issue for PR #{number}")
             return
