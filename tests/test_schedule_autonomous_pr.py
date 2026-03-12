@@ -4,10 +4,7 @@ from pathlib import Path
 
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[1]
-    / ".github"
-    / "scripts"
-    / "schedule_autonomous_pr.py"
+    Path(__file__).resolve().parents[1] / ".github" / "scripts" / "schedule_autonomous_pr.py"
 )
 SPEC = spec_from_file_location("schedule_autonomous_pr", MODULE_PATH)
 schedule_autonomous_pr = module_from_spec(SPEC)

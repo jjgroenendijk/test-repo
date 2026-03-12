@@ -15,9 +15,7 @@ PR_AUTOMATION_MARKER_PATTERN = re.compile(r"<!--\s*pr-automation:pr=(\d+)\s*-->"
 QUEUE_MARKER_PATTERN = re.compile(r"<!--\s*jules-queue\s*-->")
 CI_FAILURE_TITLE_PATTERN = re.compile(r"^CI Failure: PR #(\d+)$")
 MERGE_CONFLICT_TITLE_PATTERN = re.compile(r"^Merge Conflict: PR #(\d+)$")
-GENERIC_AUTOMATION_TITLE_PATTERN = re.compile(
-    r"^PR Automation: PR #(\d+) requires attention$"
-)
+GENERIC_AUTOMATION_TITLE_PATTERN = re.compile(r"^PR Automation: PR #(\d+) requires attention$")
 QUEUE_RETRY_INTERVAL = timedelta(hours=1)
 
 
@@ -186,9 +184,7 @@ class GitHubCLI:
         if self._issues_cache is not None:
             return self._issues_cache
 
-        data = self.run_json(
-            ["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"]
-        )
+        data = self.run_json(["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"])
         if not isinstance(data, list):
             self._issues_cache = []
             return self._issues_cache
@@ -287,9 +283,7 @@ class GitHubCLI:
 
         if self._issues_cache is not None:
             self._issues_cache = [
-                issue
-                for issue in self._issues_cache
-                if int(issue.get("number", -1)) != issue_number
+                issue for issue in self._issues_cache if int(issue.get("number", -1)) != issue_number
             ]
 
         return True
@@ -318,12 +312,9 @@ class GitHubCLI:
 
             if QUEUE_MARKER_PATTERN.search(body):
                 state.queued = True
-                created_at = parse_github_timestamp(
-                    comment.get("created_at") or comment.get("createdAt")
-                )
+                created_at = parse_github_timestamp(comment.get("created_at") or comment.get("createdAt"))
                 if created_at and (
-                    state.last_queue_comment_at is None
-                    or created_at > state.last_queue_comment_at
+                    state.last_queue_comment_at is None or created_at > state.last_queue_comment_at
                 ):
                     state.last_queue_comment_at = created_at
 
@@ -397,9 +388,7 @@ def linked_pr_number_for_issue(issue: dict):
     return None
 
 
-def canonical_issue_number(
-    issues: list[dict], issue_states: dict[int, IssueJulesState]
-):
+def canonical_issue_number(issues: list[dict], issue_states: dict[int, IssueJulesState]):
     def sort_key(issue: dict):
         issue_number = int(issue["number"])
         state = issue_states.get(issue_number, IssueJulesState())
@@ -507,9 +496,7 @@ class PrReconciler:
 
         return mergeable
 
-    def _ensure_issue_and_session(
-        self, pr: dict, reasons: list[str], blocked: list[dict]
-    ):
+    def _ensure_issue_and_session(self, pr: dict, reasons: list[str], blocked: list[dict]):
         pr_number = int(pr["number"])
         title = issue_title_for_pr(pr_number)
         linked_issue_numbers = self.client.find_open_issue_numbers_for_pr(pr_number)
@@ -562,9 +549,7 @@ class PrReconciler:
             print(f"Issue #{issue_number} is queued for retry and not ready yet.")
             return
 
-        print(
-            f"Issue #{issue_number} is ready for Jules recovery. Triggering run-agent workflow."
-        )
+        print(f"Issue #{issue_number} is ready for Jules recovery. Triggering run-agent workflow.")
         if self.client.trigger_jules_session(issue_number):
             self.stats.sessions_triggered += 1
             self.client.drop_issue_from_cache(issue_number)
@@ -583,9 +568,7 @@ class PrReconciler:
 
         for pr_number, issues in sorted(grouped.items()):
             issue_states = {
-                int(issue["number"]): self.client.get_issue_jules_state(
-                    int(issue["number"])
-                )
+                int(issue["number"]): self.client.get_issue_jules_state(int(issue["number"]))
                 for issue in issues
             }
             canonical_number = canonical_issue_number(issues, issue_states)
@@ -631,9 +614,7 @@ class PrReconciler:
             )
             return
 
-        mergeable = self._resolve_mergeable(
-            pr_number, str(pr.get("mergeable") or "UNKNOWN")
-        )
+        mergeable = self._resolve_mergeable(pr_number, str(pr.get("mergeable") or "UNKNOWN"))
         checks = self.client.get_pr_checks(pr_number)
         waiting = waiting_checks(checks)
         blocked = blocking_checks(checks)
@@ -650,9 +631,7 @@ class PrReconciler:
             return
 
         if waiting:
-            print(
-                f"PR #{pr_number} still has non-terminal checks; waiting for CI to finish."
-            )
+            print(f"PR #{pr_number} still has non-terminal checks; waiting for CI to finish.")
             return
 
         if self.client.merge_pr(pr_number):
@@ -673,14 +652,8 @@ class PrReconciler:
         refreshed_waiting = waiting_checks(refreshed_checks)
         refreshed_blocked = blocking_checks(refreshed_checks)
 
-        if (
-            refreshed_waiting
-            and str(refreshed_mergeable).upper() != "CONFLICTING"
-            and not refreshed_blocked
-        ):
-            print(
-                f"PR #{pr_number} has non-terminal checks after merge attempt; waiting for CI to finish."
-            )
+        if refreshed_waiting and str(refreshed_mergeable).upper() != "CONFLICTING" and not refreshed_blocked:
+            print(f"PR #{pr_number} has non-terminal checks after merge attempt; waiting for CI to finish.")
             return
 
         fallback_reasons = []
@@ -691,9 +664,7 @@ class PrReconciler:
         if not fallback_reasons:
             fallback_reasons.append("Automatic merge failed for an unknown reason.")
 
-        self._ensure_issue_and_session(
-            refreshed_pr, fallback_reasons, refreshed_blocked
-        )
+        self._ensure_issue_and_session(refreshed_pr, fallback_reasons, refreshed_blocked)
 
 
 def resolve_repo(args_repo: str | None):
@@ -716,16 +687,10 @@ def resolve_repo(args_repo: str | None):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Reconcile open PRs and recover Jules sessions."
-    )
-    parser.add_argument(
-        "--pr-number", type=int, help="Optional single PR number to reconcile"
-    )
+    parser = argparse.ArgumentParser(description="Reconcile open PRs and recover Jules sessions.")
+    parser.add_argument("--pr-number", type=int, help="Optional single PR number to reconcile")
     parser.add_argument("--repo", help="GitHub repo in owner/name format")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Print intended changes only"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Print intended changes only")
     return parser.parse_args()
 
 

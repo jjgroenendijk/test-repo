@@ -2,9 +2,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 
-MODULE_PATH = (
-    Path(__file__).resolve().parents[1] / ".github" / "scripts" / "reconcile_prs.py"
-)
+MODULE_PATH = Path(__file__).resolve().parents[1] / ".github" / "scripts" / "reconcile_prs.py"
 SPEC = spec_from_file_location("reconcile_prs", MODULE_PATH)
 reconcile_prs = module_from_spec(SPEC)
 assert SPEC and SPEC.loader
@@ -352,11 +350,7 @@ def test_closed_pr_canonical_automation_issue_is_closed_during_recovery():
         merge_result=False,
     )
     client.automation_issues = [
-        {
-            "number": 701,
-            "title": "CI Failure: PR #71",
-            "body": "<!-- pr-automation:pr=71 -->",
-        }
+        {"number": 701, "title": "CI Failure: PR #71", "body": "<!-- pr-automation:pr=71 -->"}
     ]
 
     reconciler = reconcile_prs.PrReconciler(client)

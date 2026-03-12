@@ -26,9 +26,7 @@ def test_is_session_busy_only_for_non_terminal_states():
 
 @patch("jules.post_issue_comment")
 @patch("jules.issue_has_queue_comment", return_value=False)
-def test_queue_issue_posts_single_queue_comment(
-    mock_has_queue_comment, mock_post_issue_comment
-):
+def test_queue_issue_posts_single_queue_comment(mock_has_queue_comment, mock_post_issue_comment):
     jules.queue_issue(
         42,
         {
@@ -49,19 +47,12 @@ def test_queue_issue_posts_single_queue_comment(
 @patch(
     "jules.list_open_issues",
     return_value=[
-        {
-            "number": 1,
-            "title": "Foreign issue",
-            "body": "body",
-            "author_login": "someone-else",
-        },
+        {"number": 1, "title": "Foreign issue", "body": "body", "author_login": "someone-else"},
         {"number": 2, "title": "Has session", "body": "body", "author_login": "owner"},
         {"number": 3, "title": "Next pending", "body": "body", "author_login": "owner"},
     ],
 )
-def test_find_next_pending_issue_skips_issues_with_existing_sessions(
-    mock_list_open_issues, mock_find_session_id
-):
+def test_find_next_pending_issue_skips_issues_with_existing_sessions(mock_list_open_issues, mock_find_session_id):
     issue = jules.find_next_pending_issue("owner/repo", "owner")
 
     assert issue == {
