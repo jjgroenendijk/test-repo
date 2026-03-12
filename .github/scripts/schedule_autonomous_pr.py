@@ -83,7 +83,9 @@ class GitHubCLI:
         return [int(pr["number"]) for pr in data]
 
     def list_open_issues(self):
-        data = self.run_json(["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"])
+        data = self.run_json(
+            ["gh", "api", f"repos/{self.repo}/issues?state=open&per_page=100"]
+        )
         if not isinstance(data, list):
             return []
         return [issue for issue in data if "pull_request" not in issue]
@@ -207,7 +209,9 @@ class AutonomousScheduler:
             if not SESSION_ID_PATTERN.search(body):
                 continue
 
-            created_at = parse_github_timestamp(comment.get("created_at") or comment.get("createdAt"))
+            created_at = parse_github_timestamp(
+                comment.get("created_at") or comment.get("createdAt")
+            )
             if created_at and (latest is None or created_at > latest):
                 latest = created_at
 
@@ -237,7 +241,9 @@ class AutonomousScheduler:
 
         if self.should_skip_for_cooldown(issue_number):
             self.stats.skipped_for_cooldown += 1
-            print(f"Skipping scheduled autonomy because issue #{issue_number} is inside cooldown.")
+            print(
+                f"Skipping scheduled autonomy because issue #{issue_number} is inside cooldown."
+            )
             return self.stats
 
         print(f"Triggering scheduled Jules session via issue #{issue_number}")
@@ -281,7 +287,9 @@ def parse_args():
         help="Do not trigger if the tracker issue received a session comment more recently than this.",
     )
     parser.add_argument("--force", action="store_true", help="Ignore cooldown checks")
-    parser.add_argument("--dry-run", action="store_true", help="Print intended changes only")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print intended changes only"
+    )
     return parser.parse_args()
 
 

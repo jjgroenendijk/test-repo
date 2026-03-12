@@ -48,7 +48,9 @@ def parse_trusted_actors(raw_value: str | None, repo_owner: str | None) -> set[s
     return trusted
 
 
-def get_trusted_actors(repo_owner: str, extra_trusted_actors: str | None = None) -> set[str]:
+def get_trusted_actors(
+    repo_owner: str, extra_trusted_actors: str | None = None
+) -> set[str]:
     raw_value = extra_trusted_actors
     if raw_value is None:
         raw_value = os.environ.get("JULES_TRUSTED_ACTORS", "")
@@ -157,7 +159,9 @@ def is_pr_trusted(
     return is_trusted_pr(
         author_login=extract_pr_author_login(pr_data),
         head_owner_login=extract_pr_head_repo_owner(pr_data),
-        is_cross_repository=pr_data.get("isCrossRepository", pr_data.get("is_cross_repository")),
+        is_cross_repository=pr_data.get(
+            "isCrossRepository", pr_data.get("is_cross_repository")
+        ),
         repo_owner=repo_owner,
         trusted_actors_raw=extra_trusted_actors,
     )
@@ -171,10 +175,14 @@ def load_json(path: str) -> Any:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Evaluate trusted automation actors and PRs.")
+    parser = argparse.ArgumentParser(
+        description="Evaluate trusted automation actors and PRs."
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    actor_parser = subparsers.add_parser("actor", help="Check whether an actor is trusted.")
+    actor_parser = subparsers.add_parser(
+        "actor", help="Check whether an actor is trusted."
+    )
     actor_parser.add_argument("--actor", required=True)
     actor_parser.add_argument("--repo-owner", required=True)
     actor_parser.add_argument("--trusted-actors", default=None)
@@ -201,10 +209,14 @@ def main() -> int:
     if args.command == "actor":
         trusted = is_trusted_actor(args.actor, args.repo_owner, trusted_actors_raw)
     elif args.pr_file:
-        trusted = is_pr_trusted(load_json(args.pr_file), args.repo_owner, trusted_actors_raw)
+        trusted = is_pr_trusted(
+            load_json(args.pr_file), args.repo_owner, trusted_actors_raw
+        )
     else:
         if args.author is None or args.head_owner is None or args.is_cross is None:
-            raise SystemExit("pr command requires either --pr-file or --author/--head-owner/--is-cross")
+            raise SystemExit(
+                "pr command requires either --pr-file or --author/--head-owner/--is-cross"
+            )
         trusted = is_trusted_pr(
             args.author,
             args.head_owner,
