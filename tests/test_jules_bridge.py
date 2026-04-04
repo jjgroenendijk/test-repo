@@ -38,7 +38,7 @@ def test_queue_issue_posts_single_queue_comment(
         },
     )
 
-    mock_has_queue_comment.assert_called_once_with(42)
+    mock_has_queue_comment.assert_called_once_with(42, comments=None)
     mock_post_issue_comment.assert_called_once()
     body = mock_post_issue_comment.call_args.args[1]
     assert "sessions/999" in body
@@ -69,6 +69,7 @@ def test_find_next_pending_issue_skips_issues_with_existing_sessions(
         "title": "Next pending",
         "body": "body",
         "author_login": "owner",
+        "comments": None,
     }
     mock_list_open_issues.assert_called_once_with("owner/repo")
     assert mock_find_session_id.call_count == 2

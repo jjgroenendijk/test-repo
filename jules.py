@@ -177,34 +177,37 @@ def extract_session_id_from_comments(comments):
     return None
 
 
-def find_session_id(issue_number):
+def find_session_id(issue_number, comments=None):
     """Find the Jules Session ID from the issue comments."""
-    issue = load_issue(issue_number, fields="comments")
-    if not issue:
-        return None
-    return extract_session_id_from_comments(issue.get("comments", []))
+    if comments is None:
+        issue = load_issue(issue_number, fields="comments")
+        if not issue:
+            return None
+        comments = issue.get("comments", [])
+    return extract_session_id_from_comments(comments)
 
 
-def issue_has_queue_comment(issue_number):
+def issue_has_queue_comment(issue_number, comments=None):
     """Check whether the issue already has a queue-status comment."""
-    issue = load_issue(issue_number, fields="comments")
-    if not issue:
-        return False
+    if comments is None:
+        issue = load_issue(issue_number, fields="comments")
+        if not issue:
+            return False
+        comments = issue.get("comments", [])
 
-    for comment in issue.get("comments", []):
+    for comment in comments:
         if QUEUE_MARKER in comment.get("body", ""):
             return True
     return False
-
 
 def post_issue_comment(issue_number, body):
     """Post a comment to an issue."""
     return run_command(["gh", "issue", "comment", str(issue_number), "--body", body])
 
 
-def queue_issue(issue_number, busy_session):
+def queue_issue(issue_number, busy_session, comments=None):
     """Leave a single queue comment when the repository already has an active session."""
-    if issue_has_queue_comment(issue_number):
+    if issue_has_queue_comment(issue_number, comments=comments):
         print(f"Issue #{issue_number} is already marked as queued.")
         return
 
@@ -231,8 +234,16 @@ def list_open_issues(full_repo):
     output = run_command(
         [
             "gh",
-            "api",
-            f"repos/{full_repo}/issues?state=open&sort=created&direction=asc&per_page=100",
+            "issue",
+            "list",
+            "--json",
+            "number,title,body,author,comments",
+            "-R",
+            full_repo,
+            "--search",
+            "is:open sort:created-asc",
+            "--limit",
+            "100",
         ]
     )
     if not output:
@@ -252,13 +263,11 @@ def list_open_issues(full_repo):
             "number": issue.get("number"),
             "title": issue.get("title"),
             "body": issue.get("body"),
-            "author_login": issue.get("user", {}).get("login"),
+            "author_login": issue.get("author", {}).get("login"),
+            "comments": issue.get("comments", []),
         }
         for issue in issues
-        if "pull_request" not in issue
     ]
-
-
 def is_repo_owner(login, repo_owner):
     """Return True when a GitHub login matches the repository owner."""
     return bool(login) and login.lower() == repo_owner.lower()
@@ -272,13 +281,14 @@ def find_next_pending_issue(full_repo, repo_owner):
             continue
         if not is_repo_owner(issue.get("author_login"), repo_owner):
             continue
-        if find_session_id(issue_number):
+        if find_session_id(issue_number, comments=issue.get("comments")):
             continue
         return {
             "number": issue_number,
             "title": issue.get("title"),
             "body": issue.get("body"),
             "author_login": issue.get("author_login"),
+            "comments": issue.get("comments"),
         }
     return None
 
@@ -327,11 +337,11 @@ def resolve_issue_for_event(event_name, event_data, full_repo, repo_owner):
     }
 
 
-def start_issue_session(client, issue_number, title, body, owner, repo_name, full_repo):
+def start_issue_session(client, issue_number, title, body, owner, repo_name, full_repo, comments=None):
     """Start a Jules session for an issue, or queue it when this repo is busy."""
     print(f"Processing New Issue #{issue_number}: {title} (Repo: {full_repo})")
 
-    existing_session_id = find_session_id(issue_number)
+    existing_session_id = find_session_id(issue_number, comments=comments)
     if existing_session_id:
         print(
             f"Issue #{issue_number} already has a Jules session: {existing_session_id}"
@@ -359,7 +369,7 @@ def start_issue_session(client, issue_number, title, body, owner, repo_name, ful
                 "Repository already has an active Jules session: "
                 f"{busy_session.get('name')} ({busy_session.get('state')})"
             )
-            queue_issue(issue_number, busy_session)
+            queue_issue(issue_number, busy_session, comments=comments)
             return 0
 
         print(f"Creating Session with Source: {source_name}")
@@ -453,7 +463,10 @@ def main():
             print(f"Ignoring comment from non-owner account: {sender}")
             sys.exit(0)
 
-        session_id = find_session_id(issue_number)
+        comments = issue_data.get("comments")
+        if not isinstance(comments, list):
+            comments = None
+        session_id = find_session_id(issue_number, comments=comments)
         if not session_id:
             print("No active Jules session found for this issue.")
             sys.exit(0)
@@ -474,9 +487,12 @@ def main():
                 f"Ignoring issue #{issue_number} from non-owner account: {issue_author_login}"
             )
             sys.exit(0)
+        comments = issue_data.get("comments")
+        if not isinstance(comments, list):
+            comments = None
         sys.exit(
             start_issue_session(
-                client, issue_number, title, body, owner, repo_name, full_repo
+                client, issue_number, title, body, owner, repo_name, full_repo, comments=comments
             )
         )
 
