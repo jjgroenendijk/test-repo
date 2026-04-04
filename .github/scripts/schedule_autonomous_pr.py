@@ -91,12 +91,13 @@ class GitHubCLI:
         return [issue for issue in data if "pull_request" not in issue]
 
     def find_autonomous_issue(self):
-        for issue in self.list_open_issues():
+        open_issues = self.list_open_issues()
+        for issue in open_issues:
             body = str(issue.get("body", ""))
             if AUTONOMOUS_MARKER in body:
                 return int(issue["number"])
 
-        for issue in self.list_open_issues():
+        for issue in open_issues:
             if issue.get("title") == AUTONOMOUS_TITLE:
                 return int(issue["number"])
 
