@@ -1,0 +1,3 @@
+Update .git/hooks/sendemail-validate.sample
+
+Updates the `validate_cover_letter` function in `.git/hooks/sendemail-validate.sample` to use `aspell` for spell checking the cover letter. It will list the spelling errors and return a non-zero exit code if mistakes are found.
