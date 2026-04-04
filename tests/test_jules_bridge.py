@@ -45,7 +45,6 @@ def test_queue_issue_posts_single_queue_comment(
     assert jules.QUEUE_MARKER in body
 
 
-@patch("jules.find_session_id", side_effect=["sessions/existing", None])
 @patch(
     "jules.list_open_issues",
     return_value=[
@@ -54,13 +53,26 @@ def test_queue_issue_posts_single_queue_comment(
             "title": "Foreign issue",
             "body": "body",
             "author_login": "someone-else",
+            "comments": [],
         },
-        {"number": 2, "title": "Has session", "body": "body", "author_login": "owner"},
-        {"number": 3, "title": "Next pending", "body": "body", "author_login": "owner"},
+        {
+            "number": 2,
+            "title": "Has session",
+            "body": "body",
+            "author_login": "owner",
+            "comments": [{"body": "**Session ID:** `sessions/existing`"}],
+        },
+        {
+            "number": 3,
+            "title": "Next pending",
+            "body": "body",
+            "author_login": "owner",
+            "comments": [],
+        },
     ],
 )
 def test_find_next_pending_issue_skips_issues_with_existing_sessions(
-    mock_list_open_issues, mock_find_session_id
+    mock_list_open_issues,
 ):
     issue = jules.find_next_pending_issue("owner/repo", "owner")
 
@@ -71,4 +83,3 @@ def test_find_next_pending_issue_skips_issues_with_existing_sessions(
         "author_login": "owner",
     }
     mock_list_open_issues.assert_called_once_with("owner/repo")
-    assert mock_find_session_id.call_count == 2

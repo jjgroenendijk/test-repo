@@ -231,8 +231,16 @@ def list_open_issues(full_repo):
     output = run_command(
         [
             "gh",
-            "api",
-            f"repos/{full_repo}/issues?state=open&sort=created&direction=asc&per_page=100",
+            "issue",
+            "list",
+            "--repo",
+            full_repo,
+            "--search",
+            "is:open sort:created-asc",
+            "--json",
+            "number,title,body,author,comments",
+            "--limit",
+            "100",
         ]
     )
     if not output:
@@ -252,10 +260,10 @@ def list_open_issues(full_repo):
             "number": issue.get("number"),
             "title": issue.get("title"),
             "body": issue.get("body"),
-            "author_login": issue.get("user", {}).get("login"),
+            "author_login": issue.get("author", {}).get("login"),
+            "comments": issue.get("comments", []),
         }
         for issue in issues
-        if "pull_request" not in issue
     ]
 
 
@@ -272,7 +280,7 @@ def find_next_pending_issue(full_repo, repo_owner):
             continue
         if not is_repo_owner(issue.get("author_login"), repo_owner):
             continue
-        if find_session_id(issue_number):
+        if extract_session_id_from_comments(issue.get("comments", [])):
             continue
         return {
             "number": issue_number,
