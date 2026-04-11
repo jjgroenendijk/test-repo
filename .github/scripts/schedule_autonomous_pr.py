@@ -92,16 +92,15 @@ class GitHubCLI:
 
     def find_autonomous_issue(self):
         open_issues = self.list_open_issues()
+        fallback_issue = None
         for issue in open_issues:
             body = str(issue.get("body", ""))
             if AUTONOMOUS_MARKER in body:
                 return int(issue["number"])
+            if fallback_issue is None and issue.get("title") == AUTONOMOUS_TITLE:
+                fallback_issue = int(issue["number"])
 
-        for issue in open_issues:
-            if issue.get("title") == AUTONOMOUS_TITLE:
-                return int(issue["number"])
-
-        return None
+        return fallback_issue
 
     def create_issue(self, title: str, body: str):
         if self.dry_run:
