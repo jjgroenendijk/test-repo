@@ -1,6 +1,6 @@
 import os
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -84,3 +84,32 @@ def test_find_next_pending_issue_skips_issues_with_existing_sessions(
         "comments": [],
     }
     mock_list_open_issues.assert_called_once_with("owner/repo")
+
+
+@patch("jules.post_issue_comment")
+def test_start_issue_session_wraps_issue_body_with_autonomy_prompt(
+    mock_post_issue_comment,
+):
+    client = MagicMock()
+    client.find_source_for_repo.return_value = "sources/github/owner/repo"
+    client.find_busy_session_for_source.return_value = None
+    client.create_session.return_value = {"name": "sessions/123"}
+
+    exit_code = jules.start_issue_session(
+        client,
+        7,
+        "Embed Subtitles",
+        "Add the checkbox and yt-dlp flags.",
+        "owner",
+        "repo",
+        "owner/repo",
+    )
+
+    assert exit_code == 0
+    client.create_session.assert_called_once()
+    args, kwargs = client.create_session.call_args
+    assert args[0] == "sources/github/owner/repo"
+    assert kwargs["title"] == "Embed Subtitles"
+    assert "Never ask the user for plan approval" in kwargs["prompt"]
+    assert "Issue title: Embed Subtitles" in kwargs["prompt"]
+    assert "Add the checkbox and yt-dlp flags." in kwargs["prompt"]
