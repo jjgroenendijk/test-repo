@@ -40,9 +40,11 @@ validate_patch () {
 	file="$1"
 	# Ensure that the patch applies without conflicts.
 	git am -3 "$file" || return
-	# TODO: Replace with appropriate checks for this patch
-	# (e.g. checkpatch.pl).
-	true
+	# Run checkpatch.pl if it's available.
+	if command -v checkpatch.pl >/dev/null 2>&1
+	then
+		checkpatch.pl "$file" || return
+	fi
 }
 
 validate_series () {
