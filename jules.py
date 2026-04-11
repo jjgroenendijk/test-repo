@@ -15,6 +15,17 @@ import requests
 JULES_API_BASE = "https://jules.googleapis.com/v1alpha"
 SESSION_ID_PATTERN = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
 QUEUE_MARKER = "<!-- jules-queue -->"
+AUTONOMY_PROMPT_HEADER = """You are running through this repository's autonomous GitHub issue bridge.
+
+Execution rules:
+- Follow the repository instructions in `AGENTS.md`.
+- Work autonomously from start to finish.
+- Never ask the user for plan approval, permission to continue, or routine feedback.
+- Do not stop to ask whether you should run normal quality checks, tests, formatting, verification, or documentation updates. Do them when they are relevant.
+- If more than one reasonable option exists, choose the safest option that keeps progress moving and explain the choice in your summary instead of pausing.
+- Only ask for input when blocked by missing credentials, an external dependency you cannot access, or irreconcilable conflicting requirements.
+- Before finishing, run the relevant verification for the work you changed.
+"""
 BUSY_SESSION_STATES = {
     "QUEUED",
     "PLANNING",
@@ -28,6 +39,19 @@ BUSY_SESSION_STATES = {
 def is_session_busy(session):
     """Return True when a session still occupies the repo's only active slot."""
     return str(session.get("state") or "").upper() in BUSY_SESSION_STATES
+
+
+def build_session_prompt(title, body):
+    """Wrap the issue body with autonomy instructions for new Jules sessions."""
+    issue_title = (title or "").strip() or "Untitled issue"
+    issue_body = (body or "").strip() or "No additional task details were provided."
+
+    return (
+        f"{AUTONOMY_PROMPT_HEADER}\n"
+        f"Issue title: {issue_title}\n\n"
+        "Issue details:\n"
+        f"{issue_body}"
+    )
 
 
 class JulesClient:
@@ -96,6 +120,7 @@ class JulesClient:
                 },
             },
             "automationMode": "AUTO_CREATE_PR",
+            "requirePlanApproval": False,
             "title": title,
         }
 
@@ -373,7 +398,11 @@ def start_issue_session(client, issue_number, title, body, owner, repo_name, ful
             return 0
 
         print(f"Creating Session with Source: {source_name}")
-        session = client.create_session(source_name, prompt=body or "", title=title)
+        session = client.create_session(
+            source_name,
+            prompt=build_session_prompt(title, body),
+            title=title,
+        )
         session_id = session.get("name")
 
         print(f"Session Created: {session_id}")

@@ -6,7 +6,7 @@ import os
 # Add root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from jules import JulesClient, JULES_API_BASE
+from jules import JulesClient, JULES_API_BASE, build_session_prompt
 
 
 class TestJulesSession(unittest.TestCase):
@@ -46,6 +46,7 @@ class TestJulesSession(unittest.TestCase):
                 "githubRepoContext": {"startingBranch": "main"},
             },
             "automationMode": "AUTO_CREATE_PR",
+            "requirePlanApproval": False,
             "title": "Test Title",
         }
 
@@ -62,6 +63,23 @@ class TestJulesSession(unittest.TestCase):
         mock_get.assert_called_with(expected_get_url, headers=self.client.headers)
 
         self.assertEqual(session, {"name": "sessions/123"})
+
+    def test_build_session_prompt_adds_autonomy_rules_and_issue_details(self):
+        prompt = build_session_prompt(
+            "Embed Subtitles",
+            "Add a checkbox and wire yt-dlp embed subtitle flags.",
+        )
+
+        self.assertIn("Work autonomously from start to finish.", prompt)
+        self.assertIn("Never ask the user for plan approval", prompt)
+        self.assertIn("Issue title: Embed Subtitles", prompt)
+        self.assertIn("Add a checkbox and wire yt-dlp embed subtitle flags.", prompt)
+
+    def test_build_session_prompt_handles_missing_body(self):
+        prompt = build_session_prompt("Untitled", "")
+
+        self.assertIn("Issue title: Untitled", prompt)
+        self.assertIn("No additional task details were provided.", prompt)
 
     @patch("requests.post")
     def test_send_message(self, mock_post):
