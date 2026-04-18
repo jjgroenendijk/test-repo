@@ -66,14 +66,14 @@ class TestJulesSession(unittest.TestCase):
 
     def test_build_session_prompt_adds_autonomy_rules_and_issue_details(self):
         prompt = build_session_prompt(
-            "Embed Subtitles",
-            "Add a checkbox and wire yt-dlp embed subtitle flags.",
+            "SpotiFLAC Queue UX",
+            "Prepare the first SpotiFLAC web UI backlog slice.",
         )
 
         self.assertIn("Work autonomously from start to finish.", prompt)
         self.assertIn("Never ask the user for plan approval", prompt)
-        self.assertIn("Issue title: Embed Subtitles", prompt)
-        self.assertIn("Add a checkbox and wire yt-dlp embed subtitle flags.", prompt)
+        self.assertIn("Issue title: SpotiFLAC Queue UX", prompt)
+        self.assertIn("Prepare the first SpotiFLAC web UI backlog slice.", prompt)
 
     def test_build_session_prompt_handles_missing_body(self):
         prompt = build_session_prompt("Untitled", "")

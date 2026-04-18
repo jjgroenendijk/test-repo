@@ -18,7 +18,7 @@
    - Keep backlog progress updated while implementing.
 
 4. **New Requirement Invention**
-   - If no requirements or backlog items are open, propose a simple high-value requirement for the yt-dlp web interface.
+   - If no requirements or backlog items are open, propose a simple high-value requirement for the SpotiFLAC web UI.
    - Start implementation and create/maintain an open backlog item during the work.
 
 5. **Testing**
