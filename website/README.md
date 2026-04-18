@@ -1,34 +1,28 @@
-# Website
+# Website Reset Placeholder
 
-This Next.js app provides a web interface for running `yt-dlp` and viewing archived download history.
+Legacy yt-dlp UI removed.
 
-## Features
+This Next.js app now exists only as a minimal placeholder while Google Jules rebuilds the product around a self-hosted web UI for the Python module `SpotiFLAC`.
 
-- **Download History**: View a persistent history of all download attempts, including status (completed, failed) and metadata.
-- **Retry**: Easily retry failed downloads or re-download completed items.
-- **Delete**: Remove download records and their associated files from disk directly from the history view.
-- **Disk Usage**: Monitor the total storage used by downloads.
+## Current state
+
+- no yt-dlp download UI
+- no legacy media workflow code
+- minimal placeholder page only
+- health endpoint kept for container/runtime checks
 
 ## Local development
 
-1. Install dependencies:
-
 ```bash
 npm ci
-```
-
-2. Run the app:
-
-```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment variables
 
-- `DATA_DIR` (optional): data root for downloads/history. Defaults to `.data` in development and `/data` in production.
-- `YT_DLP_BIN` (optional): binary name/path for `yt-dlp`.
+- `DATA_DIR` (optional): future persistent application data root. Defaults to `/data` in production.
 
 ## Test commands
 

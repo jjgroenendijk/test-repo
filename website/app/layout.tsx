@@ -13,8 +13,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jules YT-DLP Archive",
-  description: "Web interface for yt-dlp video downloads and archive tracking",
+  title: "Jules SpotiFLAC Reset",
+  description: "Reset placeholder for upcoming self-hosted SpotiFLAC web UI",
 };
 
 export default function RootLayout({

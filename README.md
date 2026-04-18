@@ -1,13 +1,20 @@
-# Google Jules + YT-DLP Web Archive
+# Google Jules + SpotiFLAC Web UI Reset
 
-This repository is configured for **Google Jules** autonomous development and includes a web interface for downloading and archiving online videos with `yt-dlp`.
+This repository keeps the **Google Jules** autonomous development bridge and has been reset to start fresh on a self-hosted web UI for the Python module `SpotiFLAC`.
 
-## What this repo provides
+## What stays
 
-- A GitHub Actions + `jules.py` bridge that starts Jules sessions from GitHub Issues.
-- A Next.js web UI to submit download jobs and review archived history.
-- Server-side `yt-dlp` execution with persisted archive metadata.
-- A single container build for deployment.
+- GitHub Actions + `jules.py` issue bridge for Google Jules
+- Issue-backed autonomous work with queued retry
+- Trusted PR automation and reconciliation
+- Single-container deployment target
+
+## What changed
+
+- Legacy yt-dlp product direction removed
+- Legacy yt-dlp website implementation removed
+- Repository now targets a homelab-friendly SpotiFLAC web UI
+- Website currently holds a reset placeholder until Jules builds the new product
 
 ## Jules workflow
 
@@ -50,7 +57,17 @@ Required secrets:
 
 Optional repository variable:
 
-- `JULES_TRUSTED_ACTORS`: extra trusted logins for privileged PR follow-up automation, for example `["app/google-jules"]` or `app/google-jules teammate`
+- `JULES_TRUSTED_ACTORS`: extra trusted logins for privileged PR follow-up automation, for example `[`"app/google-jules"`]` or `app/google-jules teammate`
+
+## Product target
+
+Jules will rebuild the product around these goals:
+
+- self-hosted web UI for `SpotiFLAC`
+- single container image for homelab deployment
+- persistent `/data` volume
+- music-library workflows for Spotify tracks, albums, and playlists
+- safe Python module orchestration from the web backend
 
 ## Local development
 
@@ -61,7 +78,7 @@ uv sync --all-groups
 uv run pytest
 ```
 
-### Web interface
+### Website placeholder
 
 ```bash
 cd website
@@ -73,23 +90,22 @@ Open `http://localhost:3000`.
 
 Useful env vars:
 
-- `DATA_DIR`: storage location for downloads/history (default `.data` in dev, `/data` in production).
-- `YT_DLP_BIN`: override path/name for `yt-dlp` binary.
+- `DATA_DIR`: storage location for persistent app data in future product work
 
 ## Run in one container
 
 Build and run:
 
 ```bash
-docker build -t jules-yt-dlp .
-docker run --rm -p 3000:3000 -v $(pwd)/data:/data jules-yt-dlp
+docker build -t jules-spotiflac-reset .
+docker run --rm -p 3000:3000 -v $(pwd)/data:/data jules-spotiflac-reset
 ```
 
-The app will be available on `http://localhost:3000`.
+The placeholder app will be available on `http://localhost:3000`.
 
 ## CI/CD
 
-- `Verify Codebase` runs Python lint/tests and website lint/unit/e2e tests.
+- `Verify Codebase` runs Python lint/tests and website quality checks.
 - `Scheduled Autonomous PR` runs daily to create or reuse the canonical autonomous-development issue and trigger an issue-backed Jules session when the repo is idle.
 - `Run Agent` reacts to new issues/comments and also polls hourly to drain queued issues when the repo's active Jules session finishes.
 - `PR Reconciliation` runs hourly to merge healthy open PRs, wait on non-terminal CI states, retry queued Jules automation issues, deduplicate stale automation tickets, recover missing Jules sessions, and close linked automation issues after successful merges.

@@ -1,7 +1,12 @@
 # Jules Requirements
 
 ## Overview
-This repository integrates **Google Jules** via its REST API and hosts a web interface that makes `yt-dlp` easier to use for downloading and archiving online videos.
+This repository integrates **Google Jules** via its REST API and is being repurposed to build a self-hosted web UI for the Python module `SpotiFLAC`.
+
+Current state:
+- Jules automation stays active.
+- Legacy yt-dlp product code is removed.
+- SpotiFLAC product implementation starts from a clean slate.
 
 ## Architecture
 
@@ -25,30 +30,34 @@ This repository integrates **Google Jules** via its REST API and hosts a web int
 - **Scheduled Recovery:** Recurring autonomous runs must reuse the same issue-backed flow instead of relying on Jules-native scheduling.
 - **Transient Check Handling:** PR reconciliation must wait for non-terminal check states instead of treating them as Jules blockers.
 
-### 3. Web Downloader Interface
-- Users submit one or more video URLs via a web UI.
-- The app runs `yt-dlp` server-side with safe argument construction.
-- Downloads are archived with `--download-archive` and persisted metadata.
-- Users can inspect previous runs and downloaded files from the same interface.
+### 3. SpotiFLAC Web UI Product Direction
+- The product target is a browser-based UI for the Python module `SpotiFLAC`.
+- The UI is meant for people self-hosting the app in a single container in a homelab.
+- The UI must focus on music-library workflows around Spotify track, album, and playlist URLs.
+- The backend must orchestrate the Python `SpotiFLAC` module, not `yt-dlp`.
+- The product should support homelab-friendly storage paths, persistent history, and safe server-side job execution.
+- Product-specific implementation details remain unsatisfied until new backlog items are completed.
 
 ### 4. Containerized Deployment
 - The full system is shipped as a **single container image**.
-- The container includes Node.js app runtime, `yt-dlp`, and `ffmpeg`.
-- Persistent media/archive data is stored in a mounted `/data` volume.
+- The container must include the runtimes and dependencies needed for the website and Python integration.
+- Persistent media/application data must be stored in a mounted `/data` volume.
 
 ## Setup Requirements
 - **Environment Variables:**
   - `GITHUB_TOKEN`: For GitHub issue comments in workflows.
   - `GOOGLE_JULES_API`: API key for Jules.
-  - `DATA_DIR` (optional): Path for downloads/archive data (defaults to `/data`).
+  - `DATA_DIR` (optional): Path for persistent application data. Defaults to `/data` in production.
 - **Dependencies:**
   - Python 3 + `uv` for Jules bridge/testing.
   - Node.js for website development.
   - Docker for container build/publish.
 
 ## Product Requirements
-- Keep the codebase focused on the yt-dlp archive product scope.
-- Provide a web UI focused on `yt-dlp` download/archive workflows.
-- Include unit tests and Playwright tests for key user flows.
+- Keep the codebase focused on the SpotiFLAC web UI product scope.
+- Do not reintroduce yt-dlp product code or yt-dlp backlog items.
+- Keep Google Jules integration, issue-backed autonomy, queueing, trusted PR automation, and scheduled autonomous development intact.
+- Build the web UI specifically for self-hosted homelab deployment.
+- Include unit tests and Playwright tests for new user-facing features when implementation begins.
 - CI must verify Python + website quality gates.
 - CI/CD must publish one runnable container image.

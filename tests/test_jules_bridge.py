@@ -98,8 +98,8 @@ def test_start_issue_session_wraps_issue_body_with_autonomy_prompt(
     exit_code = jules.start_issue_session(
         client,
         7,
-        "Embed Subtitles",
-        "Add the checkbox and yt-dlp flags.",
+        "SpotiFLAC Queue UX",
+        "Prepare the first SpotiFLAC web UI backlog slice.",
         "owner",
         "repo",
         "owner/repo",
@@ -109,7 +109,7 @@ def test_start_issue_session_wraps_issue_body_with_autonomy_prompt(
     client.create_session.assert_called_once()
     args, kwargs = client.create_session.call_args
     assert args[0] == "sources/github/owner/repo"
-    assert kwargs["title"] == "Embed Subtitles"
+    assert kwargs["title"] == "SpotiFLAC Queue UX"
     assert "Never ask the user for plan approval" in kwargs["prompt"]
-    assert "Issue title: Embed Subtitles" in kwargs["prompt"]
-    assert "Add the checkbox and yt-dlp flags." in kwargs["prompt"]
+    assert "Issue title: SpotiFLAC Queue UX" in kwargs["prompt"]
+    assert "Prepare the first SpotiFLAC web UI backlog slice." in kwargs["prompt"]
