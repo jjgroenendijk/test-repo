@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+.pi-lens/
+uv.lock
+data/
+verification/
+dev_server.log
+website/playwright-report/
+website/test-results/
+website/dist/
+node_modules/
+next_output.log
+server.log
+server_output_manual.log

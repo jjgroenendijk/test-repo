@@ -1,0 +1,233 @@
+:root {
+  color: #17201b;
+  background: #f6f7f2;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #476154;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 0.95;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 1.25rem;
+}
+
+.runtime-badge {
+  border: 1px solid #b9c7bd;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #284236;
+  background: #ffffff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.queue-panel,
+.storage-panel,
+.job-card {
+  border: 1px solid #d5ddd7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.queue-panel {
+  padding: 24px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  color: #314a3f;
+  font-weight: 800;
+}
+
+.url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #aebdb4;
+  border-radius: 6px;
+  padding: 0 14px;
+  color: #17201b;
+  background: #fbfcfa;
+}
+
+button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: #1f7a4d;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 14px 0 0;
+  color: #52675c;
+}
+
+.hint[data-state="error"] {
+  color: #9a2f27;
+}
+
+.hint[data-state="ready"] {
+  color: #1f6f48;
+}
+
+.storage-panel {
+  padding: 22px;
+}
+
+.storage-panel span,
+.section-heading span,
+.job-source,
+.job-meta {
+  color: #5f7268;
+}
+
+.storage-panel strong {
+  display: block;
+  margin: 10px 0;
+  font-size: 2rem;
+}
+
+.jobs {
+  margin-top: 28px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.job-list {
+  display: grid;
+  gap: 10px;
+}
+
+.job-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 16px;
+}
+
+.job-title {
+  margin-bottom: 4px;
+  font-weight: 800;
+}
+
+.job-source {
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+
+.job-meta {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(100% - 24px, 1120px);
+    padding: 22px 0;
+  }
+
+  .topbar,
+  .section-heading,
+  .job-card {
+    align-items: flex-start;
+  }
+
+  .topbar,
+  .workspace,
+  .section-heading,
+  .job-card {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .section-heading {
+    display: grid;
+  }
+
+  .url-row {
+    grid-template-columns: 1fr;
+  }
+
+  .job-meta {
+    justify-items: start;
+    white-space: normal;
+  }
+}
