@@ -110,7 +110,9 @@ def test_start_issue_session_wraps_issue_body_with_autonomy_prompt(
     args, kwargs = client.create_session.call_args
     assert args[0] == "sources/github/owner/repo"
     assert kwargs["title"] == "SpotiFLAC Queue UX"
-    assert "Never ask the user any questions" in kwargs["prompt"]
+    assert "Never ask the user any questions under any circumstance" in kwargs["prompt"]
+    assert "Never ask the user for validation" in kwargs["prompt"]
+    assert "decide what you think is the best option" in kwargs["prompt"]
     assert "continue with the safest local fallback" in kwargs["prompt"]
     assert "Issue title: SpotiFLAC Queue UX" in kwargs["prompt"]
     assert "Prepare the first SpotiFLAC web UI backlog slice." in kwargs["prompt"]

@@ -20,8 +20,9 @@ AUTONOMY_PROMPT_HEADER = """You are running through this repository's autonomous
 Execution rules:
 - Follow the repository instructions in `AGENTS.md`.
 - Work autonomously from start to finish.
-- Never ask the user any questions.
-- Never ask for plan approval, permission to continue, or feedback.
+- Never ask the user any questions under any circumstance.
+- Never ask the user for validation, clarification, plan approval, permission to continue, or feedback.
+- If instructions, requirements, or implementation choices are ambiguous, decide what you think is the best option from the repository context and continue.
 - Do not stop to ask whether you should run normal quality checks, tests, formatting, verification, or documentation updates. Do them when they are relevant.
 - If more than one reasonable option exists, choose the safest option that keeps progress moving and explain the choice in your summary instead of pausing.
 - If blocked by missing credentials, inaccessible external dependencies, or conflicting requirements, record the blocker in an issue/backlog note and continue with the safest local fallback.

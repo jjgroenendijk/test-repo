@@ -24,7 +24,7 @@ Current state:
 - **Single Active Session:** Only one non-terminal Jules session may be active for this repository at a time.
 - **Queued Retry:** When a new issue arrives while Jules is busy, the issue is queued and retried automatically until it starts.
 - **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
-- **Autonomous Session Prompting:** New Jules sessions must be instructed to continue autonomously without asking for routine plan approval or user feedback for normal implementation and verification steps.
+- **Autonomous Session Prompting:** New Jules sessions must be instructed to continue autonomously under all circumstances, without asking the user for validation, clarification, plan approval, permission to continue, or feedback. When context is ambiguous, Jules must choose the best option from repository context, continue, and document the assumption in its summary.
 - **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
 - **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
 - **Scheduled Recovery:** Recurring autonomous runs must reuse the same issue-backed flow instead of relying on Jules-native scheduling.
