@@ -27,7 +27,7 @@ The automation will:
 2. Resolve this repository as a Jules source.
 3. Start a Jules session immediately when the repo has no active Jules work.
 4. Queue the issue automatically when another Jules session for this repo is still running.
-5. Wrap the issue body with autonomy instructions so Jules never asks questions and keeps working through implementation and verification with safe local assumptions.
+5. Wrap the issue body with autonomy instructions so Jules never asks questions, never asks for user validation or approval, and keeps working through implementation and verification by choosing the best local option when context is ambiguous.
 6. Comment back with the session ID once the issue starts.
 
 Issue-triggered Jules entry stays owner-only even if you configure extra trusted PR actors.

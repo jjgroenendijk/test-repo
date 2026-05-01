@@ -71,7 +71,9 @@ class TestJulesSession(unittest.TestCase):
         )
 
         self.assertIn("Work autonomously from start to finish.", prompt)
-        self.assertIn("Never ask the user any questions.", prompt)
+        self.assertIn("Never ask the user any questions under any circumstance.", prompt)
+        self.assertIn("Never ask the user for validation", prompt)
+        self.assertIn("decide what you think is the best option", prompt)
         self.assertIn("continue with the safest local fallback", prompt)
         self.assertIn("Issue title: SpotiFLAC Queue UX", prompt)
         self.assertIn("Prepare the first SpotiFLAC web UI backlog slice.", prompt)
