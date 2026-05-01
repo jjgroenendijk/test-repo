@@ -231,3 +231,28 @@ button {
     white-space: normal;
   }
 }
+
+.job-error {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.empty-state, .error-state {
+  color: #6b7280;
+  font-style: italic;
+  padding: 1rem 0;
+}
+.error-state {
+  color: #ef4444;
+}
+
+.hint[data-state="success"] {
+  color: #10b981;
+}

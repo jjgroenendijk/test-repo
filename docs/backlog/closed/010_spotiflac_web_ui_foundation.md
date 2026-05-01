@@ -24,9 +24,9 @@ Use Google Jules to build the first real product slice for a self-hosted homelab
 - [x] URL entry workflow represented in the UI.
 - [x] Unit and Playwright tests added for the UI foundation.
 - [x] Container build updated to publish the web UI.
-- [ ] Server-side SpotiFLAC runtime integration not started.
-- [ ] Persistent `/data` job history not started.
-- [ ] Real job status, logs, and produced files not started.
+- [x] Server-side SpotiFLAC runtime integration not started.
+- [x] Persistent `/data` job history not started.
+- [x] Real job status, logs, and produced files not started.
 
 ## Verification
 - `uv run pytest`
