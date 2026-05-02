@@ -37,6 +37,7 @@ function renderJob(job) {
   const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
   const canCancel = job.status === "Queued" || job.status === "Running";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
+  const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
@@ -47,9 +48,19 @@ function renderJob(job) {
       <div class="job-meta">
         <span>${escapeHtml(job.status)}</span>
         <span>${filesText}</span>
-        ${cancelBtnHtml}
+        <div class="job-actions">
+          ${viewLogsBtnHtml}
+          ${cancelBtnHtml}
+        </div>
       </div>
       ${errorHtml}
+      <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
+          <button type="button" class="close-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+        </div>
+        <pre class="job-logs-content" id="logs-content-${escapeHtml(job.id)}">Loading...</pre>
+      </div>
     </article>
   `;
 }
@@ -159,6 +170,42 @@ export function renderApp(root) {
   });
 
   jobList.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("view-logs-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const logsContainer = root.querySelector(`#logs-container-${jobId}`);
+      const logsContent = root.querySelector(`#logs-content-${jobId}`);
+
+      if (logsContainer) {
+        logsContainer.style.display = "block";
+        try {
+          const response = await fetch(`/api/jobs/${jobId}/log`);
+          if (response.ok) {
+            const data = await response.json();
+            logsContent.textContent = data.log || "No logs available.";
+            // Auto-scroll to bottom
+            logsContent.scrollTop = logsContent.scrollHeight;
+          } else {
+            logsContent.textContent = "Log file not found or error fetching logs.";
+          }
+        } catch (err) {
+          logsContent.textContent = "Error fetching logs.";
+          console.error(err);
+        }
+      }
+    }
+
+    if (event.target.classList.contains("close-logs-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const logsContainer = root.querySelector(`#logs-container-${jobId}`);
+      if (logsContainer) {
+        logsContainer.style.display = "none";
+      }
+    }
+
     if (event.target.classList.contains("cancel-job-btn")) {
       const jobId = event.target.dataset.jobId;
       if (!jobId) return;

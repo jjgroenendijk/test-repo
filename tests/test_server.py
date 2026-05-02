@@ -56,3 +56,32 @@ def test_cancel_job(mock_run):
 def test_cancel_nonexistent_job():
     response = client.delete("/api/jobs/not-a-real-id")
     assert response.status_code == 404
+
+def test_get_job_log(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    logs_dir = data_dir / "logs"
+    logs_dir.mkdir()
+
+    monkeypatch.setattr("server.LOGS_DIR", logs_dir)
+
+    job_id = "test-job-123"
+    log_content = "This is a test log\nWith multiple lines\n"
+
+    log_file = logs_dir / f"{job_id}.log"
+    log_file.write_text(log_content)
+
+    response = client.get(f"/api/jobs/{job_id}/log")
+    assert response.status_code == 200
+    assert response.json() == {"log": log_content}
+
+def test_get_job_log_not_found(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    logs_dir = data_dir / "logs"
+    logs_dir.mkdir()
+
+    monkeypatch.setattr("server.LOGS_DIR", logs_dir)
+
+    response = client.get("/api/jobs/nonexistent-job/log")
+    assert response.status_code == 404
