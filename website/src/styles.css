@@ -256,3 +256,26 @@ button {
 .hint[data-state="success"] {
   color: #10b981;
 }
+
+.cancel-job-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 0.5rem;
+}
+
+.cancel-job-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--text-secondary);
+}
+
+.cancel-job-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

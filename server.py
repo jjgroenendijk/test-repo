@@ -39,6 +39,9 @@ except PermissionError:
 # Lock for history file
 history_lock = asyncio.Lock()
 
+# Map job_id to running process
+running_processes = {}
+
 
 class JobRequest(BaseModel):
     url: HttpUrl
@@ -89,6 +92,14 @@ async def update_job_status(job_id: str, status: str, error_log: Optional[str] =
 
 async def run_spotiflac(job_id: str, url: str):
     logger.info(f"Starting job {job_id} for URL {url}")
+
+    # Check if job was already cancelled while queued
+    history = await read_history()
+    for job in history:
+        if job["id"] == job_id and job["status"] == "Cancelled":
+            logger.info(f"Job {job_id} was cancelled before starting.")
+            return
+
     await update_job_status(job_id, "Running")
 
     log_file_path = LOGS_DIR / f"{job_id}.log"
@@ -100,6 +111,7 @@ async def run_spotiflac(job_id: str, url: str):
         await update_job_status(job_id, "Failed", error_log=str(e))
         return
 
+    process = None
     try:
         with open(log_file_path, "w") as log_file:
             process = await asyncio.create_subprocess_exec(
@@ -108,12 +120,17 @@ async def run_spotiflac(job_id: str, url: str):
                 stderr=asyncio.subprocess.STDOUT
             )
 
+            running_processes[job_id] = process
+
             await process.wait()
 
             if process.returncode == 0:
                 # Count files
                 file_count = sum(1 for _ in job_output_dir.rglob("*") if _.is_file())
                 await update_job_status(job_id, "Completed", files=file_count)
+            elif process.returncode == -15: # Terminated
+                logger.info(f"Job {job_id} was terminated.")
+                # Status already updated by DELETE endpoint
             else:
                 # Read last lines of log
                 error_lines = ""
@@ -121,9 +138,14 @@ async def run_spotiflac(job_id: str, url: str):
                     lines = lf.readlines()
                     error_lines = "".join(lines[-10:]) if lines else "Unknown error"
                 await update_job_status(job_id, "Failed", error_log=error_lines)
+    except asyncio.CancelledError:
+        logger.info(f"Job task {job_id} was cancelled.")
     except Exception as e:
         logger.error(f"Job {job_id} failed to execute: {e}")
         await update_job_status(job_id, "Failed", error_log=str(e))
+    finally:
+        if job_id in running_processes:
+            del running_processes[job_id]
 
 
 @app.post("/api/jobs")
@@ -152,6 +174,37 @@ async def create_job(request: JobRequest, background_tasks: BackgroundTasks):
 async def list_jobs():
     return await read_history()
 
+@app.delete("/api/jobs/{job_id}")
+async def cancel_job(job_id: str):
+    history = []
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        job_found = False
+
+        for job in history:
+            if job["id"] == job_id:
+                job_found = True
+                if job["status"] in ["Queued", "Running"]:
+                    job["status"] = "Cancelled"
+                break
+
+        if not job_found:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(history, f, indent=2)
+
+    if job_id in running_processes:
+        process = running_processes[job_id]
+        try:
+            process.terminate()
+        except ProcessLookupError:
+            pass
+
+    return {"status": "success"}
 
 # Serve frontend
 FRONTEND_DIST = Path(__file__).parent / "website" / "dist"
