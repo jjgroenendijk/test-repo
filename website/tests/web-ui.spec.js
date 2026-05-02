@@ -150,3 +150,62 @@ test('can view job logs', async ({ page }) => {
   // Verify log container is hidden again
   await expect(logsContainer).toBeHidden();
 });
+
+test("can clear job history", async ({ page }) => {
+  // Mock API route for jobs to provide mixed jobs
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "1",
+            url: "https://open.spotify.com/track/1",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 1,
+            error_log: null
+          },
+          {
+            id: "2",
+            url: "https://open.spotify.com/track/2",
+            status: "Running",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  let clearHistoryCalled = false;
+  await page.route("/api/history/clear", async (route) => {
+    if (route.request().method() === "DELETE") {
+      clearHistoryCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "success", cleared: 1 })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const clearBtn = page.getByRole("button", { name: "Clear history" });
+  await expect(clearBtn).toBeVisible();
+
+  await clearBtn.click();
+
+  // Playwright executes the mock fetch almost instantly, so we might miss the 'Clearing...' text.
+  // We can just verify it returned to 'Clear history' and the mock was called.
+  await expect(page.getByRole("button", { name: "Clear history" })).toBeVisible();
+
+  expect(clearHistoryCalled).toBe(true);
+});

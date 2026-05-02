@@ -188,6 +188,26 @@ async def get_job_log(job_id: str):
         logger.error(f"Error reading log file for {job_id}: {e}")
         raise HTTPException(status_code=500, detail="Error reading log")
 
+
+@app.delete("/api/history/clear")
+async def clear_history():
+    history = []
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        # Keep only active jobs
+        filtered_history = [
+            job for job in history
+            if job.get("status") in ["Queued", "Running"]
+        ]
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(filtered_history, f, indent=2)
+
+    return {"status": "success", "cleared": len(history) - len(filtered_history)}
+
 @app.delete("/api/jobs/{job_id}")
 async def cancel_job(job_id: str):
     history = []
