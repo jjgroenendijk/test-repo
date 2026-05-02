@@ -39,6 +39,8 @@ function renderJob(job) {
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
 
+  const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
+
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
       <div>
@@ -54,6 +56,7 @@ function renderJob(job) {
         </div>
       </div>
       ${errorHtml}
+      ${progressHtml}
       <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
@@ -117,6 +120,26 @@ export function renderApp(root) {
   const feedback = root.querySelector("#queue-feedback");
   const jobList = root.querySelector("#job-list");
 
+  async function updateProgress(jobId) {
+    const container = root.querySelector(`#progress-container-${jobId}`);
+    if (!container) return;
+
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/progress`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          const trackInfo = data.track ? `: ${escapeHtml(data.track)}` : '';
+          container.innerHTML = `<strong>Progress:</strong> [${data.current}/${data.total}]${trackInfo} (${data.percentage}%)`;
+        } else {
+          container.innerHTML = 'Starting...';
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async function fetchJobs() {
     try {
       const response = await fetch("/api/jobs");
@@ -127,6 +150,13 @@ export function renderApp(root) {
         jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
       } else {
         jobList.innerHTML = jobs.map(renderJob).join("");
+
+        // Fetch progress for running jobs
+        for (const job of jobs) {
+          if (job.status === "Running") {
+            updateProgress(job.id);
+          }
+        }
       }
     } catch (err) {
       console.error(err);
@@ -138,6 +168,21 @@ export function renderApp(root) {
   fetchJobs();
   // Poll every 5 seconds
   const pollInterval = setInterval(fetchJobs, 5000);
+
+  // Poll progress more frequently (e.g., every 2 seconds) for smoother updates
+  const progressPollInterval = setInterval(() => {
+    const runningJobs = Array.from(root.querySelectorAll('.job-card')).filter(card => {
+      const statusText = card.querySelector('.job-meta span:first-child')?.textContent;
+      return statusText === 'Running';
+    });
+
+    runningJobs.forEach(card => {
+      const jobId = card.dataset.jobId;
+      if (jobId) {
+        updateProgress(jobId);
+      }
+    });
+  }, 2000);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -251,5 +296,8 @@ export function renderApp(root) {
 
   // Return cleanup function
 
-  return () => clearInterval(pollInterval);
+  return () => {
+    clearInterval(pollInterval);
+    clearInterval(progressPollInterval);
+  };
 }
