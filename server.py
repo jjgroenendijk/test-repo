@@ -174,6 +174,20 @@ async def create_job(request: JobRequest, background_tasks: BackgroundTasks):
 async def list_jobs():
     return await read_history()
 
+
+@app.get("/api/jobs/{job_id}/log")
+async def get_job_log(job_id: str):
+    log_file_path = LOGS_DIR / f"{job_id}.log"
+    if not log_file_path.exists() or not log_file_path.is_file():
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    try:
+        with open(log_file_path, "r") as f:
+            return {"log": f.read()}
+    except Exception as e:
+        logger.error(f"Error reading log file for {job_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error reading log")
+
 @app.delete("/api/jobs/{job_id}")
 async def cancel_job(job_id: str):
     history = []
