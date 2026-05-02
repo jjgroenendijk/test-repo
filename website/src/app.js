@@ -1,18 +1,3 @@
-export const demoJobs = [
-  {
-    title: "Album import",
-    source: "spotify.com/album/1ATL5GLyefJaxhQzSPVrLX",
-    status: "Waiting for backend",
-    files: "0 files",
-  },
-  {
-    title: "Playlist archive",
-    source: "spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
-    status: "Planned",
-    files: "Persistent /data history",
-  },
-];
-
 export function isSpotifyUrl(value) {
   try {
     const url = new URL(value);
@@ -37,17 +22,30 @@ export function classifySpotifyUrl(value) {
   return new URL(value).pathname.split("/").filter(Boolean)[0];
 }
 
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 function renderJob(job) {
+  const errorHtml = job.error_log ? `<pre class="job-error">${escapeHtml(job.error_log)}</pre>` : "";
+  const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
   return `
-    <article class="job-card">
+    <article class="job-card" data-job-id="${escapeHtml(job.id)}">
       <div>
-        <p class="job-title">${job.title}</p>
-        <p class="job-source">${job.source}</p>
+        <p class="job-title">${escapeHtml(job.url)}</p>
+        <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
       </div>
       <div class="job-meta">
-        <span>${job.status}</span>
-        <span>${job.files}</span>
+        <span>${escapeHtml(job.status)}</span>
+        <span>${filesText}</span>
       </div>
+      ${errorHtml}
     </article>
   `;
 }
@@ -90,10 +88,9 @@ export function renderApp(root) {
       <section class="jobs" aria-label="Recent jobs">
         <div class="section-heading">
           <h2>Recent jobs</h2>
-          <span>Backend integration next</span>
         </div>
-        <div class="job-list">
-          ${demoJobs.map(renderJob).join("")}
+        <div class="job-list" id="job-list">
+          <!-- Jobs will be loaded here -->
         </div>
       </section>
     </section>
@@ -102,8 +99,31 @@ export function renderApp(root) {
   const form = root.querySelector("#queue-form");
   const input = root.querySelector("#spotify-url");
   const feedback = root.querySelector("#queue-feedback");
+  const jobList = root.querySelector("#job-list");
 
-  form.addEventListener("submit", (event) => {
+  async function fetchJobs() {
+    try {
+      const response = await fetch("/api/jobs");
+      if (!response.ok) throw new Error("Failed to fetch");
+      const jobs = await response.json();
+
+      if (jobs.length === 0) {
+        jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
+      } else {
+        jobList.innerHTML = jobs.map(renderJob).join("");
+      }
+    } catch (err) {
+      console.error(err);
+      jobList.innerHTML = `<p class="error-state">Failed to load jobs.</p>`;
+    }
+  }
+
+  // Initial load
+  fetchJobs();
+  // Poll every 5 seconds
+  const pollInterval = setInterval(fetchJobs, 5000);
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const value = input.value.trim();
 
@@ -113,8 +133,27 @@ export function renderApp(root) {
       return;
     }
 
-    const type = classifySpotifyUrl(value);
-    feedback.textContent = `Ready to queue ${type} when the SpotiFLAC backend is connected.`;
-    feedback.dataset.state = "ready";
+    try {
+      const response = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: value })
+      });
+
+      if (!response.ok) throw new Error("Failed to queue");
+
+      input.value = "";
+      feedback.textContent = "Job queued successfully.";
+      feedback.dataset.state = "success";
+
+      // Refresh list immediately
+      fetchJobs();
+    } catch (err) {
+      feedback.textContent = "Error queueing job.";
+      feedback.dataset.state = "error";
+    }
   });
+
+  // Return cleanup function
+  return () => clearInterval(pollInterval);
 }
