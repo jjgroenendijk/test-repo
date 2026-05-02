@@ -87,6 +87,57 @@ def test_get_job_log_not_found(tmp_path, monkeypatch):
     response = client.get("/api/jobs/nonexistent-job/log")
     assert response.status_code == 404
 
+def test_get_job_progress(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    logs_dir = data_dir / "logs"
+    logs_dir.mkdir()
+
+    monkeypatch.setattr("server.LOGS_DIR", logs_dir)
+
+    job_id = "test-job-prog"
+    log_file = logs_dir / f"{job_id}.log"
+
+    # 1. Test not found
+    response = client.get(f"/api/jobs/{job_id}/progress")
+    assert response.status_code == 200
+    assert response.json() is None
+
+    # 2. Test empty/no progress log
+    log_file.write_text("Starting download...\n")
+    response = client.get(f"/api/jobs/{job_id}/progress")
+    assert response.status_code == 200
+    assert response.json() is None
+
+    # 3. Test log with progress and track name
+    log_content = """Fetching metadata...
+[1/13] Daft Punk
+  ↳ Give Life Back to Music
+[2/13] Daft Punk
+  ↳ The Game of Love
+"""
+    log_file.write_text(log_content)
+    response = client.get(f"/api/jobs/{job_id}/progress")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["current"] == 2
+    assert data["total"] == 13
+    assert data["track"] == "The Game of Love"
+    assert data["percentage"] == 15
+
+    # 4. Test log with progress but no track name yet
+    log_content = """Fetching metadata...
+[3/13] Daft Punk
+"""
+    log_file.write_text(log_content)
+    response = client.get(f"/api/jobs/{job_id}/progress")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["current"] == 3
+    assert data["total"] == 13
+    assert data["track"] is None
+    assert data["percentage"] == 23
+
 @patch('server.run_spotiflac')
 def test_clear_history(mock_run):
     # Create an initial job (mock makes it complete successfully, but background task means it might be queued initially)

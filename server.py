@@ -188,6 +188,43 @@ async def get_job_log(job_id: str):
         logger.error(f"Error reading log file for {job_id}: {e}")
         raise HTTPException(status_code=500, detail="Error reading log")
 
+@app.get("/api/jobs/{job_id}/progress")
+async def get_job_progress(job_id: str):
+    import re
+    log_file_path = LOGS_DIR / f"{job_id}.log"
+    if not log_file_path.exists() or not log_file_path.is_file():
+        return None
+
+    try:
+        with open(log_file_path, "r") as f:
+            log_content = f.read()
+
+        matches = list(re.finditer(r"\[(\d+)/(\d+)\]", log_content))
+        if not matches:
+            return None
+
+        last_match = matches[-1]
+        current = int(last_match.group(1))
+        total = int(last_match.group(2))
+
+        track_name = None
+        start_idx = last_match.end()
+
+        # Find next track name indicator
+        track_matches = list(re.finditer(r"↳\s*([^\n│]+)", log_content[start_idx:]))
+        if track_matches:
+            track_name = track_matches[-1].group(1).strip()
+
+        return {
+            "current": current,
+            "total": total,
+            "track": track_name,
+            "percentage": int((current / total) * 100) if total > 0 else 0
+        }
+    except Exception as e:
+        logger.error(f"Error parsing progress for {job_id}: {e}")
+        return None
+
 
 @app.delete("/api/history/clear")
 async def clear_history():
