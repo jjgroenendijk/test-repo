@@ -101,8 +101,9 @@ export function renderApp(root) {
       </section>
 
       <section class="jobs" aria-label="Recent jobs">
-        <div class="section-heading">
+        <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
+          <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
         </div>
         <div class="job-list" id="job-list">
           <!-- Jobs will be loaded here -->
@@ -228,6 +229,27 @@ export function renderApp(root) {
     }
   });
 
+
+  const clearHistoryBtn = root.querySelector("#clear-history-btn");
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", async () => {
+      clearHistoryBtn.disabled = true;
+      clearHistoryBtn.textContent = "Clearing...";
+      try {
+        const response = await fetch("/api/history/clear", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to clear history", err);
+      } finally {
+        clearHistoryBtn.disabled = false;
+        clearHistoryBtn.textContent = "Clear history";
+      }
+    });
+  }
+
   // Return cleanup function
+
   return () => clearInterval(pollInterval);
 }

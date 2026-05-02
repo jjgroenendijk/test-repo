@@ -393,3 +393,31 @@ button:active {
   word-break: break-all;
   border: 1px solid rgba(31, 122, 77, 0.1);
 }
+
+.clear-history-btn {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  color: #17201b;
+  font-weight: 500;
+}
+
+.clear-history-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.clear-history-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.section-heading-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

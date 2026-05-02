@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
@@ -85,3 +86,54 @@ def test_get_job_log_not_found(tmp_path, monkeypatch):
 
     response = client.get("/api/jobs/nonexistent-job/log")
     assert response.status_code == 404
+
+@patch('server.run_spotiflac')
+def test_clear_history(mock_run):
+    # Create an initial job (mock makes it complete successfully, but background task means it might be queued initially)
+    # However, for tests, we can directly manipulate the test history file or create a job and let it run,
+    # then clear history.
+
+    # Create two jobs
+    response1 = client.post("/api/jobs", json={"url": "https://open.spotify.com/track/123"})
+    job1_id = response1.json()["id"]
+
+    response2 = client.post("/api/jobs", json={"url": "https://open.spotify.com/track/456"})
+    job2_id = response2.json()["id"]
+
+    # One job we'll cancel so it's "Cancelled"
+    client.delete(f"/api/jobs/{job1_id}")
+
+    # Wait for the other job to potentially be running or queued, let's inject a "Completed" status
+    # for testing purposes into the history file directly to be sure it gets cleared.
+
+    with open(HISTORY_FILE, "r") as f:
+        history = json.load(f)
+
+    for job in history:
+        if job["id"] == job2_id:
+            job["status"] = "Completed"
+
+    history.append({
+        "id": "running-job-id",
+        "url": "https://open.spotify.com/track/789",
+        "status": "Running",
+        "created_at": "2023-01-01T00:00:00Z"
+    })
+
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
+
+    # Call clear history
+    response = client.delete("/api/history/clear")
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"
+    assert response.json()["cleared"] >= 2 # Cancelled and Completed
+
+    # Verify history
+    response = client.get("/api/jobs")
+    jobs = response.json()
+
+    # Only the "Running" job should remain
+    assert len(jobs) == 1
+    assert jobs[0]["id"] == "running-job-id"
+    assert jobs[0]["status"] == "Running"
