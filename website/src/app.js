@@ -35,6 +35,9 @@ function escapeHtml(unsafe) {
 function renderJob(job) {
   const errorHtml = job.error_log ? `<pre class="job-error">${escapeHtml(job.error_log)}</pre>` : "";
   const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
+  const canCancel = job.status === "Queued" || job.status === "Running";
+  const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
+
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
       <div>
@@ -44,6 +47,7 @@ function renderJob(job) {
       <div class="job-meta">
         <span>${escapeHtml(job.status)}</span>
         <span>${filesText}</span>
+        ${cancelBtnHtml}
       </div>
       ${errorHtml}
     </article>
@@ -151,6 +155,29 @@ export function renderApp(root) {
     } catch (err) {
       feedback.textContent = "Error queueing job.";
       feedback.dataset.state = "error";
+    }
+  });
+
+  jobList.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("cancel-job-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      event.target.disabled = true;
+      event.target.textContent = "Cancelling...";
+
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          method: "DELETE"
+        });
+        if (response.ok) {
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to cancel job", err);
+        event.target.disabled = false;
+        event.target.textContent = "Cancel";
+      }
     }
   });
 
