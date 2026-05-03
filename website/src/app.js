@@ -130,7 +130,12 @@ export function renderApp(root) {
         const data = await response.json();
         if (data) {
           const trackInfo = data.track ? `: ${escapeHtml(data.track)}` : '';
-          container.innerHTML = `<strong>Progress:</strong> [${data.current}/${data.total}]${trackInfo} (${data.percentage}%)`;
+          container.innerHTML = `
+            <div style="margin-bottom: 4px;"><strong>Progress:</strong> [${data.current}/${data.total}]${trackInfo} (${data.percentage}%)</div>
+            <div class="progress-bar-bg" aria-hidden="true">
+              <div class="progress-bar-fill" style="width: ${data.percentage}%;"></div>
+            </div>
+          `;
         } else {
           container.innerHTML = 'Starting...';
         }
