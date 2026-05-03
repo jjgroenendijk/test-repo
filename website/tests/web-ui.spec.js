@@ -209,3 +209,69 @@ test("can clear job history", async ({ page }) => {
 
   expect(clearHistoryCalled).toBe(true);
 });
+
+test("displays visual progress bar for running jobs", async ({ page }) => {
+  // Mock API route for jobs to provide a running job
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "running-job-id",
+            url: "https://open.spotify.com/album/progress",
+            status: "Running",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  // Mock API route for progress
+  await page.route("/api/jobs/running-job-id/progress", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          current: 5,
+          total: 10,
+          track: "Track 5",
+          percentage: 50
+        })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  // Wait for the job card to load
+  const jobCard = page.locator(".job-card").filter({ hasText: "Running" });
+  await expect(jobCard).toBeVisible();
+
+  // Verify the progress text is present
+  await expect(jobCard.locator("strong:has-text('Progress:')")).toBeVisible();
+  await expect(jobCard).toContainText("[5/10]: Track 5 (50%)");
+
+  // Verify progress bar background
+  const progressBarBg = jobCard.locator(".progress-bar-bg");
+  await expect(progressBarBg).toBeVisible();
+
+  // Verify progress bar fill width
+  const progressBarFill = jobCard.locator(".progress-bar-fill");
+  await expect(progressBarFill).toBeVisible();
+
+  // Checking the style width property
+  await expect(progressBarFill).toHaveCSS("width", /.+/);
+  // Specifically wait for the width to reflect 50%
+  // We check style="width: 50%;" inline style
+  await expect(progressBarFill).toHaveAttribute("style", "width: 50%;");
+});
