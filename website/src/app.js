@@ -40,6 +40,7 @@ function renderJob(job) {
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
   const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">Retry</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
+  const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
 
@@ -54,12 +55,20 @@ function renderJob(job) {
         <span>${filesText}</span>
         <div class="job-actions">
           ${viewLogsBtnHtml}
+          ${viewFilesBtnHtml}
           ${cancelBtnHtml}
           ${retryBtnHtml}
         </div>
       </div>
       ${errorHtml}
       ${progressHtml}
+      <div class="job-files-container glass" id="files-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Downloaded Files</h3>
+          <button type="button" class="close-files-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+        </div>
+        <ul class="job-files-list" id="files-list-${escapeHtml(job.id)}" style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #333;">Loading...</ul>
+      </div>
       <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
@@ -257,6 +266,44 @@ export function renderApp(root) {
       const logsContainer = root.querySelector(`#logs-container-${jobId}`);
       if (logsContainer) {
         logsContainer.style.display = "none";
+      }
+    }
+
+    if (event.target.classList.contains("view-files-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const filesContainer = root.querySelector(`#files-container-${jobId}`);
+      const filesList = root.querySelector(`#files-list-${jobId}`);
+
+      if (filesContainer) {
+        filesContainer.style.display = "block";
+        try {
+          const response = await fetch(`/api/jobs/${jobId}/files`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.files && data.files.length > 0) {
+                filesList.innerHTML = data.files.map(file => `<li>${escapeHtml(file)}</li>`).join("");
+            } else {
+                filesList.innerHTML = "<li>No files found.</li>";
+            }
+          } else {
+            filesList.innerHTML = "<li>Error fetching files.</li>";
+          }
+        } catch (err) {
+          filesList.innerHTML = "<li>Error fetching files.</li>";
+          console.error(err);
+        }
+      }
+    }
+
+    if (event.target.classList.contains("close-files-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const filesContainer = root.querySelector(`#files-container-${jobId}`);
+      if (filesContainer) {
+        filesContainer.style.display = "none";
       }
     }
 

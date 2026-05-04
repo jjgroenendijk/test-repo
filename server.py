@@ -188,6 +188,35 @@ async def get_job_log(job_id: str):
         logger.error(f"Error reading log file for {job_id}: {e}")
         raise HTTPException(status_code=500, detail="Error reading log")
 
+@app.get("/api/jobs/{job_id}/files")
+async def get_job_files(job_id: str):
+    import re
+    # Strict validation of job_id to prevent path traversal
+    if not re.match(r"^[a-zA-Z0-9-]+$", job_id):
+        raise HTTPException(status_code=400, detail="Invalid job ID format")
+
+    job_dir = (DATA_DIR / job_id).resolve()
+
+    # Extra check to ensure job_dir is still within DATA_DIR
+    if not job_dir.is_relative_to(DATA_DIR.resolve()):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if not job_dir.exists() or not job_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Job directory not found")
+
+    files = []
+    try:
+        for p in job_dir.rglob("*"):
+            if p.is_file():
+                # Get path relative to the job directory
+                rel_path = p.relative_to(job_dir)
+                files.append(str(rel_path))
+        return {"files": sorted(files)}
+    except Exception as e:
+        logger.error(f"Error listing files for {job_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error listing files")
+
+
 @app.get("/api/jobs/{job_id}/progress")
 async def get_job_progress(job_id: str):
     import re
