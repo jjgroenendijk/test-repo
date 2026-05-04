@@ -36,7 +36,9 @@ function renderJob(job) {
   const errorHtml = job.error_log ? `<pre class="job-error">${escapeHtml(job.error_log)}</pre>` : "";
   const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
   const canCancel = job.status === "Queued" || job.status === "Running";
+  const canRetry = job.status === "Failed" || job.status === "Cancelled";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
+  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">Retry</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
@@ -53,6 +55,7 @@ function renderJob(job) {
         <div class="job-actions">
           ${viewLogsBtnHtml}
           ${cancelBtnHtml}
+          ${retryBtnHtml}
         </div>
       </div>
       ${errorHtml}
@@ -275,6 +278,32 @@ export function renderApp(root) {
         console.error("Failed to cancel job", err);
         event.target.disabled = false;
         event.target.textContent = "Cancel";
+      }
+    }
+
+    if (event.target.classList.contains("retry-job-btn")) {
+      const jobUrl = event.target.dataset.jobUrl;
+      if (!jobUrl) return;
+
+      event.target.disabled = true;
+      event.target.textContent = "Retrying...";
+
+      try {
+        const response = await fetch("/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: jobUrl })
+        });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          event.target.disabled = false;
+          event.target.textContent = "Retry";
+        }
+      } catch (err) {
+        console.error("Failed to retry job", err);
+        event.target.disabled = false;
+        event.target.textContent = "Retry";
       }
     }
   });
