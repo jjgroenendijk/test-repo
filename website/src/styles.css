@@ -305,7 +305,8 @@ button:active {
   color: #10b981;
 }
 
-.cancel-job-btn {
+.cancel-job-btn,
+.retry-job-btn {
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -320,13 +321,15 @@ button:active {
   box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.05);
 }
 
-.cancel-job-btn:hover:not(:disabled) {
+.cancel-job-btn:hover:not(:disabled),
+.retry-job-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.8);
   color: var(--text);
   border-color: rgba(255, 255, 255, 0.8);
 }
 
-.cancel-job-btn:disabled {
+.cancel-job-btn:disabled,
+.retry-job-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;

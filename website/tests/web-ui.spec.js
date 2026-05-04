@@ -62,6 +62,52 @@ test("validates supported Spotify URLs and queues job", async ({ page }) => {
 });
 
 
+test("shows retry button for failed job and handles click", async ({ page }) => {
+  // Mock API route for jobs to provide a failed job
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "126",
+            url: "https://open.spotify.com/track/789",
+            status: "Failed",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: "Something went wrong"
+          }
+        ]),
+      });
+    } else if (route.request().method() === "POST") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "127",
+          url: "https://open.spotify.com/track/789",
+          status: "Queued",
+          created_at: new Date().toISOString(),
+          files: 0,
+          error_log: null
+        })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const retryBtn = page.getByRole("button", { name: "Retry" });
+  await expect(retryBtn).toBeVisible();
+
+  await retryBtn.click();
+
+  await expect(page.getByRole("button", { name: "Retrying..." })).toBeVisible();
+});
+
 test("shows cancel button for queued job and handles click", async ({ page }) => {
   // First we need to override the initial GET mock to show a queued job
   await page.route("/api/jobs", async (route) => {
