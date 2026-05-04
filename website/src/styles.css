@@ -445,3 +445,40 @@ button:active {
   transition: width 0.3s ease-out;
   box-shadow: 0 0 8px rgba(31, 122, 77, 0.4);
 }
+
+/* File List Styles */
+.view-files-btn {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #17201b;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.05);
+  min-height: auto;
+}
+
+.view-files-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.close-files-btn {
+  background: transparent;
+  border: 1px solid rgba(31, 122, 77, 0.3);
+  color: #1f7a4d;
+  transition: all 0.2s;
+}
+
+.close-files-btn:hover {
+  background: rgba(31, 122, 77, 0.1);
+  transform: none;
+}
+
+.job-files-list li {
+  margin-bottom: 4px;
+}
