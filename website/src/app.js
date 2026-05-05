@@ -41,6 +41,7 @@ function renderJob(job) {
   const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">Retry</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
+  const downloadZipBtnHtml = job.status === "Completed" ? `<a href="/api/jobs/${escapeHtml(job.id)}/download" download class="download-zip-btn view-files-btn">Download ZIP</a>` : "";
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
 
@@ -56,6 +57,7 @@ function renderJob(job) {
         <div class="job-actions">
           ${viewLogsBtnHtml}
           ${viewFilesBtnHtml}
+          ${downloadZipBtnHtml}
           ${cancelBtnHtml}
           ${retryBtnHtml}
         </div>

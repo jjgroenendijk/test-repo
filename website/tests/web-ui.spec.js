@@ -321,3 +321,20 @@ test("displays visual progress bar for running jobs", async ({ page }) => {
   // We check style="width: 50%;" inline style
   await expect(progressBarFill).toHaveAttribute("style", "width: 50%;");
 });
+
+test('displays Download ZIP link for completed jobs', async ({ page }) => {
+  await page.goto('/');
+
+  // Wait for the job card with ID 123 (which is mocked as "Completed" in beforeEach)
+  const jobCard = page.locator('.job-card').filter({ hasText: '1ATL5GLyefJaxhQzSPVrLX' });
+  await expect(jobCard).toBeVisible();
+
+  // Find the Download ZIP link
+  const downloadLink = jobCard.locator('.download-zip-btn');
+  await expect(downloadLink).toBeVisible();
+  await expect(downloadLink).toHaveText('Download ZIP');
+
+  // Verify the href attribute
+  await expect(downloadLink).toHaveAttribute('href', '/api/jobs/123/download');
+  await expect(downloadLink).toHaveAttribute('download', '');
+});
