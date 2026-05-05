@@ -482,3 +482,12 @@ button:active {
 .job-files-list li {
   margin-bottom: 4px;
 }
+
+.download-zip-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  line-height: normal;
+}

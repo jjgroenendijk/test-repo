@@ -188,3 +188,33 @@ def test_clear_history(mock_run):
     assert len(jobs) == 1
     assert jobs[0]["id"] == "running-job-id"
     assert jobs[0]["status"] == "Running"
+
+def test_download_job_zip(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-download-job"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    (job_dir / "track.flac").write_text("dummy flac content")
+
+    response = client.get(f"/api/jobs/{job_id}/download")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+
+    # We could also check if the zip file actually unzips properly, but checking response headers is sufficient here.
+
+def test_download_job_zip_invalid_id():
+    response = client.get("/api/jobs/invalid..id/download")
+    assert response.status_code == 400
+
+def test_download_job_zip_not_found(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    response = client.get("/api/jobs/nonexistent-job/download")
+    assert response.status_code == 404

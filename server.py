@@ -255,7 +255,48 @@ async def get_job_progress(job_id: str):
         return None
 
 
+
+@app.get("/api/jobs/{job_id}/download")
+def download_job(job_id: str, background_tasks: BackgroundTasks):
+    import re
+    import shutil
+    import tempfile
+    import os
+
+    if not re.match(r"^[a-zA-Z0-9-]+$", job_id):
+        raise HTTPException(status_code=400, detail="Invalid job ID format")
+
+    job_dir = (DATA_DIR / job_id).resolve()
+
+    if not job_dir.is_relative_to(DATA_DIR.resolve()):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if not job_dir.exists() or not job_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Job directory not found")
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    temp_file.close()
+
+    base_name = temp_file.name[:-4]
+    try:
+        shutil.make_archive(base_name, 'zip', job_dir)
+    except Exception:
+        if os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
+        raise
+
+    zip_path = temp_file.name
+
+    background_tasks.add_task(os.unlink, zip_path)
+
+    return FileResponse(
+        path=zip_path,
+        media_type="application/zip",
+        filename=f"SpotiFLAC-{job_id}.zip"
+    )
+
 @app.delete("/api/history/clear")
+
 async def clear_history():
     history = []
     async with history_lock:
