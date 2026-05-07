@@ -285,7 +285,12 @@ export function renderApp(root) {
           if (response.ok) {
             const data = await response.json();
             if (data.files && data.files.length > 0) {
-                filesList.innerHTML = data.files.map(file => `<li>${escapeHtml(file)}</li>`).join("");
+                filesList.innerHTML = data.files.map(file => {
+                    const encodedJobId = encodeURIComponent(jobId);
+                    const encodedFile = file.split('/').map(encodeURIComponent).join('/');
+                    const fileName = file.split('/').pop();
+                    return `<li><a href="/api/jobs/${encodedJobId}/files/${encodedFile}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(file)}</a></li>`;
+                }).join("");
             } else {
                 filesList.innerHTML = "<li>No files found.</li>";
             }
