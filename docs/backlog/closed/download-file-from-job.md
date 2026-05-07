@@ -1,0 +1,2 @@
+# Download single file from job\n\nThe web UI should allow downloading specific individual files from a completed job's list of downloaded files, rather than only downloading the entire job as a zip. This will save bandwidth for users who only want to fetch a single file. \n\nImplement this by adding download links to the file list shown when clicking 'View Files' on a completed job card.
+Verified successfully

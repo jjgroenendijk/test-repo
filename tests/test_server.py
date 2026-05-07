@@ -218,3 +218,51 @@ def test_download_job_zip_not_found(tmp_path, monkeypatch):
 
     response = client.get("/api/jobs/nonexistent-job/download")
     assert response.status_code == 404
+
+def test_download_single_file(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-job-file"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    file_content = "some specific content"
+    (job_dir / "specific_file.txt").write_text(file_content)
+
+    response = client.get(f"/api/jobs/{job_id}/files/specific_file.txt")
+    assert response.status_code == 200
+    assert response.text == file_content
+    # The file should not be zipped, just plain text here
+    # Starlette/FastAPI FileResponse tries to infer content type, but might not add it or sets application/octet-stream if unknown.
+
+def test_download_single_file_not_found(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-job-file-miss"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    response = client.get(f"/api/jobs/{job_id}/files/missing_file.txt")
+    assert response.status_code == 404
+
+def test_download_single_file_path_traversal(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-job-file-trav"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    # Create a file outside the job directory
+    secret_file = data_dir / "secret.txt"
+    secret_file.write_text("secret")
+
+    # Try to access it
+    # TestClient resolves ../ locally before sending, so we use %2E%2E to bypass it
+    response = client.get(f"/api/jobs/{job_id}/files/%2E%2E/secret.txt")
+    assert response.status_code == 403

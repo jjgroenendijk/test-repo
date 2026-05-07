@@ -491,3 +491,16 @@ button:active {
   box-sizing: border-box;
   line-height: normal;
 }
+
+.file-download-link {
+  color: #244636;
+  text-decoration: underline;
+  text-decoration-color: rgba(36, 70, 54, 0.4);
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
+}
+
+.file-download-link:hover {
+  color: #12281e;
+  text-decoration-color: #12281e;
+}
