@@ -81,18 +81,20 @@ test("shows retry button for failed job and handles click", async ({ page }) => 
         ]),
       });
     } else if (route.request().method() === "POST") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          id: "127",
-          url: "https://open.spotify.com/track/789",
-          status: "Queued",
-          created_at: new Date().toISOString(),
-          files: 0,
-          error_log: null
-        })
-      });
+      setTimeout(async () => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: "127",
+            url: "https://open.spotify.com/track/789",
+            status: "Queued",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          })
+        });
+      }, 500);
     } else {
       await route.fallback();
     }
@@ -126,6 +128,20 @@ test("shows cancel button for queued job and handles click", async ({ page }) =>
           }
         ]),
       });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route("**/api/jobs/*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      setTimeout(async () => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "success" })
+        });
+      }, 500);
     } else {
       await route.fallback();
     }
