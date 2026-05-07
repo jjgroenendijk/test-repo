@@ -28,9 +28,27 @@ describe("classifySpotifyUrl", () => {
 
 describe("renderApp", () => {
   it("renders a job with file links properly formatted", async () => {
-    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>');
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
     global.document = dom.window.document;
     global.window = dom.window;
+
+    // Mock localStorage and matchMedia
+    global.localStorage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    };
+    global.window.matchMedia = vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // Deprecated
+      removeListener: vi.fn(), // Deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
 
     const root = document.getElementById("root");
 

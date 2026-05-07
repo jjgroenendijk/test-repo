@@ -90,7 +90,13 @@ export function renderApp(root) {
           <p class="eyebrow">Self-hosted music library intake</p>
           <h1>SpotiFLAC</h1>
         </div>
-        <span class="runtime-badge">Single container</span>
+        <div class="topbar-actions">
+          <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon theme-icon-dark"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun theme-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          </button>
+          <span class="runtime-badge">Single container</span>
+        </div>
       </header>
 
       <section class="workspace" aria-label="SpotiFLAC queue">
@@ -187,6 +193,28 @@ export function renderApp(root) {
   fetchJobs();
   // Poll every 5 seconds
   const pollInterval = setInterval(fetchJobs, 5000);
+
+  const themeToggleBtn = root.querySelector("#theme-toggle");
+
+  function initTheme() {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", toggleTheme);
+  }
+
+  initTheme();
 
   // Poll progress more frequently (e.g., every 2 seconds) for smoother updates
   const progressPollInterval = setInterval(() => {
@@ -327,6 +355,9 @@ export function renderApp(root) {
         });
         if (response.ok) {
           fetchJobs();
+        } else {
+          event.target.disabled = false;
+          event.target.textContent = "Cancel";
         }
       } catch (err) {
         console.error("Failed to cancel job", err);
