@@ -354,3 +354,13 @@ test('displays Download ZIP link for completed jobs', async ({ page }) => {
   await expect(downloadLink).toHaveAttribute('href', '/api/jobs/123/download');
   await expect(downloadLink).toHaveAttribute('download', '');
 });
+
+test("toggles dark mode", async ({ page }) => {
+  await page.goto("/");
+  const themeToggle = page.locator("#theme-toggle");
+  const html = page.locator("html");
+  await themeToggle.click();
+  await expect(html).toHaveClass(/dark/);
+  await themeToggle.click();
+  await expect(html).not.toHaveClass(/dark/);
+});
