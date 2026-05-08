@@ -99,4 +99,20 @@ describe("renderApp", () => {
 
     cleanup();
   });
+
+  it("toggles dark mode and updates localStorage", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+    const root = document.getElementById("root");
+    renderApp(root);
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    themeToggleBtn.click();
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(global.localStorage.setItem).toHaveBeenCalledWith("theme", "dark");
+  });
 });
