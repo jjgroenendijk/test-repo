@@ -319,6 +319,59 @@ def download_job(job_id: str, background_tasks: BackgroundTasks):
         filename=f"SpotiFLAC-{job_id}.zip"
     )
 
+@app.get("/api/history/download")
+def download_all_completed_jobs(background_tasks: BackgroundTasks):
+    import shutil
+    import tempfile
+    import os
+    import json
+
+    history = []
+    if HISTORY_FILE.exists():
+        with open(HISTORY_FILE, "r") as f:
+            try:
+                history = json.load(f)
+            except json.JSONDecodeError:
+                pass
+
+    completed_jobs = [job for job in history if job.get("status") == "Completed"]
+
+    if not completed_jobs:
+        raise HTTPException(status_code=404, detail="No completed jobs found")
+
+    temp_dir = tempfile.mkdtemp()
+
+    for job in completed_jobs:
+        job_id = job["id"]
+        job_dir = DATA_DIR / job_id
+        if job_dir.exists() and job_dir.is_dir():
+            target_dir = os.path.join(temp_dir, job_id)
+            shutil.copytree(job_dir, target_dir)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    temp_file.close()
+
+    base_name = temp_file.name[:-4]
+    try:
+        shutil.make_archive(base_name, 'zip', temp_dir)
+    except Exception:
+        if os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        raise
+
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+    zip_path = temp_file.name
+
+    background_tasks.add_task(os.unlink, zip_path)
+
+    return FileResponse(
+        path=zip_path,
+        media_type="application/zip",
+        filename="SpotiFLAC-all-completed.zip"
+    )
+
 def _delete_job_files(job_id: str):
     import shutil
     job_dir = DATA_DIR / job_id

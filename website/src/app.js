@@ -129,7 +129,10 @@ export function renderApp(root) {
       <section class="jobs" aria-label="Recent jobs">
         <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
-          <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+          <div style="display: flex; gap: 8px;">
+            <a href="/api/history/download" id="download-all-btn" class="clear-history-btn" download style="text-decoration: none; display: none;">Download all completed</a>
+            <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+          </div>
         </div>
         <div class="job-list" id="job-list">
           <!-- Jobs will be loaded here -->
@@ -173,6 +176,12 @@ export function renderApp(root) {
       const response = await fetch("/api/jobs");
       if (!response.ok) throw new Error("Failed to fetch");
       const jobs = await response.json();
+
+      const downloadAllBtn = root.querySelector("#download-all-btn");
+      if (downloadAllBtn) {
+        const hasCompleted = jobs.some(job => job.status === "Completed");
+        downloadAllBtn.style.display = hasCompleted ? "inline-flex" : "none";
+      }
 
       if (jobs.length === 0) {
         jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
