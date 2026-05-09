@@ -319,48 +319,67 @@ def download_job(job_id: str, background_tasks: BackgroundTasks):
         filename=f"SpotiFLAC-{job_id}.zip"
     )
 
-@app.delete("/api/history/clear")
+def _delete_job_files(job_id: str):
+    import shutil
+    job_dir = DATA_DIR / job_id
+    if job_dir.exists() and job_dir.is_dir():
+        shutil.rmtree(job_dir, ignore_errors=True)
 
+@app.delete("/api/history/clear")
 async def clear_history():
     history = []
+    cleared_jobs = []
     async with history_lock:
         if HISTORY_FILE.exists():
             with open(HISTORY_FILE, "r") as f:
                 history = json.load(f)
 
-        # Keep only active jobs
-        filtered_history = [
-            job for job in history
-            if job.get("status") in ["Queued", "Running"]
-        ]
+        filtered_history = []
+        for job in history:
+            if job.get("status") in ["Queued", "Running"]:
+                filtered_history.append(job)
+            else:
+                cleared_jobs.append(job["id"])
 
         with open(HISTORY_FILE, "w") as f:
             json.dump(filtered_history, f, indent=2)
 
-    return {"status": "success", "cleared": len(history) - len(filtered_history)}
+    for job_id in cleared_jobs:
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        await asyncio.to_thread(_delete_job_files, job_id)
+
+    return {"status": "success", "cleared": len(cleared_jobs)}
 
 @app.delete("/api/jobs/{job_id}")
 async def cancel_job(job_id: str):
     history = []
+    delete_job_files_flag = False
     async with history_lock:
         if HISTORY_FILE.exists():
             with open(HISTORY_FILE, "r") as f:
                 history = json.load(f)
 
         job_found = False
+        new_history = []
 
         for job in history:
             if job["id"] == job_id:
                 job_found = True
                 if job["status"] in ["Queued", "Running"]:
                     job["status"] = "Cancelled"
-                break
+                    new_history.append(job)
+                else:
+                    # Actually delete it from history
+                    delete_job_files_flag = True
+            else:
+                new_history.append(job)
 
         if not job_found:
             raise HTTPException(status_code=404, detail="Job not found")
 
         with open(HISTORY_FILE, "w") as f:
-            json.dump(history, f, indent=2)
+            json.dump(new_history, f, indent=2)
 
     if job_id in running_processes:
         process = running_processes[job_id]
@@ -368,6 +387,11 @@ async def cancel_job(job_id: str):
             process.terminate()
         except ProcessLookupError:
             pass
+
+    if delete_job_files_flag:
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        await asyncio.to_thread(_delete_job_files, job_id)
 
     return {"status": "success"}
 

@@ -37,8 +37,10 @@ function renderJob(job) {
   const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
   const canCancel = job.status === "Queued" || job.status === "Running";
   const canRetry = job.status === "Failed" || job.status === "Cancelled";
+  const canDelete = job.status === "Completed" || job.status === "Failed" || job.status === "Cancelled";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
   const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">Retry</button>` : "";
+  const deleteBtnHtml = canDelete ? `<button type="button" class="delete-job-btn" data-job-id="${escapeHtml(job.id)}">Delete</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
   const downloadZipBtnHtml = job.status === "Completed" ? `<a href="/api/jobs/${escapeHtml(job.id)}/download" download class="download-zip-btn view-files-btn">Download ZIP</a>` : "";
@@ -60,6 +62,7 @@ function renderJob(job) {
           ${downloadZipBtnHtml}
           ${cancelBtnHtml}
           ${retryBtnHtml}
+          ${deleteBtnHtml}
         </div>
       </div>
       ${errorHtml}
@@ -389,6 +392,30 @@ export function renderApp(root) {
         console.error("Failed to retry job", err);
         event.target.disabled = false;
         event.target.textContent = "Retry";
+      }
+    }
+
+    if (event.target.classList.contains("delete-job-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      event.target.disabled = true;
+      event.target.textContent = "Deleting...";
+
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          method: "DELETE"
+        });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          event.target.disabled = false;
+          event.target.textContent = "Delete";
+        }
+      } catch (err) {
+        console.error("Failed to delete job", err);
+        event.target.disabled = false;
+        event.target.textContent = "Delete";
       }
     }
   });
