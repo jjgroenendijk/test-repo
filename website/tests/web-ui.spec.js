@@ -110,6 +110,56 @@ test("shows retry button for failed job and handles click", async ({ page }) => 
   await expect(page.getByRole("button", { name: "Retrying..." })).toBeVisible();
 });
 
+test("can delete a job", async ({ page }) => {
+  // Mock API route for jobs to provide a completed job
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "job-to-delete",
+            url: "https://open.spotify.com/track/delete-me",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 1,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  let deleteJobCalled = false;
+  await page.route("**/api/jobs/job-to-delete", async (route) => {
+    if (route.request().method() === "DELETE") {
+      deleteJobCalled = true;
+      setTimeout(async () => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "success" })
+        });
+      }, 500);
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const deleteBtn = page.getByRole("button", { name: "Delete" });
+  await expect(deleteBtn).toBeVisible();
+
+  await deleteBtn.click();
+  await expect(page.getByRole("button", { name: "Deleting..." })).toBeVisible();
+
+  expect(deleteJobCalled).toBe(true);
+});
+
 test("shows cancel button for queued job and handles click", async ({ page }) => {
   // First we need to override the initial GET mock to show a queued job
   await page.route("/api/jobs", async (route) => {

@@ -435,7 +435,8 @@ button:active {
 }
 
 .cancel-job-btn,
-.retry-job-btn {
+.retry-job-btn,
+.delete-job-btn {
   background: var(--glass-bg);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -451,14 +452,16 @@ button:active {
 }
 
 .cancel-job-btn:hover:not(:disabled),
-.retry-job-btn:hover:not(:disabled) {
+.retry-job-btn:hover:not(:disabled),
+.delete-job-btn:hover:not(:disabled) {
   background: var(--glass-bg-hover);
   color: var(--text-primary);
   border-color: var(--glass-border);
 }
 
 .cancel-job-btn:disabled,
-.retry-job-btn:disabled {
+.retry-job-btn:disabled,
+.delete-job-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
