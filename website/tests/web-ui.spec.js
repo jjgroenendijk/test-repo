@@ -414,3 +414,59 @@ test("toggles dark mode", async ({ page }) => {
   await themeToggle.click();
   await expect(html).not.toHaveClass(/dark/);
 });
+
+test("filters jobs by status", async ({ page }) => {
+  // Add a Queued job to the mock to test filtering
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "123",
+            url: "https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 10,
+            error_log: null
+          },
+          {
+            id: "125",
+            url: "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+            status: "Queued",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+        await route.continue();
+    }
+  });
+
+  await page.goto("/");
+
+  // Initially shows both jobs
+  await expect(page.locator(".job-card")).toHaveCount(2);
+
+  // Filter by Completed
+  await page.locator("#job-status-filter").selectOption("Completed");
+  await expect(page.locator(".job-card")).toHaveCount(1);
+  await expect(page.locator(".job-card")).toContainText("Completed");
+
+  // Filter by Queued
+  await page.locator("#job-status-filter").selectOption("Queued");
+  await expect(page.locator(".job-card")).toHaveCount(1);
+  await expect(page.locator(".job-card")).toContainText("Queued");
+
+  // Filter by Failed (no jobs should match)
+  await page.locator("#job-status-filter").selectOption("Failed");
+  await expect(page.locator(".job-card")).toHaveCount(0);
+  await expect(page.locator(".empty-state")).toContainText("No jobs match the selected filter.");
+
+  // Filter by All
+  await page.locator("#job-status-filter").selectOption("All");
+  await expect(page.locator(".job-card")).toHaveCount(2);
+});

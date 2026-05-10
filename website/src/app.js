@@ -129,7 +129,15 @@ export function renderApp(root) {
       <section class="jobs" aria-label="Recent jobs">
         <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="job-status-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by status">
+              <option value="All">All</option>
+              <option value="Queued">Queued</option>
+              <option value="Running">Running</option>
+              <option value="Completed">Completed</option>
+              <option value="Failed">Failed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
             <a href="/api/history/download" id="download-all-btn" class="clear-history-btn" download style="text-decoration: none; display: none;">Download all completed</a>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
@@ -145,6 +153,7 @@ export function renderApp(root) {
   const input = root.querySelector("#spotify-url");
   const feedback = root.querySelector("#queue-feedback");
   const jobList = root.querySelector("#job-list");
+  const statusFilter = root.querySelector("#job-status-filter");
 
   async function updateProgress(jobId) {
     const container = root.querySelector(`#progress-container-${jobId}`);
@@ -183,10 +192,17 @@ export function renderApp(root) {
         downloadAllBtn.style.display = hasCompleted ? "inline-flex" : "none";
       }
 
-      if (jobs.length === 0) {
-        jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
+      const selectedStatus = statusFilter ? statusFilter.value : "All";
+      const filteredJobs = selectedStatus === "All" ? jobs : jobs.filter(job => job.status === selectedStatus);
+
+      if (filteredJobs.length === 0) {
+        if (jobs.length === 0) {
+          jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
+        } else {
+          jobList.innerHTML = `<p class="empty-state">No jobs match the selected filter.</p>`;
+        }
       } else {
-        jobList.innerHTML = jobs.map(renderJob).join("");
+        jobList.innerHTML = filteredJobs.map(renderJob).join("");
 
         // Fetch progress for running jobs
         for (const job of jobs) {
@@ -199,6 +215,10 @@ export function renderApp(root) {
       console.error(err);
       jobList.innerHTML = `<p class="error-state">Failed to load jobs.</p>`;
     }
+  }
+
+  if (statusFilter) {
+    statusFilter.addEventListener("change", fetchJobs);
   }
 
   // Initial load
