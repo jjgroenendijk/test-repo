@@ -212,6 +212,37 @@ async def get_job_file(job_id: str, file_path: str):
     return FileResponse(target_file)
 
 
+@app.get("/api/jobs/{job_id}/cover")
+async def get_job_cover(job_id: str):
+    import re
+    # Strict validation of job_id to prevent path traversal
+    if not re.match(r"^[a-zA-Z0-9-]+$", job_id):
+        raise HTTPException(status_code=400, detail="Invalid job ID format")
+
+    job_dir = (DATA_DIR / job_id).resolve()
+
+    # Extra check to ensure job_dir is still within DATA_DIR
+    if not job_dir.is_relative_to(DATA_DIR.resolve()):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if not job_dir.exists() or not job_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Job directory not found")
+
+    try:
+        # Search for common image formats
+        for ext in ("*.jpg", "*.jpeg", "*.png"):
+            for p in job_dir.rglob(ext):
+                if p.is_file():
+                    return FileResponse(p)
+
+        raise HTTPException(status_code=404, detail="Cover not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error finding cover for {job_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error finding cover")
+
+
 @app.get("/api/jobs/{job_id}/files")
 async def get_job_files(job_id: str):
     import re

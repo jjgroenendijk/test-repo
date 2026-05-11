@@ -249,6 +249,53 @@ def test_download_single_file_not_found(tmp_path, monkeypatch):
     response = client.get(f"/api/jobs/{job_id}/files/missing_file.txt")
     assert response.status_code == 404
 
+def test_get_job_cover_success(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-job-cover-success"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    # Create a dummy image file
+    cover_file = job_dir / "cover.jpg"
+    cover_file.write_text("dummy image data")
+
+    response = client.get(f"/api/jobs/{job_id}/cover")
+    assert response.status_code == 200
+    assert response.text == "dummy image data"
+
+
+def test_get_job_cover_not_found(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    job_id = "test-job-cover-not-found"
+    job_dir = data_dir / job_id
+    job_dir.mkdir()
+
+    # No images here
+    response = client.get(f"/api/jobs/{job_id}/cover")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Cover not found"}
+
+
+def test_get_job_cover_invalid_job_id():
+    response = client.get("/api/jobs/invalid..id/cover")
+    assert response.status_code == 400
+
+
+def test_get_job_cover_job_not_found(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    response = client.get("/api/jobs/nonexistent-job/cover")
+    assert response.status_code == 404
+
+
 def test_download_single_file_path_traversal(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     data_dir.mkdir()

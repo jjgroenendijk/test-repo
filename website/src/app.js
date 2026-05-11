@@ -49,6 +49,7 @@ function renderJob(job) {
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
+      <img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.style.display='none'" alt="Cover art" />
       <div>
         <p class="job-title">${escapeHtml(job.url)}</p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
