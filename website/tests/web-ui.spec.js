@@ -263,6 +263,38 @@ test('can view job logs', async ({ page }) => {
   await expect(logsContainer).toBeHidden();
 });
 
+test("can refresh job list", async ({ page }) => {
+  let fetchJobsCalledCount = 0;
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      fetchJobsCalledCount++;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const refreshBtn = page.getByRole("button", { name: "Refresh jobs" });
+  await expect(refreshBtn).toBeVisible();
+
+  // Reset count after initial load and polling that might happen
+  fetchJobsCalledCount = 0;
+
+  await refreshBtn.click();
+
+  // Wait for button to be enabled again
+  await expect(page.getByRole("button", { name: "Refresh jobs" })).toBeVisible();
+
+  // Verify that a network request was made
+  expect(fetchJobsCalledCount).toBeGreaterThan(0);
+});
+
 test("can clear job history", async ({ page }) => {
   // Mock API route for jobs to provide mixed jobs
   await page.route("/api/jobs", async (route) => {

@@ -140,6 +140,7 @@ export function renderApp(root) {
               <option value="Cancelled">Cancelled</option>
             </select>
             <a href="/api/history/download" id="download-all-btn" class="clear-history-btn" download style="text-decoration: none; display: none;">Download all completed</a>
+            <button type="button" id="refresh-jobs-btn" class="clear-history-btn">Refresh jobs</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
         </div>
@@ -450,6 +451,20 @@ export function renderApp(root) {
     }
   });
 
+
+  const refreshJobsBtn = root.querySelector("#refresh-jobs-btn");
+  if (refreshJobsBtn) {
+    refreshJobsBtn.addEventListener("click", async () => {
+      refreshJobsBtn.disabled = true;
+      refreshJobsBtn.textContent = "Refreshing...";
+      try {
+        await fetchJobs();
+      } finally {
+        refreshJobsBtn.disabled = false;
+        refreshJobsBtn.textContent = "Refresh jobs";
+      }
+    });
+  }
 
   const clearHistoryBtn = root.querySelector("#clear-history-btn");
   if (clearHistoryBtn) {
