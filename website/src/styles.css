@@ -344,11 +344,20 @@ button:active {
 
 .job-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 18px;
   align-items: center;
   padding: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.track-cover {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px 0 var(--glass-shadow);
+  flex-shrink: 0;
 }
 
 .job-card:hover {
