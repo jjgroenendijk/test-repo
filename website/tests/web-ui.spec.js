@@ -345,6 +345,7 @@ test("can clear job history", async ({ page }) => {
   const clearBtn = page.getByRole("button", { name: "Clear history" });
   await expect(clearBtn).toBeVisible();
 
+  page.once("dialog", dialog => dialog.accept());
   await clearBtn.click();
 
   // Playwright executes the mock fetch almost instantly, so we might miss the 'Clearing...' text.

@@ -469,6 +469,9 @@ export function renderApp(root) {
   const clearHistoryBtn = root.querySelector("#clear-history-btn");
   if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to clear all non-running job history? This cannot be undone.")) {
+        return;
+      }
       clearHistoryBtn.disabled = true;
       clearHistoryBtn.textContent = "Clearing...";
       try {
