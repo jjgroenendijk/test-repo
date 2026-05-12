@@ -141,6 +141,10 @@ export function renderApp(root) {
             </select>
             <a href="/api/history/download" id="download-all-btn" class="clear-history-btn" download style="text-decoration: none; display: none;">Download all completed</a>
             <button type="button" id="refresh-jobs-btn" class="clear-history-btn">Refresh jobs</button>
+            <label style="display: flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; color: var(--text-primary); cursor: pointer;">
+              <input type="checkbox" id="auto-refresh-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
+              Auto-refresh
+            </label>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
         </div>
@@ -223,10 +227,31 @@ export function renderApp(root) {
     statusFilter.addEventListener("change", fetchJobs);
   }
 
+  const autoRefreshToggle = root.querySelector("#auto-refresh-toggle");
+  let pollInterval;
+
+  function applyAutoRefreshState() {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+    }
+    if (autoRefreshToggle && autoRefreshToggle.checked) {
+      pollInterval = setInterval(fetchJobs, 5000);
+    }
+  }
+
+  if (autoRefreshToggle) {
+    const savedAutoRefresh = localStorage.getItem("autoRefresh");
+    autoRefreshToggle.checked = savedAutoRefresh !== "false"; // Default to true
+
+    autoRefreshToggle.addEventListener("change", () => {
+      localStorage.setItem("autoRefresh", autoRefreshToggle.checked);
+      applyAutoRefreshState();
+    });
+  }
+
   // Initial load
   fetchJobs();
-  // Poll every 5 seconds
-  const pollInterval = setInterval(fetchJobs, 5000);
+  applyAutoRefreshState();
 
   const themeToggleBtn = root.querySelector("#theme-toggle");
 
