@@ -82,6 +82,10 @@ describe("renderApp", () => {
       })
     );
 
+    const badge = document.querySelector('.url-type-badge');
+    expect(badge).not.toBeNull();
+    expect(badge.textContent).toBe('track');
+
     // Simulate clicking "View Files"
     viewFilesBtn.click();
 
