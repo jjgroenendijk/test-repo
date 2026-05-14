@@ -47,7 +47,7 @@ test("shows the SpotiFLAC queue shell and fetched jobs", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "SpotiFLAC" })).toBeVisible();
-  await expect(page.getByLabel("Spotify URL")).toBeVisible();
+  await expect(page.getByLabel("Spotify URLs")).toBeVisible();
   await expect(page.getByText("/data", { exact: true })).toBeVisible();
   await expect(page.getByText("10 files")).toBeVisible();
 });
@@ -55,10 +55,46 @@ test("shows the SpotiFLAC queue shell and fetched jobs", async ({ page }) => {
 test("validates supported Spotify URLs and queues job", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByLabel("Spotify URL").fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
+  await page.getByLabel("Spotify URLs").fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
   await page.getByRole("button", { name: "Queue" }).click();
 
-  await expect(page.getByText("Job queued successfully.")).toBeVisible();
+  await expect(page.getByText("Successfully queued 1 job.")).toBeVisible();
+});
+
+test("validates and queues multiple Spotify URLs", async ({ page }) => {
+  await page.goto("/");
+
+  // Mock the /api/jobs endpoint to intercept requests
+  const requests = [];
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "POST") {
+      requests.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: `mock-job-${requests.length}`,
+          url: route.request().postDataJSON().url,
+          status: "Queued",
+          created_at: new Date().toISOString(),
+          files: 0
+        })
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  const urls = "https://open.spotify.com/track/123\nhttps://open.spotify.com/album/456\n  https://open.spotify.com/playlist/789  ";
+  await page.getByLabel("Spotify URLs").fill(urls);
+  await page.getByRole("button", { name: "Queue" }).click();
+
+  await expect(page.getByText("Successfully queued 3 jobs.")).toBeVisible();
+
+  expect(requests).toHaveLength(3);
+  expect(requests[0].url).toBe("https://open.spotify.com/track/123");
+  expect(requests[1].url).toBe("https://open.spotify.com/album/456");
+  expect(requests[2].url).toBe("https://open.spotify.com/playlist/789");
 });
 
 

@@ -114,7 +114,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -253,7 +254,8 @@ label {
   gap: 10px;
 }
 
-input {
+input,
+textarea {
   width: 100%;
   min-height: 48px;
   border: 1px solid var(--input-border);
@@ -267,7 +269,14 @@ input {
   transition: all 0.2s ease;
 }
 
-input:focus {
+textarea {
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+input:focus,
+textarea:focus {
   outline: none;
   background: var(--input-bg-focus);
   border-color: var(--input-border-focus);
