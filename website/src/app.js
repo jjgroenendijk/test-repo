@@ -106,16 +106,16 @@ export function renderApp(root) {
 
       <section class="workspace" aria-label="SpotiFLAC queue">
         <form class="queue-panel" id="queue-form">
-          <label for="spotify-url">Spotify URL</label>
+          <label for="spotify-url">Spotify URLs</label>
           <div class="url-row">
-            <input
+            <textarea
               id="spotify-url"
               name="spotify-url"
-              type="url"
               placeholder="https://open.spotify.com/album/..."
               autocomplete="off"
               required
-            />
+              rows="3"
+            ></textarea>
             <button type="submit">Queue</button>
           </div>
           <p class="hint" id="queue-feedback">Tracks, albums, and playlists will run through the SpotiFLAC module.</p>
@@ -293,32 +293,63 @@ export function renderApp(root) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const value = input.value.trim();
 
-    if (!isSpotifyUrl(value)) {
-      feedback.textContent = "Enter a Spotify track, album, or playlist URL.";
+    // Split input by any whitespace, filter out empty strings
+    const urls = input.value.split(/\s+/).filter(Boolean);
+
+    if (urls.length === 0) {
+      feedback.textContent = "Enter at least one Spotify URL.";
       feedback.dataset.state = "error";
       return;
     }
 
-    try {
-      const response = await fetch("/api/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: value })
-      });
+    const invalidUrls = urls.filter(url => !isSpotifyUrl(url));
+    if (invalidUrls.length > 0) {
+      feedback.textContent = "One or more URLs are invalid. Ensure they are valid Spotify track, album, or playlist URLs.";
+      feedback.dataset.state = "error";
+      return;
+    }
 
-      if (!response.ok) throw new Error("Failed to queue");
+    const queueBtn = form.querySelector('button[type="submit"]');
+    queueBtn.disabled = true;
+    queueBtn.textContent = "Queueing...";
+
+    try {
+      const requests = urls.map(url =>
+        fetch("/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        })
+      );
+
+      const responses = await Promise.allSettled(requests);
+
+      const failedCount = responses.filter(r => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)).length;
+      const successCount = responses.length - failedCount;
+
+      if (successCount === 0) {
+        throw new Error("Failed to queue all jobs");
+      }
 
       input.value = "";
-      feedback.textContent = "Job queued successfully.";
-      feedback.dataset.state = "success";
+
+      if (failedCount === 0) {
+        feedback.textContent = `Successfully queued ${successCount} job${successCount > 1 ? 's' : ''}.`;
+        feedback.dataset.state = "success";
+      } else {
+        feedback.textContent = `Queued ${successCount} job${successCount > 1 ? 's' : ''}, but failed to queue ${failedCount}.`;
+        feedback.dataset.state = "error"; // Show orange/red to indicate partial failure
+      }
 
       // Refresh list immediately
       fetchJobs();
     } catch (err) {
-      feedback.textContent = "Error queueing job.";
+      feedback.textContent = "Error queueing jobs.";
       feedback.dataset.state = "error";
+    } finally {
+      queueBtn.disabled = false;
+      queueBtn.textContent = "Queue";
     }
   });
 
