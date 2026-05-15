@@ -52,7 +52,10 @@ function renderJob(job) {
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
       <img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.style.display='none'" alt="Cover art" />
       <div>
-        <p class="job-title">${escapeHtml(job.url)} <span class="url-type-badge" style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; text-transform: capitalize; vertical-align: middle;">${escapeHtml(urlType)}</span></p>
+        <p class="job-title">
+          <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener noreferrer" class="source-link">${escapeHtml(job.url)}</a>
+          <span class="url-type-badge" style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; text-transform: capitalize; vertical-align: middle;">${escapeHtml(urlType)}</span>
+        </p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
       </div>
       <div class="job-meta">

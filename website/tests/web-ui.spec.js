@@ -567,3 +567,42 @@ test("filters jobs by status", async ({ page }) => {
   await page.locator("#job-status-filter").selectOption("All");
   await expect(page.locator(".job-card")).toHaveCount(2);
 });
+
+test("job URLs are rendered as clickable links", async ({ page }) => {
+  // Use the mocked API route to provide a job
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "123",
+            url: "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 1,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  // Wait for the job card to load
+  const jobCard = page.locator(".job-card").first();
+  await expect(jobCard).toBeVisible();
+
+  // Find the source link inside the job title
+  const sourceLink = jobCard.locator(".job-title a.source-link");
+  await expect(sourceLink).toBeVisible();
+
+  // Verify href and attributes
+  await expect(sourceLink).toHaveAttribute("href", "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC");
+  await expect(sourceLink).toHaveAttribute("target", "_blank");
+  await expect(sourceLink).toHaveAttribute("rel", "noopener noreferrer");
+});
