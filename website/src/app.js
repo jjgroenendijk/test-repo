@@ -202,8 +202,11 @@ export function renderApp(root) {
         downloadAllBtn.style.display = hasCompleted ? "inline-flex" : "none";
       }
 
+      // Sort jobs by newest first
+      const sortedJobs = [...jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
       const selectedStatus = statusFilter ? statusFilter.value : "All";
-      const filteredJobs = selectedStatus === "All" ? jobs : jobs.filter(job => job.status === selectedStatus);
+      const filteredJobs = selectedStatus === "All" ? sortedJobs : sortedJobs.filter(job => job.status === selectedStatus);
 
       if (filteredJobs.length === 0) {
         if (jobs.length === 0) {
