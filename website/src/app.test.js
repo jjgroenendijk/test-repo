@@ -104,6 +104,59 @@ describe("renderApp", () => {
     cleanup();
   });
 
+  it("sorts jobs by newest first", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+
+    global.localStorage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    };
+    global.window.matchMedia = vi.fn().mockImplementation(query => ({
+      matches: false,
+    }));
+
+    const root = document.getElementById("root");
+
+    // Mock fetch jobs returning two jobs out of order
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([
+          {
+            id: "older-job",
+            url: "https://open.spotify.com/track/old",
+            status: "Completed",
+            created_at: "2023-01-01T00:00:00Z",
+            files: 1
+          },
+          {
+            id: "newer-job",
+            url: "https://open.spotify.com/track/new",
+            status: "Queued",
+            created_at: "2024-01-01T00:00:00Z",
+            files: 0
+          }
+        ])
+      })
+    );
+
+    const cleanup = renderApp(root);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const jobCards = document.querySelectorAll(".job-card");
+    expect(jobCards.length).toBe(2);
+    // The newer job should be rendered first
+    expect(jobCards[0].getAttribute("data-job-id")).toBe("newer-job");
+    expect(jobCards[1].getAttribute("data-job-id")).toBe("older-job");
+
+    cleanup();
+  });
+
   it("toggles dark mode and updates localStorage", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
