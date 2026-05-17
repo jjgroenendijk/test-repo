@@ -21,10 +21,10 @@ Ensure the single SpotiFLAC web UI container image is published to GitHub Contai
 - Follow-up work should verify tags, permissions, hosted-image smoke tests, and user-facing pull/run documentation.
 
 ## Status
-- [ ] Verify the GHCR publish workflow tags and permissions.
-- [ ] Document the published image pull/run path in `README.md`.
-- [ ] Confirm CI publishes the image after the container build succeeds.
-- [ ] Add CI verification that pulls the published GHCR image and smoke-tests the running container.
+- [x] Verify the GHCR publish workflow tags and permissions.
+- [x] Document the published image pull/run path in `README.md`.
+- [x] Confirm CI publishes the image after the container build succeeds.
+- [x] Add CI verification that pulls the published GHCR image and smoke-tests the running container.
 
 ## Verification
 - Review `.github/workflows/publish-container.yml`.

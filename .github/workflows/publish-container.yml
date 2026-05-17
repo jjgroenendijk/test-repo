@@ -47,3 +47,30 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Smoke test published image
+        if: github.event_name != 'pull_request'
+        env:
+          GHCR_REPO: ghcr.io/${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          IMAGE_TAG=$(echo "${GHCR_REPO}:sha-${SHA::7}" | tr '[:upper:]' '[:lower:]')
+          echo "Pulling published image: $IMAGE_TAG"
+          docker pull "$IMAGE_TAG"
+
+          echo "Starting container..."
+          docker run -d --name spotiflac-test -p 3000:3000 -v $(pwd)/data:/data "$IMAGE_TAG"
+
+          echo "Waiting for container to start..."
+          sleep 5
+
+          echo "Testing web UI..."
+          if ! curl --fail --retry 5 --retry-connrefused --retry-delay 2 http://localhost:3000/; then
+            echo "Smoke test failed: Web UI is not responding"
+            docker logs spotiflac-test
+            exit 1
+          fi
+
+          echo "Smoke test passed"
+          docker stop spotiflac-test
+          docker rm spotiflac-test
