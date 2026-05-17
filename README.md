@@ -92,16 +92,41 @@ Useful env vars:
 
 - `DATA_DIR`: storage location for persistent app data in future product work
 
-## Run in one container
+## Run the hosted container
 
-Build and run:
+Pull and run the GitHub Container Registry image:
 
 ```bash
-docker build -t jules-spotiflac-reset .
-docker run --rm -p 3000:3000 -v $(pwd)/data:/data jules-spotiflac-reset
+docker pull ghcr.io/jjgroenendijk/test-repo:main
+docker run --rm -p 3000:3000 -v $(pwd)/data:/data ghcr.io/jjgroenendijk/test-repo:main
 ```
 
 The web UI will be available on `http://localhost:3000`.
+
+### Docker Compose
+
+Create a `compose.yml` file:
+
+```yaml
+services:
+  spotiflac-web:
+    image: ghcr.io/jjgroenendijk/test-repo:main
+    ports:
+      - "3000:3000"
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+```
+
+Start the container:
+
+```bash
+docker compose up
+```
+
+The web UI will be available on `http://localhost:3000`, and persistent app data will be stored in `./data`.
 
 ## CI/CD
 
