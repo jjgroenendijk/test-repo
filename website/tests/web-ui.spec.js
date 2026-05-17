@@ -502,6 +502,37 @@ test('displays Download ZIP link for completed jobs', async ({ page }) => {
   await expect(downloadLink).toHaveAttribute('download', '');
 });
 
+test('displays Download all completed button when completed jobs exist', async ({ page }) => {
+  // Use the mocked API route to provide a completed job
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: '123',
+            url: 'https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX',
+            status: 'Completed',
+            created_at: new Date().toISOString(),
+            files: 10,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const downloadAllBtn = page.locator('#download-all-btn');
+  await expect(downloadAllBtn).toBeVisible();
+  await expect(downloadAllBtn).toHaveAttribute('href', '/api/history/download');
+  await expect(downloadAllBtn).toHaveAttribute('download', '');
+});
+
 test("toggles dark mode", async ({ page }) => {
   await page.goto("/");
   const themeToggle = page.locator("#theme-toggle");
