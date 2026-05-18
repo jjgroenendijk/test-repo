@@ -127,7 +127,7 @@ export function renderApp(root) {
         <aside class="storage-panel" aria-label="Storage status">
           <span>Data volume</span>
           <strong>/data</strong>
-          <p>Job history, logs, and produced files will persist outside the container.</p>
+          <p id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</p>
         </aside>
       </section>
 
@@ -190,6 +190,29 @@ export function renderApp(root) {
     }
   }
 
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  async function updateStorageUsage() {
+    try {
+      const response = await fetch("/api/system/storage");
+      if (response.ok) {
+        const data = await response.json();
+        const textElement = root.querySelector("#storage-usage-text");
+        if (textElement && data.free !== undefined && data.total !== undefined) {
+          textElement.textContent = `${formatBytes(data.free)} free of ${formatBytes(data.total)}`;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch storage usage", err);
+    }
+  }
+
   async function fetchJobs() {
     try {
       const response = await fetch("/api/jobs");
@@ -242,7 +265,10 @@ export function renderApp(root) {
       clearInterval(pollInterval);
     }
     if (autoRefreshToggle && autoRefreshToggle.checked) {
-      pollInterval = setInterval(fetchJobs, 5000);
+      pollInterval = setInterval(() => {
+        fetchJobs();
+        updateStorageUsage();
+      }, 5000);
     }
   }
 
@@ -258,6 +284,7 @@ export function renderApp(root) {
 
   // Initial load
   fetchJobs();
+  updateStorageUsage();
   applyAutoRefreshState();
 
   const themeToggleBtn = root.querySelector("#theme-toggle");
