@@ -313,3 +313,18 @@ def test_download_single_file_path_traversal(tmp_path, monkeypatch):
     # TestClient resolves ../ locally before sending, so we use %2E%2E to bypass it
     response = client.get(f"/api/jobs/{job_id}/files/%2E%2E/secret.txt")
     assert response.status_code == 403
+
+def test_get_system_storage(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    response = client.get("/api/system/storage")
+    assert response.status_code == 200
+    data = response.json()
+    assert "total" in data
+    assert "used" in data
+    assert "free" in data
+    assert isinstance(data["total"], int)
+    assert isinstance(data["used"], int)
+    assert isinstance(data["free"], int)

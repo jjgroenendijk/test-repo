@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -478,6 +479,20 @@ async def cancel_job(job_id: str):
         await asyncio.to_thread(_delete_job_files, job_id)
 
     return {"status": "success"}
+
+@app.get("/api/system/storage")
+def get_system_storage():
+    try:
+        # Get disk usage for the configured DATA_DIR
+        usage = shutil.disk_usage(DATA_DIR)
+        return {
+            "total": usage.total,
+            "used": usage.used,
+            "free": usage.free
+        }
+    except Exception as e:
+        logger.error(f"Error checking storage usage: {e}")
+        raise HTTPException(status_code=500, detail="Error checking storage usage")
 
 # Serve frontend
 FRONTEND_DIST = Path(__file__).parent / "website" / "dist"
