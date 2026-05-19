@@ -637,3 +637,58 @@ test("job URLs are rendered as clickable links", async ({ page }) => {
   await expect(sourceLink).toHaveAttribute("target", "_blank");
   await expect(sourceLink).toHaveAttribute("rel", "noopener noreferrer");
 });
+
+test('search input filters jobs by URL and ID', async ({ page }) => {
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-111',
+            url: 'https://open.spotify.com/track/alpha',
+            status: 'Completed',
+            created_at: new Date(Date.now() - 2000).toISOString(),
+            files: 1,
+            error_log: null
+          },
+          {
+            id: 'job-222',
+            url: 'https://open.spotify.com/album/beta',
+            status: 'Queued',
+            created_at: new Date(Date.now() - 1000).toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  // Wait for initial jobs to load
+  await expect(page.locator('.job-card')).toHaveCount(2);
+
+  // Search by URL substring
+  await page.fill('#job-search-input', 'alpha');
+  await expect(page.locator('.job-card')).toHaveCount(1);
+  await expect(page.locator('.job-card').first()).toContainText('alpha');
+
+  // Search by ID substring
+  await page.fill('#job-search-input', '222');
+  await expect(page.locator('.job-card')).toHaveCount(1);
+  await expect(page.locator('.job-card').first()).toContainText('beta');
+
+  // Search with no matches
+  await page.fill('#job-search-input', 'nonexistent');
+  await expect(page.locator('.job-card')).toHaveCount(0);
+  await expect(page.locator('.empty-state')).toContainText('No jobs match the search query.');
+
+  // Clear search
+  await page.fill('#job-search-input', '');
+  await expect(page.locator('.job-card')).toHaveCount(2);
+});
