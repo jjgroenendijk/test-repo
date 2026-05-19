@@ -135,6 +135,7 @@ export function renderApp(root) {
         <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
             <select id="job-status-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by status">
               <option value="All">All</option>
               <option value="Queued">Queued</option>
@@ -164,6 +165,7 @@ export function renderApp(root) {
   const feedback = root.querySelector("#queue-feedback");
   const jobList = root.querySelector("#job-list");
   const statusFilter = root.querySelector("#job-status-filter");
+  const searchInput = root.querySelector("#job-search-input");
 
   async function updateProgress(jobId) {
     const container = root.querySelector(`#progress-container-${jobId}`);
@@ -229,11 +231,21 @@ export function renderApp(root) {
       const sortedJobs = [...jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       const selectedStatus = statusFilter ? statusFilter.value : "All";
-      const filteredJobs = selectedStatus === "All" ? sortedJobs : sortedJobs.filter(job => job.status === selectedStatus);
+      let filteredJobs = selectedStatus === "All" ? sortedJobs : sortedJobs.filter(job => job.status === selectedStatus);
+
+      const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : "";
+      if (searchQuery) {
+        filteredJobs = filteredJobs.filter(job =>
+          (job.url && job.url.toLowerCase().includes(searchQuery)) ||
+          (job.id && job.id.toLowerCase().includes(searchQuery))
+        );
+      }
 
       if (filteredJobs.length === 0) {
         if (jobs.length === 0) {
           jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
+        } else if (searchQuery) {
+          jobList.innerHTML = `<p class="empty-state">No jobs match the search query.</p>`;
         } else {
           jobList.innerHTML = `<p class="empty-state">No jobs match the selected filter.</p>`;
         }
@@ -255,6 +267,14 @@ export function renderApp(root) {
 
   if (statusFilter) {
     statusFilter.addEventListener("change", fetchJobs);
+  }
+
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetchJobs, 300);
+    });
   }
 
   const autoRefreshToggle = root.querySelector("#auto-refresh-toggle");
