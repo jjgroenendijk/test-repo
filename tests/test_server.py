@@ -58,6 +58,35 @@ def test_cancel_nonexistent_job():
     response = client.delete("/api/jobs/not-a-real-id")
     assert response.status_code == 404
 
+def test_clear_failed_history():
+    import json
+
+    # Write some dummy jobs directly to history file
+    dummy_history = [
+        {"id": "job-1", "url": "https://open.spotify.com/track/abc", "status": "Failed"},
+        {"id": "job-2", "url": "https://open.spotify.com/track/def", "status": "Completed"},
+        {"id": "job-3", "url": "https://open.spotify.com/track/ghi", "status": "Failed"},
+        {"id": "job-4", "url": "https://open.spotify.com/track/jkl", "status": "Running"}
+    ]
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(dummy_history, f)
+
+    resp = client.delete("/api/history/clear-failed")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["cleared"] == 2
+
+    resp = client.get("/api/jobs")
+    assert resp.status_code == 200
+    remaining_jobs = resp.json()
+
+    assert len(remaining_jobs) == 2
+    statuses = [j["status"] for j in remaining_jobs]
+    assert "Completed" in statuses
+    assert "Running" in statuses
+    assert "Failed" not in statuses
+
 def test_get_job_log(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
