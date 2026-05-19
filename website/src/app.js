@@ -462,7 +462,15 @@ export function renderApp(root) {
                     const encodedJobId = encodeURIComponent(jobId);
                     const encodedFile = file.split('/').map(encodeURIComponent).join('/');
                     const fileName = file.split('/').pop();
-                    return `<li><a href="/api/jobs/${encodedJobId}/files/${encodedFile}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(file)}</a></li>`;
+                    const fileUrl = `/api/jobs/${encodedJobId}/files/${encodedFile}`;
+
+                    let audioHtml = "";
+                    const lowerFile = file.toLowerCase();
+                    if (lowerFile.endsWith('.flac') || lowerFile.endsWith('.mp3') || lowerFile.endsWith('.wav') || lowerFile.endsWith('.m4a') || lowerFile.endsWith('.ogg')) {
+                        audioHtml = `<br><audio controls src="${fileUrl}" style="margin-top: 8px; max-width: 100%; height: 32px;"></audio>`;
+                    }
+
+                    return `<li style="margin-bottom: 12px;"><a href="${fileUrl}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(file)}</a>${audioHtml}</li>`;
                 }).join("");
             } else {
                 filesList.innerHTML = "<li>No files found.</li>";

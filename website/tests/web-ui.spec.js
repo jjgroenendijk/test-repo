@@ -692,3 +692,60 @@ test('search input filters jobs by URL and ID', async ({ page }) => {
   await page.fill('#job-search-input', '');
   await expect(page.locator('.job-card')).toHaveCount(2);
 });
+
+test('renders audio player for audio files', async ({ page }) => {
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-audio',
+            url: 'https://open.spotify.com/track/audio1',
+            status: 'Completed',
+            created_at: new Date().toISOString(),
+            files: 2,
+            error_log: null
+          }
+        ])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route('/api/jobs/job-audio/files', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          files: ['song.flac', 'cover.jpg']
+        })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const jobCard = page.locator('.job-card[data-job-id="job-audio"]');
+  await expect(jobCard).toBeVisible();
+
+  const viewFilesBtn = jobCard.locator('button.view-files-btn');
+  await expect(viewFilesBtn).toBeVisible();
+  await viewFilesBtn.click();
+
+  const filesContainer = page.locator('#files-container-job-audio');
+  await expect(filesContainer).toBeVisible();
+
+  // The flac file should have an audio element
+  const audioEl = filesContainer.locator('audio[src="/api/jobs/job-audio/files/song.flac"]');
+  await expect(audioEl).toBeVisible();
+
+  // The jpg file should not have an audio element
+  const nonAudioCount = await filesContainer.locator('audio[src="/api/jobs/job-audio/files/cover.jpg"]').count();
+  expect(nonAudioCount).toBe(0);
+});
