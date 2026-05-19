@@ -172,4 +172,45 @@ describe("renderApp", () => {
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(global.localStorage.setItem).toHaveBeenCalledWith("theme", "dark");
   });
+
+  it("calls the clear-failed endpoint and refreshes when Clear failed is clicked", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    // Mock confirm to simulate user clicking "OK"
+    global.window.confirm = vi.fn(() => true);
+
+    const root = document.getElementById("root");
+
+    // Setup fetch mock to track calls
+    const fetchMock = vi.fn();
+    fetchMock.mockImplementation((url, options) => {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+    global.fetch = fetchMock;
+
+    renderApp(root);
+
+    // The initial fetchJobs triggers fetch('/api/jobs') and updateStorageUsage triggers fetch('/api/system/storage')
+    // We want to verify the specific DELETE call when the button is clicked.
+
+    const clearFailedBtn = document.getElementById("clear-failed-btn");
+    expect(clearFailedBtn).not.toBeNull();
+
+    clearFailedBtn.click();
+
+    // Allow async handlers to complete
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(global.window.confirm).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith("/api/history/clear-failed", { method: "DELETE" });
+  });
 });
