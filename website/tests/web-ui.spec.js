@@ -749,3 +749,66 @@ test('renders audio player for audio files', async ({ page }) => {
   const nonAudioCount = await filesContainer.locator('audio[src="/api/jobs/job-audio/files/cover.jpg"]').count();
   expect(nonAudioCount).toBe(0);
 });
+
+test("filters jobs by type", async ({ page }) => {
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "101",
+            url: "https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 10,
+            error_log: null
+          },
+          {
+            id: "102",
+            url: "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+            status: "Queued",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          },
+          {
+            id: "103",
+            url: "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+            status: "Running",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+        await route.continue();
+    }
+  });
+
+  await page.goto("http://127.0.0.1:3000");
+
+  // Initially, all jobs should be visible
+  await expect(page.locator('.job-card')).toHaveCount(3);
+
+  // Filter by Album
+  await page.selectOption('#job-type-filter', 'Album');
+  await expect(page.locator('.job-card')).toHaveCount(1);
+  await expect(page.locator('.job-card').first()).toContainText('album');
+
+  // Filter by Track
+  await page.selectOption('#job-type-filter', 'Track');
+  await expect(page.locator('.job-card')).toHaveCount(1);
+  await expect(page.locator('.job-card').first()).toContainText('track');
+
+  // Filter by Playlist
+  await page.selectOption('#job-type-filter', 'Playlist');
+  await expect(page.locator('.job-card')).toHaveCount(1);
+  await expect(page.locator('.job-card').first()).toContainText('playlist');
+
+  // Filter back to All Types
+  await page.selectOption('#job-type-filter', 'All Types');
+  await expect(page.locator('.job-card')).toHaveCount(3);
+});

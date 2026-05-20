@@ -136,6 +136,12 @@ export function renderApp(root) {
           <h2>Recent jobs</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
+            <select id="job-type-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by type">
+              <option value="All Types">All Types</option>
+              <option value="Track">Track</option>
+              <option value="Album">Album</option>
+              <option value="Playlist">Playlist</option>
+            </select>
             <select id="job-status-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by status">
               <option value="All">All</option>
               <option value="Queued">Queued</option>
@@ -165,6 +171,7 @@ export function renderApp(root) {
   const input = root.querySelector("#spotify-url");
   const feedback = root.querySelector("#queue-feedback");
   const jobList = root.querySelector("#job-list");
+  const typeFilter = root.querySelector("#job-type-filter");
   const statusFilter = root.querySelector("#job-status-filter");
   const searchInput = root.querySelector("#job-search-input");
 
@@ -231,8 +238,14 @@ export function renderApp(root) {
       // Sort jobs by newest first
       const sortedJobs = [...jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
+      const selectedType = typeFilter ? typeFilter.value : "All Types";
+      let filteredJobs = selectedType === "All Types" ? sortedJobs : sortedJobs.filter(job => {
+        const jobType = classifySpotifyUrl(job.url);
+        return jobType.toLowerCase() === selectedType.toLowerCase();
+      });
+
       const selectedStatus = statusFilter ? statusFilter.value : "All";
-      let filteredJobs = selectedStatus === "All" ? sortedJobs : sortedJobs.filter(job => job.status === selectedStatus);
+      filteredJobs = selectedStatus === "All" ? filteredJobs : filteredJobs.filter(job => job.status === selectedStatus);
 
       const searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : "";
       if (searchQuery) {
@@ -264,6 +277,10 @@ export function renderApp(root) {
       console.error(err);
       jobList.innerHTML = `<p class="error-state">Failed to load jobs.</p>`;
     }
+  }
+
+  if (typeFilter) {
+    typeFilter.addEventListener("change", fetchJobs);
   }
 
   if (statusFilter) {
