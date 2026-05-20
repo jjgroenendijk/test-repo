@@ -213,4 +213,22 @@ describe("renderApp", () => {
     expect(global.window.confirm).toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledWith("/api/history/clear-failed", { method: "DELETE" });
   });
+
+  it("renders the download all completed button with the correct href", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+    renderApp(root);
+
+    const downloadAllBtn = document.getElementById("download-all-btn");
+    expect(downloadAllBtn).not.toBeNull();
+    expect(downloadAllBtn.getAttribute("href")).toBe("/api/history/download");
+    expect(downloadAllBtn.hasAttribute("download")).toBe(true);
+  });
 });
