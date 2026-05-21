@@ -156,6 +156,7 @@ export function renderApp(root) {
               <input type="checkbox" id="auto-refresh-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
               Auto-refresh
             </label>
+            <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
@@ -642,6 +643,28 @@ export function renderApp(root) {
       } finally {
         clearFailedBtn.disabled = false;
         clearFailedBtn.textContent = "Clear failed";
+      }
+    });
+  }
+
+  const clearCompletedBtn = root.querySelector("#clear-completed-btn");
+  if (clearCompletedBtn) {
+    clearCompletedBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to clear all completed jobs? This cannot be undone.")) {
+        return;
+      }
+      clearCompletedBtn.disabled = true;
+      clearCompletedBtn.textContent = "Clearing...";
+      try {
+        const response = await fetch("/api/history/clear-completed", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to clear completed jobs", err);
+      } finally {
+        clearCompletedBtn.disabled = false;
+        clearCompletedBtn.textContent = "Clear completed";
       }
     });
   }
