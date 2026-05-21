@@ -436,6 +436,32 @@ async def clear_history():
 
     return {"status": "success", "cleared": len(cleared_jobs)}
 
+@app.delete("/api/history/clear-completed")
+async def clear_completed_history():
+    history = []
+    cleared_jobs = []
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        filtered_history = []
+        for job in history:
+            if job.get("status") == "Completed":
+                cleared_jobs.append(job["id"])
+            else:
+                filtered_history.append(job)
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(filtered_history, f, indent=2)
+
+    for job_id in cleared_jobs:
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        await asyncio.to_thread(_delete_job_files, job_id)
+
+    return {"status": "success", "cleared": len(cleared_jobs)}
+
 @app.delete("/api/history/clear-failed")
 async def clear_failed_history():
     history = []
