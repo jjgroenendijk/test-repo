@@ -27,6 +27,43 @@ describe("classifySpotifyUrl", () => {
 });
 
 describe("renderApp", () => {
+  it("renders the queue status summary with correct counts", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    global.fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([
+          { status: "Queued" },
+          { status: "Running" },
+          { status: "Running" },
+          { status: "Completed" },
+          { status: "Failed" },
+          { status: "Failed" },
+          { status: "Failed" }
+        ])
+      })
+    );
+
+    const cleanup = renderApp(root);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const summaryElement = document.getElementById("queue-status-summary");
+    expect(summaryElement).not.toBeNull();
+    expect(summaryElement.textContent).toBe("Queued: 1 | Running: 2 | Completed: 1 | Failed: 3");
+
+    cleanup();
+  });
+
   it("renders a job with file links properly formatted", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",

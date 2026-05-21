@@ -161,6 +161,7 @@ export function renderApp(root) {
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
         </div>
+        <div id="queue-status-summary" style="margin-bottom: 16px; font-size: 0.9rem; font-weight: 500; color: var(--text-primary);"></div>
         <div class="job-list" id="job-list">
           <!-- Jobs will be loaded here -->
         </div>
@@ -238,6 +239,16 @@ export function renderApp(root) {
 
       // Sort jobs by newest first
       const sortedJobs = [...jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      const statusCounts = jobs.reduce((acc, job) => {
+        acc[job.status] = (acc[job.status] || 0) + 1;
+        return acc;
+      }, { Queued: 0, Running: 0, Completed: 0, Failed: 0 });
+
+      const summaryElement = root.querySelector("#queue-status-summary");
+      if (summaryElement) {
+        summaryElement.textContent = `Queued: ${statusCounts.Queued} | Running: ${statusCounts.Running} | Completed: ${statusCounts.Completed} | Failed: ${statusCounts.Failed}`;
+      }
 
       const selectedType = typeFilter ? typeFilter.value : "All Types";
       let filteredJobs = selectedType === "All Types" ? sortedJobs : sortedJobs.filter(job => {
