@@ -56,7 +56,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.136.1" },
     { name = "requests", specifier = ">=2.34.1" },
-    { name = "spotiflac", specifier = ">=0.5.0" },
+    { name = "spotiflac", specifier = ">=0.6.0" },
     { name = "uvicorn", specifier = ">=0.46.0" },
 ]
 
@@ -580,15 +580,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pyotp"
-version = "2.9.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f3/b2/1d5994ba2acde054a443bd5e2d384175449c7d2b6d1a0614dbca3a63abfc/pyotp-2.9.0.tar.gz", hash = "sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63", size = 17763, upload-time = "2023-07-27T23:41:03.295Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/c0/c33c8792c3e50193ef55adb95c1c3c2786fe281123291c2dbf0eaab95a6f/pyotp-2.9.0-py3-none-any.whl", hash = "sha256:81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612", size = 13376, upload-time = "2023-07-27T23:41:01.685Z" },
-]
-
-[[package]]
 name = "pytest"
 version = "9.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -646,7 +637,7 @@ wheels = [
 
 [[package]]
 name = "spotiflac"
-version = "0.5.0"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -654,12 +645,12 @@ dependencies = [
     { name = "packaging" },
     { name = "pycryptodome" },
     { name = "pydantic" },
-    { name = "pyotp" },
     { name = "requests" },
+    { name = "yt-dlp" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/d2/98bb2bb3ca207ad3f1e8c0614b333d6c261b513a75dcfd41324c84c7090b/spotiflac-0.5.0.tar.gz", hash = "sha256:d8dc302dd3b53d4a911d694174736b0cb1be04c3d3a260e29f40d5f453723c82", size = 125470, upload-time = "2026-05-13T00:29:56.8Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/16/62c354cdafc953f2e574b2a7b929c596a46f58b8555fcbe8f48d3487f9e6/spotiflac-0.6.0.tar.gz", hash = "sha256:70dcceb8f43379c512e5528cde8df5e44a69e3dd4a849acb5fc3d72adb218e96", size = 163770, upload-time = "2026-05-20T17:34:25.354Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6b/24/7921a6c6dd32a0b7e4d8e89a1182192bcd2a0ba6f923ec9e875283b358b8/spotiflac-0.5.0-py3-none-any.whl", hash = "sha256:60724ec234cda373aa944f4d52d56835c896dc63c0e597d0a4035643ff29e5d4", size = 130893, upload-time = "2026-05-13T00:29:55.699Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/ac/a40b9f178390d7c3965c3d70ef2c4bd86bb05ee25acac136f72de6e4c043/spotiflac-0.6.0-py3-none-any.whl", hash = "sha256:de0f1e906ac691c3c35a98c091809af51c170e2cfdf8bc61a59c024c8b14a191", size = 167956, upload-time = "2026-05-20T17:34:23.906Z" },
 ]
 
 [[package]]
@@ -716,4 +707,13 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1f/93/041fca8274050e40e6791f267d82e0e2e27dd165627bd640d3e0e378d877/uvicorn-0.46.0.tar.gz", hash = "sha256:fb9da0926999cc6cb22dc7cd71a94a632f078e6ae47ff683c5c420750fb7413d", size = 88758, upload-time = "2026-04-23T07:16:00.151Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/31/a3/5b1562db76a5a488274b2332a97199b32d0442aca0ed193697fd47786316/uvicorn-0.46.0-py3-none-any.whl", hash = "sha256:bbebbcbed972d162afca128605223022bedd345b7bc7855ce66deb31487a9048", size = 70926, upload-time = "2026-04-23T07:15:58.355Z" },
+]
+
+[[package]]
+name = "yt-dlp"
+version = "2026.3.17"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8b/34/7c6b4e3f89cb6416d2cd7ab6dab141a1df97ab0fb22d15816db2c92148c9/yt_dlp-2026.3.17.tar.gz", hash = "sha256:ba7aa31d533f1ffccfe70e421596d7ca8ff0bf1398dc6bb658b7d9dec057d2c9", size = 3119221, upload-time = "2026-03-17T23:43:00.244Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/13/5093bcb954878e50f7217fd2ab94282b53934022e4e4a03265582da83bf5/yt_dlp-2026.3.17-py3-none-any.whl", hash = "sha256:32992db94303a8a5d211a183f2174834fe7f8c29d83ed2e7a324eae97a8f26d8", size = 3315134, upload-time = "2026-03-17T23:42:57.863Z" },
 ]
