@@ -27,6 +27,84 @@ describe("classifySpotifyUrl", () => {
 });
 
 describe("renderApp", () => {
+  it("updates the storage progress bar correctly", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    global.fetch.mockImplementation((url) => {
+      if (url === "/api/system/storage") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ total: 1000, free: 100, used: 900 })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+
+    const cleanup = renderApp(root);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const textElement = document.getElementById("storage-usage-text");
+    expect(textElement).not.toBeNull();
+    expect(textElement.textContent).toBe("100 B free of 1000 B");
+
+    const fillElement = document.getElementById("storage-progress-fill");
+    expect(fillElement).not.toBeNull();
+    // 900 / 1000 = 90%
+    expect(fillElement.style.width).toBe("90%");
+    // Wait, 90% is not > 90, so it shouldn't have danger class
+    expect(fillElement.classList.contains("danger")).toBe(false);
+
+    cleanup();
+  });
+
+  it("adds danger class to storage progress bar when over 90%", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    global.fetch.mockImplementation((url) => {
+      if (url === "/api/system/storage") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ total: 1000, free: 50, used: 950 })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+
+    const cleanup = renderApp(root);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const fillElement = document.getElementById("storage-progress-fill");
+    expect(fillElement).not.toBeNull();
+    expect(fillElement.style.width).toBe("95%");
+    expect(fillElement.classList.contains("danger")).toBe(true);
+
+    cleanup();
+  });
+
   it("renders the queue status summary with correct counts", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",

@@ -127,6 +127,9 @@ export function renderApp(root) {
         <aside class="storage-panel" aria-label="Storage status">
           <span>Data volume</span>
           <strong>/data</strong>
+          <div class="storage-progress-bar-bg" aria-hidden="true" style="margin-top: 8px; margin-bottom: 8px;">
+            <div class="storage-progress-bar-fill" id="storage-progress-fill" style="width: 0%;"></div>
+          </div>
           <p id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</p>
         </aside>
       </section>
@@ -218,6 +221,17 @@ export function renderApp(root) {
         const textElement = root.querySelector("#storage-usage-text");
         if (textElement && data.free !== undefined && data.total !== undefined) {
           textElement.textContent = `${formatBytes(data.free)} free of ${formatBytes(data.total)}`;
+
+          const fillElement = root.querySelector("#storage-progress-fill");
+          if (fillElement && data.total > 0) {
+            const usedPercentage = ((data.total - data.free) / data.total) * 100;
+            fillElement.style.width = `${Math.min(100, Math.max(0, usedPercentage))}%`;
+            if (usedPercentage > 90) {
+              fillElement.classList.add("danger");
+            } else {
+              fillElement.classList.remove("danger");
+            }
+          }
         }
       }
     } catch (err) {
