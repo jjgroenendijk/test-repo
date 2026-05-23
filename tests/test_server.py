@@ -248,6 +248,71 @@ def test_clear_history(mock_run):
     assert jobs[0]["id"] == "running-job-id"
     assert jobs[0]["status"] == "Running"
 
+def test_download_all_completed_jobs(tmp_path, monkeypatch):
+    import zipfile
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    history_file = tmp_path / "history.json"
+    monkeypatch.setattr("server.HISTORY_FILE", history_file)
+
+    job1_id = "test-job-1"
+    job2_id = "test-job-2"
+    job3_id = "test-job-failed"
+
+    history_data = [
+        {"id": job1_id, "status": "Completed"},
+        {"id": job2_id, "status": "Completed"},
+        {"id": job3_id, "status": "Failed"},
+    ]
+    with open(history_file, "w") as f:
+        json.dump(history_data, f)
+
+    job1_dir = data_dir / job1_id
+    job1_dir.mkdir(parents=True)
+    (job1_dir / "file1.txt").write_text("job1 content")
+
+    job2_dir = data_dir / job2_id
+    job2_dir.mkdir(parents=True)
+    (job2_dir / "file2.txt").write_text("job2 content")
+
+    job3_dir = data_dir / job3_id
+    job3_dir.mkdir(parents=True)
+    (job3_dir / "failed.txt").write_text("failed content")
+
+    response = client.get("/api/history/download")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+    assert "filename=\"SpotiFLAC-all-completed.zip\"" in response.headers["content-disposition"]
+
+    zip_path = tmp_path / "temp.zip"
+    zip_path.write_bytes(response.content)
+
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        files = zip_ref.namelist()
+        assert f"{job1_id}/file1.txt" in files
+        assert f"{job2_id}/file2.txt" in files
+        assert f"{job3_id}/failed.txt" not in files
+
+def test_download_all_completed_jobs_no_jobs(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    monkeypatch.setattr("server.DATA_DIR", data_dir)
+
+    history_file = tmp_path / "history.json"
+    monkeypatch.setattr("server.HISTORY_FILE", history_file)
+
+    history_data = [
+        {"id": "test-job-failed", "status": "Failed"},
+    ]
+    with open(history_file, "w") as f:
+        json.dump(history_data, f)
+
+    response = client.get("/api/history/download")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No completed jobs found"
+
 def test_download_job_zip(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
