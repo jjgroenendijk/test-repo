@@ -392,7 +392,7 @@ export function renderApp(root) {
     event.preventDefault();
 
     // Split input by any whitespace, filter out empty strings
-    const urls = input.value.split(/\s+/).filter(Boolean);
+    const urls = input.value.split(/[\s,]+/).filter(Boolean);
 
     if (urls.length === 0) {
       feedback.textContent = "Enter at least one Spotify URL.";

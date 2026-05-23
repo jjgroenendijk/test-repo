@@ -85,7 +85,7 @@ test("validates and queues multiple Spotify URLs", async ({ page }) => {
     }
   });
 
-  const urls = "https://open.spotify.com/track/123\nhttps://open.spotify.com/album/456\n  https://open.spotify.com/playlist/789  ";
+  const urls = "https://open.spotify.com/track/123,https://open.spotify.com/album/456,  https://open.spotify.com/playlist/789  ";
   await page.getByLabel("Spotify URLs").fill(urls);
   await page.getByRole("button", { name: "Queue" }).click();
 
