@@ -495,11 +495,45 @@ test('displays Download ZIP link for completed jobs', async ({ page }) => {
   // Find the Download ZIP link
   const downloadLink = jobCard.locator('.download-zip-btn');
   await expect(downloadLink).toBeVisible();
-  await expect(downloadLink).toHaveText('Download ZIP');
+  await expect(downloadLink).toHaveText('Download All');
 
   // Verify the href attribute
   await expect(downloadLink).toHaveAttribute('href', '/api/jobs/123/download');
   await expect(downloadLink).toHaveAttribute('download', '');
+});
+
+test('displays Download All button on job card when completed', async ({ page }) => {
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-12345',
+            url: 'https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX',
+            status: 'Completed',
+            created_at: new Date().toISOString(),
+            files: 10,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const jobCard = page.locator('.job-card[data-job-id="job-12345"]');
+  await expect(jobCard).toBeVisible();
+
+  const downloadAllBtn = jobCard.locator('a.download-zip-btn');
+  await expect(downloadAllBtn).toBeVisible();
+  await expect(downloadAllBtn).toHaveText('Download All');
+  await expect(downloadAllBtn).toHaveAttribute('href', '/api/jobs/job-12345/download');
+  await expect(downloadAllBtn).toHaveAttribute('download', '');
 });
 
 test('displays Download all completed button when completed jobs exist', async ({ page }) => {
