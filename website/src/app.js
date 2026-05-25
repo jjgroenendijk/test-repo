@@ -160,6 +160,7 @@ export function renderApp(root) {
               Auto-refresh
             </label>
             <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
+            <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
@@ -646,6 +647,37 @@ export function renderApp(root) {
       } finally {
         clearHistoryBtn.disabled = false;
         clearHistoryBtn.textContent = "Clear history";
+      }
+    });
+  }
+
+  const retryFailedBtn = root.querySelector("#retry-failed-btn");
+  if (retryFailedBtn) {
+    retryFailedBtn.addEventListener("click", async () => {
+      retryFailedBtn.disabled = true;
+      retryFailedBtn.textContent = "Retrying...";
+      try {
+        const jobsResponse = await fetch("/api/jobs");
+        if (jobsResponse.ok) {
+          const jobs = await jobsResponse.json();
+          const failedJobs = jobs.filter(job => job.status === "Failed");
+
+          const retryRequests = failedJobs.map(job =>
+            fetch("/api/jobs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: job.url })
+            })
+          );
+
+          await Promise.allSettled(retryRequests);
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to retry jobs", err);
+      } finally {
+        retryFailedBtn.disabled = false;
+        retryFailedBtn.textContent = "Retry failed";
       }
     });
   }
