@@ -138,7 +138,7 @@ test("shows retry button for failed job and handles click", async ({ page }) => 
 
   await page.goto("/");
 
-  const retryBtn = page.getByRole("button", { name: "Retry" });
+  const retryBtn = page.getByRole("button", { name: "Retry", exact: true });
   await expect(retryBtn).toBeVisible();
 
   await retryBtn.click();
@@ -845,4 +845,55 @@ test("filters jobs by type", async ({ page }) => {
   // Filter back to All Types
   await page.selectOption('#job-type-filter', 'All Types');
   await expect(page.locator('.job-card')).toHaveCount(3);
+});
+
+test('can retry all failed jobs', async ({ page }) => {
+  let retryCalled = false;
+  let retriedUrl = '';
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-failed',
+            url: 'https://open.spotify.com/track/failed-track',
+            status: 'Failed',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: 'Test error log'
+          }
+        ])
+      });
+    } else if (route.request().method() === 'POST') {
+      retryCalled = true;
+      const postData = JSON.parse(route.request().postData() || '{}');
+      retriedUrl = postData.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id' })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  // Wait for the job card to load
+  await expect(page.locator('.job-card')).toHaveCount(1);
+
+  const retryFailedBtn = page.locator('#retry-failed-btn');
+  await expect(retryFailedBtn).toBeVisible();
+
+  await retryFailedBtn.click();
+
+  // Give it a moment to call the API
+  await page.waitForTimeout(500);
+
+  expect(retryCalled).toBe(true);
+  expect(retriedUrl).toBe('https://open.spotify.com/track/failed-track');
 });
