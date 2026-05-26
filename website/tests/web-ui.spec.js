@@ -897,3 +897,44 @@ test('can retry all failed jobs', async ({ page }) => {
   expect(retryCalled).toBe(true);
   expect(retriedUrl).toBe('https://open.spotify.com/track/failed-track');
 });
+
+test('can queue multiple comma-separated URLs', async ({ page }) => {
+  let queuedUrls = [];
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'POST') {
+      const postData = JSON.parse(route.request().postData() || '{}');
+      queuedUrls.push(postData.url);
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id-' + Math.random() })
+      });
+    } else if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const input = page.locator('#spotify-url');
+  await input.fill('https://open.spotify.com/track/1, https://open.spotify.com/track/2,https://open.spotify.com/track/3');
+
+  const queueBtn = page.locator('button[type="submit"]');
+  await queueBtn.click();
+
+  // Wait for the feedback to indicate success
+  const feedback = page.locator('#queue-feedback');
+  await expect(feedback).toContainText('Successfully queued 3 jobs.');
+
+  expect(queuedUrls).toHaveLength(3);
+  expect(queuedUrls).toContain('https://open.spotify.com/track/1');
+  expect(queuedUrls).toContain('https://open.spotify.com/track/2');
+  expect(queuedUrls).toContain('https://open.spotify.com/track/3');
+});
