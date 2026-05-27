@@ -162,6 +162,7 @@ export function renderApp(root) {
             <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
+            <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
         </div>
@@ -625,6 +626,30 @@ export function renderApp(root) {
       } finally {
         refreshJobsBtn.disabled = false;
         refreshJobsBtn.textContent = "Refresh jobs";
+      }
+    });
+  }
+
+  const clearCancelledBtn = root.querySelector("#clear-cancelled-btn");
+  if (clearCancelledBtn) {
+    clearCancelledBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to clear all cancelled jobs? This cannot be undone.")) {
+        return;
+      }
+      clearCancelledBtn.disabled = true;
+      clearCancelledBtn.textContent = "Clearing...";
+      try {
+        const response = await fetch("/api/history/clear-cancelled", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to clear cancelled history");
+        }
+      } catch (error) {
+        console.error("Error clearing cancelled history:", error);
+      } finally {
+        clearCancelledBtn.disabled = false;
+        clearCancelledBtn.textContent = "Clear cancelled";
       }
     });
   }

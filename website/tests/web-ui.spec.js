@@ -235,7 +235,7 @@ test("shows cancel button for queued job and handles click", async ({ page }) =>
 
   await page.goto("/");
 
-  const cancelBtn = page.getByRole("button", { name: "Cancel" });
+  const cancelBtn = page.getByRole("button", { name: "Cancel", exact: true });
   await expect(cancelBtn).toBeVisible();
 
   await cancelBtn.click();
