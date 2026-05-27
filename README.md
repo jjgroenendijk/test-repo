@@ -1,139 +1,126 @@
-# SpotiFLAC Web UI
+# Autonomous Software Development Experiment
 
-This repository keeps the **Google Jules** autonomous development bridge and builds toward a self-hosted web UI for the Python module `SpotiFLAC`.
+This repository is an experiment in automated software development.
+It uses Google Jules as the development agent.
+It uses GitHub Actions to decide when work should run.
 
-## What stays
+The goal is simple.
+GitHub decides when work should happen.
+Jules does the software work.
+CI verifies the result.
+GitHub can then merge trusted pull requests.
 
-- GitHub Actions + `jules.py` issue bridge for Google Jules
-- Issue-backed autonomous work with queued retry
-- Trusted PR automation and reconciliation
-- Single-container deployment target
+## First Product Goal
 
-## What changed
+Jules will first keep building a web interface for `SpotiFLAC`.
 
-- Legacy yt-dlp product direction removed
-- Legacy yt-dlp website implementation removed
-- Repository now targets a homelab-friendly SpotiFLAC web UI container
-- Website contains the first container-ready SpotiFLAC UI foundation
+The web interface should become:
 
-## Jules workflow
+- self-hosted
+- container-first
+- homelab-friendly
+- backed by persistent `/data` storage
+- useful for Spotify track, album, and playlist workflows
+- safe when it calls the underlying Python module
 
-Open a new GitHub issue with the task you want Jules to perform.
-By default, only issues opened by the repository owner automatically start or queue a Jules session.
+## Unit of Work
 
-The automation will:
+GitHub issues are the unit of work.
 
-1. Read the issue.
-2. Resolve this repository as a Jules source.
-3. Start a Jules session immediately when the repo has no active Jules work.
-4. Queue the issue automatically when another Jules session for this repo is still running.
-5. Wrap the issue body with autonomy instructions so Jules never asks questions, never asks for user validation or approval, and keeps working through implementation and verification by choosing the best local option when context is ambiguous.
-6. Comment back with the session ID once the issue starts.
+Each issue describes a task.
+GitHub passes that task to Jules.
+Jules works from the repository context.
+Jules should implement, test, document, and open a pull request.
 
-Issue-triggered Jules entry stays owner-only even if you configure extra trusted PR actors.
+Only owner-authored issues start Jules automatically.
+Owner comments can be forwarded to an existing Jules session.
+Bot comments and non-owner comments are ignored by the bridge.
 
-For recurring autonomous work, use the repository workflow in `.github/workflows/scheduled-autonomous-pr.yml`, not a schedule configured inside Jules. The workflow reuses a canonical GitHub issue and dispatches `run-agent.yml`, which keeps the session on the `AUTO_CREATE_PR` path this repository already reconciles.
+## GitHub-Side Automation
 
-## Trusted automation model
+These automations run in GitHub Actions.
 
-Privileged `workflow_run` follow-up automation only acts on trusted pull requests:
+`Run Agent` starts or resumes Jules work.
+It runs on new issues, owner comments, manual dispatch, and an hourly poll.
+It calls `jules.py`.
+It also enforces one active Jules session per repository.
+If Jules is busy, the issue is queued.
 
-- The PR must come from the same repository, not a fork.
-- The PR head repository owner must match the current repository owner.
-- The PR author must be trusted.
+`Scheduled Autonomous PR` runs daily.
+It creates or reuses a canonical autonomous-development issue.
+It then dispatches `Run Agent`.
+This keeps scheduled work tied to a normal issue.
 
-Trusted actors are resolved dynamically:
+`Verify Codebase` runs on pushes and pull requests.
+It runs Python checks.
+It also runs website linting, unit tests, Playwright tests, and the website build.
 
-- The current repository owner is always trusted by default.
-- You can optionally add more trusted GitHub logins with the repository variable `JULES_TRUSTED_ACTORS`.
-- `JULES_TRUSTED_ACTORS` accepts either a JSON array or a comma-/whitespace-separated list of logins.
+`Report CI Failure` runs after failed PR verification.
+It creates a GitHub issue for a trusted failing PR.
+It then dispatches `Run Agent` so Jules can fix the failure.
 
-This trust model is used for privileged PR follow-up like CI failure issue creation and auto-merge. The Jules issue bridge itself remains gated to owner-authored issues and owner comments, and the repository still enforces a single active Jules session at a time.
+`Manage PR Lifecycle` runs after successful PR verification.
+It approves and merges trusted PRs.
+If a merge fails, it checks for conflicts.
 
-Required secrets:
+`Detect Merge Conflicts` runs after pushes to `main`.
+It finds open PRs with conflicts.
+It creates a GitHub issue for Jules when needed.
+
+`PR Reconciliation` runs hourly.
+It merges healthy PRs.
+It waits on active CI.
+It retries queued Jules issues.
+It recovers missing Jules sessions.
+It closes duplicate or completed automation issues.
+
+`Publish Container` runs on `main` and version tags.
+It builds the repository Docker image.
+It publishes the image to GitHub Container Registry.
+
+## Jules-Side Automation
+
+Only a small part is set up inside Jules itself.
+
+The repository must be connected to Jules as a source.
+That source gives Jules access to this GitHub repository.
+
+The rest is passed by GitHub when it starts a session.
+The bridge looks up the Jules source through the Jules API.
+
+Sessions start from the `main` branch.
+Sessions use Jules `AUTO_CREATE_PR` mode.
+Plan approval is disabled.
+
+The issue body is wrapped with autonomy instructions.
+Those instructions tell Jules to work without questions.
+They also tell Jules to avoid approval prompts.
+When context is unclear, Jules should choose the safest local option.
+
+Jules is responsible for the development work.
+It reads the issue.
+It inspects the repository.
+It changes the code.
+It runs relevant verification.
+It updates docs when needed.
+It opens a pull request.
+
+No recurring schedule is configured inside Jules.
+Scheduling lives in GitHub Actions.
+Jules only runs when GitHub starts or messages a session.
+
+## Trust Model
+
+The repository owner is trusted by default.
+Extra trusted actors can be configured with `JULES_TRUSTED_ACTORS`.
+
+Privileged PR automation only acts on trusted PRs.
+The PR must come from the same repository.
+The PR head owner must match the repository owner.
+The PR author must be trusted.
+
+## Required Configuration
 
 - `GOOGLE_JULES_API`
-- `GITHUB_TOKEN` (provided by GitHub Actions)
-
-Optional repository variable:
-
-- `JULES_TRUSTED_ACTORS`: extra trusted logins for privileged PR follow-up automation, for example `[`"app/google-jules"`]` or `app/google-jules teammate`
-
-## Product target
-
-Jules will rebuild the product around these goals:
-
-- self-hosted web UI for `SpotiFLAC`
-- single container image for homelab deployment
-- persistent `/data` volume
-- music-library workflows for Spotify tracks, albums, and playlists
-- safe Python module orchestration from the web backend
-
-## Local development
-
-### Python bridge
-
-```bash
-uv sync --all-groups
-uv run pytest
-```
-
-### Website placeholder
-
-```bash
-cd website
-npm ci
-npm run dev
-```
-
-Open `http://localhost:3000`.
-
-Useful env vars:
-
-- `DATA_DIR`: storage location for persistent app data in future product work
-
-## Run the hosted container
-
-Pull and run the GitHub Container Registry image:
-
-```bash
-docker pull ghcr.io/jjgroenendijk/test-repo:main
-docker run --rm -p 3000:3000 -v $(pwd)/data:/data ghcr.io/jjgroenendijk/test-repo:main
-```
-
-The web UI will be available on `http://localhost:3000`.
-
-### Docker Compose
-
-Create a `compose.yml` file:
-
-```yaml
-services:
-  spotiflac-web:
-    image: ghcr.io/jjgroenendijk/test-repo:main
-    ports:
-      - "3000:3000"
-    environment:
-      DATA_DIR: /data
-    volumes:
-      - ./data:/data
-    restart: unless-stopped
-```
-
-Start the container:
-
-```bash
-docker compose up
-```
-
-The web UI will be available on `http://localhost:3000`, and persistent app data will be stored in `./data`.
-
-## CI/CD
-
-- `Verify Codebase` runs Python lint/tests and website quality checks.
-- `Scheduled Autonomous PR` runs daily to create or reuse the canonical autonomous-development issue and trigger an issue-backed Jules session when the repo is idle.
-- `Run Agent` reacts to new issues/comments and also polls hourly to drain queued issues when the repo's active Jules session finishes.
-- `PR Reconciliation` runs hourly to merge healthy open PRs, wait on non-terminal CI states, retry queued Jules automation issues, deduplicate stale automation tickets, recover missing Jules sessions, and close linked automation issues after successful merges.
-- `Manage PR Lifecycle` closes linked merge/conflict automation issues immediately after an automated merge succeeds.
-- `Close PR Automation Issues` runs on merged PR close events to close linked automation issues for manual merges.
-- `Publish Container` builds and publishes the single runtime image to GHCR.
+- `GITHUB_TOKEN`
+- `JULES_TRUSTED_ACTORS` for optional extra trusted actors
