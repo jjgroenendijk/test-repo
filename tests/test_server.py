@@ -87,6 +87,35 @@ def test_clear_failed_history():
     assert "Running" in statuses
     assert "Failed" not in statuses
 
+def test_clear_cancelled_history():
+    import json
+
+    # Write some dummy jobs directly to history file
+    dummy_history = [
+        {"id": "job-1", "url": "https://open.spotify.com/track/abc", "status": "Cancelled"},
+        {"id": "job-2", "url": "https://open.spotify.com/track/def", "status": "Completed"},
+        {"id": "job-3", "url": "https://open.spotify.com/track/ghi", "status": "Cancelled"},
+        {"id": "job-4", "url": "https://open.spotify.com/track/jkl", "status": "Running"}
+    ]
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(dummy_history, f)
+
+    resp = client.delete("/api/history/clear-cancelled")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["cleared"] == 2
+
+    resp = client.get("/api/jobs")
+    assert resp.status_code == 200
+    remaining_jobs = resp.json()
+
+    assert len(remaining_jobs) == 2
+    statuses = [j["status"] for j in remaining_jobs]
+    assert "Completed" in statuses
+    assert "Running" in statuses
+    assert "Cancelled" not in statuses
+
 def test_clear_completed_history():
     import json
 
