@@ -14,7 +14,6 @@ import requests
 
 JULES_API_BASE = "https://jules.googleapis.com/v1alpha"
 SESSION_ID_PATTERN = re.compile(r"\*\*Session ID:\*\* `(sessions/[^`]+)`")
-QUEUE_MARKER = "<!-- jules-queue -->"
 AUTONOMY_PROMPT_HEADER = """You are running through this repository's autonomous GitHub issue bridge.
 
 Execution rules:
@@ -28,19 +27,6 @@ Execution rules:
 - If blocked by missing credentials, inaccessible external dependencies, or conflicting requirements, record the blocker in an issue/backlog note and continue with the safest local fallback.
 - Before finishing, run the relevant verification for the work you changed.
 """
-BUSY_SESSION_STATES = {
-    "QUEUED",
-    "PLANNING",
-    "AWAITING_PLAN_APPROVAL",
-    "AWAITING_USER_FEEDBACK",
-    "IN_PROGRESS",
-    "PAUSED",
-}
-
-
-def is_session_busy(session):
-    """Return True when a session still occupies the repo's only active slot."""
-    return str(session.get("state") or "").upper() in BUSY_SESSION_STATES
 
 
 def build_session_prompt(title, body):
@@ -77,16 +63,6 @@ class JulesClient:
         self._sources_cache = response.json().get("sources", [])
         return self._sources_cache
 
-    def list_sessions(self, filter_expression="archived = false", page_size=100):
-        """List available Jules sessions."""
-        url = f"{JULES_API_BASE}/sessions"
-        params = {"pageSize": page_size}
-        if filter_expression:
-            params["filter"] = filter_expression
-        response = requests.get(url, headers=self.headers, params=params)
-        response.raise_for_status()
-        return response.json().get("sessions", [])
-
     def find_source_for_repo(self, repo_owner, repo_name):
         """Find the Jules source ID for a specific GitHub repo."""
         if self._source_map is None:
@@ -100,15 +76,6 @@ class JulesClient:
                     self._source_map[(owner.lower(), repo.lower())] = source.get("name")
 
         return self._source_map.get((repo_owner.lower(), repo_name.lower()))
-
-    def find_busy_session_for_source(self, source_name):
-        """Return the first non-terminal session for this repository source."""
-        for session in self.list_sessions():
-            if session.get("sourceContext", {}).get("source") != source_name:
-                continue
-            if is_session_busy(session):
-                return session
-        return None
 
     def create_session(self, source_name, prompt, title):
         """Create a new Jules session."""
@@ -214,110 +181,14 @@ def find_session_id(issue_number, comments=None):
     return extract_session_id_from_comments(comments)
 
 
-def issue_has_queue_comment(issue_number, comments=None):
-    """Check whether the issue already has a queue-status comment."""
-    if comments is None:
-        issue = load_issue(issue_number, fields="comments")
-        if not issue:
-            return False
-        comments = issue.get("comments", [])
-
-    for comment in comments:
-        if QUEUE_MARKER in comment.get("body", ""):
-            return True
-    return False
-
 def post_issue_comment(issue_number, body):
     """Post a comment to an issue."""
     return run_command(["gh", "issue", "comment", str(issue_number), "--body", body])
 
 
-def queue_issue(issue_number, busy_session, comments=None):
-    """Leave a single queue comment when the repository already has an active session."""
-    if issue_has_queue_comment(issue_number, comments=comments):
-        print(f"Issue #{issue_number} is already marked as queued.")
-        return
-
-    session_id = busy_session.get("name", "unknown")
-    session_state = busy_session.get("state", "UNKNOWN")
-    session_url = busy_session.get("url")
-
-    comment_lines = [
-        "⏳ **Jules is busy for this repository.**",
-        "",
-        "This issue has been queued and will be retried automatically once the active session finishes.",
-        f"- **Active Session ID:** `{session_id}`",
-        f"- **State:** `{session_state}`",
-    ]
-    if session_url:
-        comment_lines.append(f"- **Session URL:** {session_url}")
-    comment_lines.extend(["", QUEUE_MARKER])
-
-    post_issue_comment(issue_number, "\n".join(comment_lines))
-
-
-def list_open_issues(full_repo):
-    """List open issues for the repository, oldest first."""
-    output = run_command(
-        [
-            "gh",
-            "issue",
-            "list",
-            "--repo",
-            full_repo,
-            "--search",
-            "is:open sort:created-asc",
-            "--json",
-            "number,title,body,author,comments",
-            "--limit",
-            "100",
-        ]
-    )
-    if not output:
-        return []
-
-    try:
-        issues = json.loads(output)
-    except json.JSONDecodeError:
-        print("Error parsing repository issues JSON")
-        return []
-
-    if not isinstance(issues, list):
-        return []
-
-    return [
-        {
-            "number": issue.get("number"),
-            "title": issue.get("title"),
-            "body": issue.get("body"),
-            "author_login": issue.get("author", {}).get("login"),
-            "comments": issue.get("comments", []),
-        }
-        for issue in issues
-    ]
 def is_repo_owner(login, repo_owner):
     """Return True when a GitHub login matches the repository owner."""
     return bool(login) and login.lower() == repo_owner.lower()
-
-
-def find_next_pending_issue(full_repo, repo_owner):
-    """Return the oldest owner-authored open issue without a Jules session comment."""
-    for issue in list_open_issues(full_repo):
-        issue_number = issue.get("number")
-        if not issue_number:
-            continue
-        if not is_repo_owner(issue.get("author_login"), repo_owner):
-            continue
-        if find_session_id(issue_number, comments=issue.get("comments")):
-            continue
-        return {
-            "number": issue_number,
-            "title": issue.get("title"),
-            "body": issue.get("body"),
-            "author_login": issue.get("author_login"),
-            "comments": issue.get("comments"),
-        }
-    return None
 
 
 def get_issue_from_dispatch(issue_number):
@@ -330,7 +201,7 @@ def get_issue_from_dispatch(issue_number):
     return issue_data
 
 
-def resolve_issue_for_event(event_name, event_data, full_repo, repo_owner):
+def resolve_issue_for_event(event_name, event_data):
     """Resolve the issue payload that should be handled for this invocation."""
     if event_name == "workflow_dispatch":
         print("Triggered by workflow_dispatch")
@@ -340,15 +211,6 @@ def resolve_issue_for_event(event_name, event_data, full_repo, repo_owner):
             print("Error: issue_number input missing.")
             return None, None
         return "opened", get_issue_from_dispatch(issue_number)
-
-    if event_name == "schedule":
-        print("Triggered by schedule")
-        pending_issue = find_next_pending_issue(full_repo, repo_owner)
-        if not pending_issue:
-            print("No queued issues without Jules sessions were found.")
-            return None, None
-        print(f"Selected queued issue #{pending_issue['number']} for processing.")
-        return "opened", pending_issue
 
     action = event_data.get("action")
     if action not in ["opened", "created"]:
@@ -365,7 +227,7 @@ def resolve_issue_for_event(event_name, event_data, full_repo, repo_owner):
 
 
 def start_issue_session(client, issue_number, title, body, owner, repo_name, full_repo, comments=None):
-    """Start a Jules session for an issue, or queue it when this repo is busy."""
+    """Start a Jules session for an issue."""
     print(f"Processing New Issue #{issue_number}: {title} (Repo: {full_repo})")
 
     existing_session_id = find_session_id(issue_number, comments=comments)
@@ -389,15 +251,6 @@ def start_issue_session(client, issue_number, title, body, owner, repo_name, ful
             )
             post_issue_comment(issue_number, err_msg)
             return 1
-
-        busy_session = client.find_busy_session_for_source(source_name)
-        if busy_session:
-            print(
-                "Repository already has an active Jules session: "
-                f"{busy_session.get('name')} ({busy_session.get('state')})"
-            )
-            queue_issue(issue_number, busy_session, comments=comments)
-            return 0
 
         print(f"Creating Session with Source: {source_name}")
         session = client.create_session(
@@ -460,9 +313,7 @@ def main():
 
     owner, repo_name = full_repo.split("/")
     event_name = os.environ.get("GITHUB_EVENT_NAME")
-    action, issue_data = resolve_issue_for_event(
-        event_name, event_data, full_repo, owner
-    )
+    action, issue_data = resolve_issue_for_event(event_name, event_data)
     if action is None:
         sys.exit(0)
     if not issue_data:

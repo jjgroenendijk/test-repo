@@ -41,38 +41,24 @@ Bot comments and non-owner comments are ignored by the bridge.
 These automations run in GitHub Actions.
 
 `Run Agent` starts or resumes Jules work.
-It runs on new issues, owner comments, manual dispatch, and an hourly poll.
+It runs on new issues, owner comments, and manual dispatch.
 It calls `jules.py`.
-It also enforces one active Jules session per repository.
-If Jules is busy, the issue is queued.
 
-`Scheduled Autonomous PR` runs daily.
-It creates or reuses a canonical autonomous-development issue.
-It then dispatches `Run Agent`.
-This keeps scheduled work tied to a normal issue.
+`Scheduled Autonomous PR` runs four times a day.
+It starts a fresh Jules session directly with a fixed autonomy prompt.
+The prompt tells Jules to work according to `AGENTS.md` without asking questions.
 
 `Verify Codebase` runs on pushes and pull requests.
 It runs Python checks.
 It also runs website linting, unit tests, Playwright tests, and the website build.
 
-`Report CI Failure` runs after failed PR verification.
-It creates a GitHub issue for a trusted failing PR.
-It then dispatches `Run Agent` so Jules can fix the failure.
-
 `Manage PR Lifecycle` runs after successful PR verification.
-It approves and merges trusted PRs.
+It approves and merges trusted PRs only when all checks pass.
 If a merge fails, it checks for conflicts.
 
 `Detect Merge Conflicts` runs after pushes to `main`.
 It finds open PRs with conflicts.
 It creates a GitHub issue for Jules when needed.
-
-`PR Reconciliation` runs hourly.
-It merges healthy PRs.
-It waits on active CI.
-It retries queued Jules issues.
-It recovers missing Jules sessions.
-It closes duplicate or completed automation issues.
 
 `Publish Container` runs on `main` and version tags.
 It builds the repository Docker image.
