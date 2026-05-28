@@ -139,6 +139,10 @@ export function renderApp(root) {
           <h2>Recent jobs</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
+            <select id="job-sort-select" class="job-status-filter clear-history-btn" aria-label="Sort jobs">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
             <select id="job-type-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by type">
               <option value="All Types">All Types</option>
               <option value="Track">Track</option>
@@ -181,6 +185,7 @@ export function renderApp(root) {
   const typeFilter = root.querySelector("#job-type-filter");
   const statusFilter = root.querySelector("#job-status-filter");
   const searchInput = root.querySelector("#job-search-input");
+  const sortSelect = root.querySelector("#job-sort-select");
 
   async function updateProgress(jobId) {
     const container = root.querySelector(`#progress-container-${jobId}`);
@@ -253,8 +258,14 @@ export function renderApp(root) {
         downloadAllBtn.style.display = hasCompleted ? "inline-flex" : "none";
       }
 
-      // Sort jobs by newest first
-      const sortedJobs = [...jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      // Sort jobs
+      const sortOrder = sortSelect ? sortSelect.value : "newest";
+      const sortedJobs = [...jobs].sort((a, b) => {
+        if (sortOrder === "oldest") {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
 
       const statusCounts = jobs.reduce((acc, job) => {
         acc[job.status] = (acc[job.status] || 0) + 1;
@@ -313,6 +324,10 @@ export function renderApp(root) {
 
   if (statusFilter) {
     statusFilter.addEventListener("change", fetchJobs);
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", fetchJobs);
   }
 
   if (searchInput) {
