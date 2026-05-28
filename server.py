@@ -436,6 +436,39 @@ async def clear_history():
 
     return {"status": "success", "cleared": len(cleared_jobs)}
 
+@app.delete("/api/history/clear-running")
+async def clear_running_history():
+    history = []
+    cleared_jobs = []
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        filtered_history = []
+        for job in history:
+            if job.get("status") in ["Queued", "Running"]:
+                cleared_jobs.append(job["id"])
+            else:
+                filtered_history.append(job)
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(filtered_history, f, indent=2)
+
+    for job_id in cleared_jobs:
+        if job_id in running_processes:
+            process = running_processes[job_id]
+            try:
+                process.terminate()
+            except ProcessLookupError:
+                pass
+
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        await asyncio.to_thread(_delete_job_files, job_id)
+
+    return {"status": "success", "cleared": len(cleared_jobs)}
+
 @app.delete("/api/history/clear-cancelled")
 async def clear_cancelled_history():
     history = []

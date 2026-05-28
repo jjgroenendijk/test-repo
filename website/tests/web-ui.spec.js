@@ -359,6 +359,62 @@ test("can refresh job list", async ({ page }) => {
   expect(fetchJobsCalledCount).toBeGreaterThan(0);
 });
 
+test("can clear running jobs", async ({ page }) => {
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "1",
+            url: "https://open.spotify.com/track/1",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 1,
+            error_log: null
+          },
+          {
+            id: "2",
+            url: "https://open.spotify.com/track/2",
+            status: "Running",
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  let clearRunningCalled = false;
+  await page.route("/api/history/clear-running", async (route) => {
+    if (route.request().method() === "DELETE") {
+      clearRunningCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "success", cleared: 1 })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const clearRunningBtn = page.getByRole("button", { name: "Clear running" });
+  await expect(clearRunningBtn).toBeVisible();
+
+  page.once("dialog", dialog => dialog.accept());
+
+  await clearRunningBtn.click();
+
+  expect(clearRunningCalled).toBe(true);
+});
+
 test("can clear job history", async ({ page }) => {
   // Mock API route for jobs to provide mixed jobs
   await page.route("/api/jobs", async (route) => {
