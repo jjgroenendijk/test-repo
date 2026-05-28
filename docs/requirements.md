@@ -15,20 +15,20 @@ Current state:
 - It listens for GitHub issue events.
 - It executes `jules.py` to process the event and call the Jules API.
 - Public issue/comment entry stays gated to the dynamic repository owner.
-- Scheduled autonomous development must also enter through GitHub-managed workflows so sessions stay issue-backed and PR-capable.
+- Scheduled autonomous development runs through a GitHub-managed workflow that starts a Jules session directly four times a day.
 
 ### 2. Google Jules API Integration
 - **Authentication:** Uses `GOOGLE_JULES_API` key stored in repository secrets.
 - **Source Resolution:** Maps `owner/repo` to Jules Source ID.
 - **Session Creation:** New issues create Jules sessions with `AUTO_CREATE_PR`.
-- **Single Active Session:** Only one non-terminal Jules session may be active for this repository at a time.
-- **Queued Retry:** When a new issue arrives while Jules is busy, the issue is queued and retried automatically until it starts.
+- **Concurrent Sessions:** Multiple Jules sessions may run for this repository; there is no single-active-session limit or issue queue.
 - **Owner-Gated Issue Entry:** Public issue/comment events only start or steer Jules when they come from the repository owner.
 - **Autonomous Session Prompting:** New Jules sessions must be instructed to continue autonomously under all circumstances, without asking the user for validation, clarification, plan approval, permission to continue, or feedback. When context is ambiguous, Jules must choose the best option from repository context, continue, and document the assumption in its summary.
 - **Trusted PR Automation:** Privileged PR follow-up automation only acts on trusted same-repo PRs.
 - **Configurable Trusted Actors:** The repository owner is trusted by default, and optional extra logins may be provided through `JULES_TRUSTED_ACTORS`.
-- **Scheduled Recovery:** Recurring autonomous runs must reuse the same issue-backed flow instead of relying on Jules-native scheduling.
-- **Transient Check Handling:** PR reconciliation must wait for non-terminal check states instead of treating them as Jules blockers.
+- **Scheduled Autonomy:** A GitHub-managed workflow starts a fresh Jules session directly four times a day with a fixed prompt to work per `AGENTS.md`.
+- **Self-Healing Checks:** Jules is responsible for fixing its own PR check failures; there is no external polling that reconciles PR checks into issues.
+- **All-Checks-Green Merge:** Trusted PRs are auto-merged only when every check is passing.
 
 ### 3. SpotiFLAC Web UI Product Direction
 - The product target is a browser-based UI for the Python module `SpotiFLAC`.
@@ -56,7 +56,7 @@ Current state:
 ## Product Requirements
 - Keep the codebase focused on the SpotiFLAC web UI product scope.
 - Do not reintroduce yt-dlp product code or yt-dlp backlog items.
-- Keep Google Jules integration, issue-backed autonomy, queueing, trusted PR automation, and scheduled autonomous development intact.
+- Keep Google Jules integration, owner-gated issue autonomy, trusted PR automation, and scheduled autonomous development intact.
 - Build the web UI specifically for self-hosted homelab deployment.
 - Include unit tests and Playwright tests for new user-facing features when implementation begins.
 - CI must verify Python + website quality gates.
