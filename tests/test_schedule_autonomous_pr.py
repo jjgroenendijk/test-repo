@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta, timezone
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 
 MODULE_PATH = (
@@ -15,158 +15,53 @@ assert SPEC and SPEC.loader
 SPEC.loader.exec_module(schedule_autonomous_pr)
 
 
-class FakeClient:
-    def __init__(
-        self,
-        open_pr_numbers=None,
-        issue_number=None,
-        create_issue_number=501,
-        comments=None,
-        trigger_result=True,
-    ):
-        self.open_pr_numbers = open_pr_numbers or []
-        self.issue_number = issue_number
-        self.create_issue_number = create_issue_number
-        self.comments = comments or []
-        self.trigger_result = trigger_result
-
-        self.created_issues = []
-        self.triggered_sessions = []
-
-    def list_open_pr_numbers(self):
-        return self.open_pr_numbers
-
-    def find_autonomous_issue(self):
-        return self.issue_number
-
-    def create_issue(self, title, body):
-        self.created_issues.append((title, body))
-        return self.create_issue_number
-
-    def get_issue_comments(self, issue_number):
-        return self.comments
-
-    def trigger_jules_session(self, issue_number):
-        self.triggered_sessions.append(issue_number)
-        return self.trigger_result
+def _set_env(monkeypatch):
+    monkeypatch.setenv("GOOGLE_JULES_API", "fake_key")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
 
 
-def test_creates_issue_and_triggers_session_when_repo_is_idle():
-    client = FakeClient(issue_number=None, create_issue_number=701)
+def test_starts_session_with_fixed_prompt(monkeypatch):
+    _set_env(monkeypatch)
 
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
+    client = MagicMock()
+    client.find_source_for_repo.return_value = "sources/github/owner/repo"
+    client.create_session.return_value = {"name": "sessions/123"}
+
+    with patch.object(schedule_autonomous_pr, "JulesClient", return_value=client):
+        exit_code = schedule_autonomous_pr.main()
+
+    assert exit_code == 0
+    client.find_source_for_repo.assert_called_once_with("owner", "repo")
+    client.create_session.assert_called_once_with(
+        "sources/github/owner/repo",
+        prompt=schedule_autonomous_pr.SCHEDULED_PROMPT,
+        title=schedule_autonomous_pr.SCHEDULED_TITLE,
     )
-    stats = scheduler.run()
-
-    assert stats.issues_created == 1
-    assert stats.sessions_triggered == 1
-    assert client.created_issues
-    assert client.triggered_sessions == [701]
+    assert "AGENTS.md" in schedule_autonomous_pr.SCHEDULED_PROMPT
 
 
-def test_skips_when_open_prs_exist():
-    client = FakeClient(open_pr_numbers=[14], issue_number=701)
+def test_errors_when_source_missing(monkeypatch):
+    _set_env(monkeypatch)
 
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
-    )
-    stats = scheduler.run()
+    client = MagicMock()
+    client.find_source_for_repo.return_value = None
 
-    assert stats.skipped_for_open_prs == 1
-    assert stats.sessions_triggered == 0
-    assert client.triggered_sessions == []
+    with patch.object(schedule_autonomous_pr, "JulesClient", return_value=client):
+        exit_code = schedule_autonomous_pr.main()
 
-
-def test_reuses_existing_issue_when_outside_cooldown():
-    past_time = datetime.now(timezone.utc) - timedelta(hours=24)
-    client = FakeClient(
-        issue_number=808,
-        comments=[
-            {
-                "body": "- **Session ID:** `sessions/123`",
-                "created_at": past_time.isoformat(),
-            }
-        ],
-    )
-
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
-    )
-    should_skip = scheduler.should_skip_for_cooldown(808)
-
-    assert not should_skip
-
-    stats = scheduler.run()
-
-    assert stats.issues_created == 0
-    assert stats.sessions_triggered == 1
-    assert client.triggered_sessions == [808]
+    assert exit_code == 1
+    client.create_session.assert_not_called()
 
 
-def test_skips_when_recent_session_comment_exists():
-    recent_time = datetime.now(timezone.utc) - timedelta(hours=2)
-    client = FakeClient(
-        issue_number=909,
-        comments=[
-            {
-                "body": "- **Session ID:** `sessions/999`",
-                "created_at": recent_time.isoformat(),
-            }
-        ],
-    )
+def test_errors_when_api_key_missing(monkeypatch):
+    monkeypatch.delenv("GOOGLE_JULES_API", raising=False)
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
 
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
-    )
-    should_skip = scheduler.should_skip_for_cooldown(909)
-
-    assert should_skip
-
-    stats = scheduler.run()
-
-    assert stats.skipped_for_cooldown == 1
-    assert stats.sessions_triggered == 0
-    assert client.triggered_sessions == []
+    assert schedule_autonomous_pr.main() == 1
 
 
-def test_force_bypasses_cooldown():
-    recent_time = datetime.now(timezone.utc) - timedelta(hours=2)
-    client = FakeClient(
-        issue_number=1001,
-        comments=[
-            {
-                "body": "- **Session ID:** `sessions/1001`",
-                "created_at": recent_time.isoformat(),
-            }
-        ],
-    )
+def test_errors_when_repo_missing(monkeypatch):
+    monkeypatch.setenv("GOOGLE_JULES_API", "fake_key")
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
 
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
-        force=True,
-    )
-    stats = scheduler.run()
-
-    assert stats.skipped_for_cooldown == 0
-    assert stats.sessions_triggered == 1
-    assert client.triggered_sessions == [1001]
-
-
-def test_trigger_failure_increments_errors():
-    client = FakeClient(issue_number=1101, trigger_result=False)
-
-    scheduler = schedule_autonomous_pr.AutonomousScheduler(
-        client=client,
-        cooldown=timedelta(hours=18),
-    )
-    stats = scheduler.run()
-
-    assert stats.errors == 1
-    assert stats.sessions_triggered == 0
-    assert client.triggered_sessions == [1101]
+    assert schedule_autonomous_pr.main() == 1
