@@ -97,6 +97,11 @@ jobs:
               continue
             fi
 
+            if ! gh pr checks "$PR_NUMBER" --repo "${{ github.repository }}"; then
+              echo "PR #$PR_NUMBER has non-passing or pending checks. Skipping merge."
+              continue
+            fi
+
             gh pr review "$PR_NUMBER" \
               --repo "${{ github.repository }}" \
               --approve || echo "Approval step skipped or failed."
