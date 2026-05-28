@@ -166,6 +166,7 @@ export function renderApp(root) {
             <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
+            <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
           </div>
@@ -641,6 +642,30 @@ export function renderApp(root) {
       } finally {
         refreshJobsBtn.disabled = false;
         refreshJobsBtn.textContent = "Refresh jobs";
+      }
+    });
+  }
+
+  const clearRunningBtn = root.querySelector("#clear-running-btn");
+  if (clearRunningBtn) {
+    clearRunningBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to clear all running and queued jobs? This cannot be undone.")) {
+        return;
+      }
+      clearRunningBtn.disabled = true;
+      clearRunningBtn.textContent = "Clearing...";
+      try {
+        const response = await fetch("/api/history/clear-running", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to clear running history");
+        }
+      } catch (error) {
+        console.error("Error clearing running history:", error);
+      } finally {
+        clearRunningBtn.disabled = false;
+        clearRunningBtn.textContent = "Clear running";
       }
     });
   }
