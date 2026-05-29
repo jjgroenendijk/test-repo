@@ -28,6 +28,7 @@ def test_create_job(mock_run):
     assert "id" in data
     assert data["url"] == "https://open.spotify.com/track/123"
     assert data["status"] == "Queued"
+    assert "completed_at" not in data or data["completed_at"] is None
 
     # Verify it was added to history
     response = client.get("/api/jobs")
@@ -35,6 +36,7 @@ def test_create_job(mock_run):
     jobs = response.json()
     assert len(jobs) == 1
     assert jobs[0]["id"] == data["id"]
+    assert "completed_at" not in jobs[0] or jobs[0]["completed_at"] is None
 
 @patch('server.run_spotiflac')
 def test_cancel_job(mock_run):
@@ -53,6 +55,8 @@ def test_cancel_job(mock_run):
     jobs = response.json()
     assert jobs[0]["id"] == job_id
     assert jobs[0]["status"] == "Cancelled"
+    assert "completed_at" in jobs[0]
+    assert isinstance(jobs[0]["completed_at"], str)
 
 def test_cancel_nonexistent_job():
     response = client.delete("/api/jobs/not-a-real-id")

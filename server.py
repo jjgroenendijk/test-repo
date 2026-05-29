@@ -55,6 +55,7 @@ class JobResponse(BaseModel):
     created_at: str
     error_log: Optional[str] = None
     files: Optional[int] = 0
+    completed_at: Optional[str] = None
 
 
 async def read_history() -> List[Dict]:
@@ -87,6 +88,8 @@ async def update_job_status(job_id: str, status: str, error_log: Optional[str] =
                 job["error_log"] = error_log
             if files is not None:
                 job["files"] = files
+            if status in ("Completed", "Failed", "Cancelled"):
+                job["completed_at"] = datetime.now(timezone.utc).isoformat()
             break
     await write_history(history)
 
@@ -605,6 +608,7 @@ async def cancel_job(job_id: str):
                 job_found = True
                 if job["status"] in ["Queued", "Running"]:
                     job["status"] = "Cancelled"
+                    job["completed_at"] = datetime.now(timezone.utc).isoformat()
                     new_history.append(job)
                 else:
                     # Actually delete it from history

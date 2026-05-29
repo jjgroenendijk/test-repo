@@ -47,6 +47,7 @@ function renderJob(job) {
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
   const urlType = classifySpotifyUrl(job.url);
+  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()}</p>` : "";
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
@@ -57,6 +58,7 @@ function renderJob(job) {
           <span class="url-type-badge" style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; text-transform: capitalize; vertical-align: middle;">${escapeHtml(urlType)}</span>
         </p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
+        ${completedAtHtml}
       </div>
       <div class="job-meta">
         <span>${escapeHtml(job.status)}</span>
