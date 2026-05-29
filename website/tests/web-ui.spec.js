@@ -592,6 +592,7 @@ test('displays Download All button on job card when completed', async ({ page })
   await expect(downloadAllBtn).toHaveAttribute('download', '');
 });
 
+
 test('displays Download all completed button when completed jobs exist', async ({ page }) => {
   // Use the mocked API route to provide a completed job
   await page.route('/api/jobs', async (route) => {
@@ -903,6 +904,57 @@ test("filters jobs by type", async ({ page }) => {
   await expect(page.locator('.job-card')).toHaveCount(3);
 });
 
+test('retry all cancelled jobs', async ({ page }) => {
+  let retryCalled = false;
+  let retriedUrl = '';
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-cancelled',
+            url: 'https://open.spotify.com/track/cancelled-track',
+            status: 'Cancelled',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ])
+      });
+    } else if (route.request().method() === 'POST') {
+      retryCalled = true;
+      const postData = JSON.parse(route.request().postData() || '{}');
+      retriedUrl = postData.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id' })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  // Wait for the job card to load
+  await expect(page.locator('.job-card')).toHaveCount(1);
+
+  const retryCancelledBtn = page.locator('#retry-cancelled-btn');
+  await expect(retryCancelledBtn).toBeVisible();
+
+  await retryCancelledBtn.click();
+
+  // Give it a moment to call the API
+  await page.waitForTimeout(500);
+
+  expect(retryCalled).toBe(true);
+  expect(retriedUrl).toBe('https://open.spotify.com/track/cancelled-track');
+});
+
 test('can retry all failed jobs', async ({ page }) => {
   let retryCalled = false;
   let retriedUrl = '';
@@ -953,6 +1005,7 @@ test('can retry all failed jobs', async ({ page }) => {
   expect(retryCalled).toBe(true);
   expect(retriedUrl).toBe('https://open.spotify.com/track/failed-track');
 });
+
 
 test('can queue multiple comma-separated URLs', async ({ page }) => {
   let queuedUrls = [];

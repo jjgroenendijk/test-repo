@@ -348,6 +348,61 @@ describe("renderApp", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/history/clear-completed", { method: "DELETE" });
   });
 
+  it("calls the retry all cancelled jobs API when Retry cancelled is clicked", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    const fetchMock = vi.fn();
+    fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/jobs" && (!options || options.method === "GET")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: "1", url: "https://open.spotify.com/track/1", status: "Cancelled" },
+            { id: "2", url: "https://open.spotify.com/track/2", status: "Completed" }
+          ])
+        });
+      }
+      if (url === "/api/jobs" && options && options.method === "POST") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+    global.fetch = fetchMock;
+
+    renderApp(root);
+
+    // Initial fetch from renderApp
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const retryCancelledBtn = document.getElementById("retry-cancelled-btn");
+    expect(retryCancelledBtn).not.toBeNull();
+
+    retryCancelledBtn.click();
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://open.spotify.com/track/1" })
+    });
+
+    // Should not retry the completed job
+    const calls = fetchMock.mock.calls.filter(call => call[0] === "/api/jobs" && call[1] && call[1].method === "POST");
+    expect(calls.length).toBe(1);
+  });
+
   it("calls the clear-failed endpoint and refreshes when Clear failed is clicked", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
