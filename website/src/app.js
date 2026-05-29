@@ -167,6 +167,7 @@ export function renderApp(root) {
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
+            <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
@@ -744,6 +745,37 @@ export function renderApp(root) {
       } finally {
         retryFailedBtn.disabled = false;
         retryFailedBtn.textContent = "Retry failed";
+      }
+    });
+  }
+
+  const retryCancelledBtn = root.querySelector("#retry-cancelled-btn");
+  if (retryCancelledBtn) {
+    retryCancelledBtn.addEventListener("click", async () => {
+      retryCancelledBtn.disabled = true;
+      retryCancelledBtn.textContent = "Retrying...";
+      try {
+        const jobsResponse = await fetch("/api/jobs");
+        if (jobsResponse.ok) {
+          const jobs = await jobsResponse.json();
+          const cancelledJobs = jobs.filter(job => job.status === "Cancelled");
+
+          const retryRequests = cancelledJobs.map(job =>
+            fetch("/api/jobs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: job.url })
+            })
+          );
+
+          await Promise.allSettled(retryRequests);
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to retry cancelled jobs", err);
+      } finally {
+        retryCancelledBtn.disabled = false;
+        retryCancelledBtn.textContent = "Retry cancelled";
       }
     });
   }
