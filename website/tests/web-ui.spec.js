@@ -56,7 +56,7 @@ test("validates supported Spotify URLs and queues job", async ({ page }) => {
   await page.goto("/");
 
   await page.getByLabel("Spotify URLs").fill("https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M");
-  await page.getByRole("button", { name: "Queue" }).click();
+  await page.getByRole("button", { name: "Queue", exact: true }).click();
 
   await expect(page.getByText("Successfully queued 1 job.")).toBeVisible();
 });
@@ -87,7 +87,7 @@ test("validates and queues multiple Spotify URLs", async ({ page }) => {
 
   const urls = "https://open.spotify.com/track/123,https://open.spotify.com/album/456,  https://open.spotify.com/playlist/789  ";
   await page.getByLabel("Spotify URLs").fill(urls);
-  await page.getByRole("button", { name: "Queue" }).click();
+  await page.getByRole("button", { name: "Queue", exact: true }).click();
 
   await expect(page.getByText("Successfully queued 3 jobs.")).toBeVisible();
 
@@ -357,6 +357,50 @@ test("can refresh job list", async ({ page }) => {
 
   // Verify that a network request was made
   expect(fetchJobsCalledCount).toBeGreaterThan(0);
+});
+
+test("can clear queued jobs", async ({ page }) => {
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          { id: "test-queued-job-1", status: "Queued", url: "https://open.spotify.com/track/queued1" },
+          { id: "test-completed-job-1", status: "Completed", url: "https://open.spotify.com/track/completed1" }
+        ])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  let clearQueuedCalled = false;
+  await page.route("/api/history/clear-queued", async (route) => {
+    if (route.request().method() === "DELETE") {
+      clearQueuedCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "success", cleared: 1 })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const clearQueuedBtn = page.getByRole("button", { name: "Clear queued" });
+  await expect(clearQueuedBtn).toBeVisible();
+
+  page.once("dialog", dialog => dialog.accept());
+
+  const requestPromise = page.waitForRequest("/api/history/clear-queued");
+  await clearQueuedBtn.click();
+  await requestPromise;
+
+  expect(clearQueuedCalled).toBe(true);
 });
 
 test("can clear running jobs", async ({ page }) => {

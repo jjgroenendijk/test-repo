@@ -169,6 +169,7 @@ export function renderApp(root) {
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
             <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
+            <button type="button" id="clear-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
           </div>
@@ -692,6 +693,30 @@ export function renderApp(root) {
       } finally {
         clearCancelledBtn.disabled = false;
         clearCancelledBtn.textContent = "Clear cancelled";
+      }
+    });
+  }
+
+  const clearQueuedBtn = root.querySelector("#clear-queued-btn");
+  if (clearQueuedBtn) {
+    clearQueuedBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to clear all queued jobs? This cannot be undone.")) {
+        return;
+      }
+      clearQueuedBtn.disabled = true;
+      clearQueuedBtn.textContent = "Clearing...";
+      try {
+        const response = await fetch("/api/history/clear-queued", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to clear queued history");
+        }
+      } catch (error) {
+        console.error("Error clearing queued history:", error);
+      } finally {
+        clearQueuedBtn.disabled = false;
+        clearQueuedBtn.textContent = "Clear queued";
       }
     });
   }
