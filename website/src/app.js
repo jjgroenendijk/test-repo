@@ -169,6 +169,7 @@ export function renderApp(root) {
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+            <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
           </div>
         </div>
         <div id="queue-status-summary" style="margin-bottom: 16px; font-size: 0.9rem; font-weight: 500; color: var(--text-primary);"></div>

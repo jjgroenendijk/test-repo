@@ -27,6 +27,28 @@ describe("classifySpotifyUrl", () => {
 });
 
 describe("renderApp", () => {
+  it("renders the Export JSON button correctly", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    const cleanup = renderApp(root);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const exportBtn = document.getElementById("export-history-btn");
+    expect(exportBtn).not.toBeNull();
+    expect(exportBtn.getAttribute("href")).toBe("/api/history/export");
+
+    cleanup();
+  });
+
   it("updates the storage progress bar correctly", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",

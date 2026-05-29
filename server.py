@@ -404,6 +404,21 @@ def download_all_completed_jobs(background_tasks: BackgroundTasks):
         filename="SpotiFLAC-all-completed.zip"
     )
 
+@app.get("/api/history/export")
+async def export_history_json():
+    if not HISTORY_FILE.exists():
+        # Return an empty JSON array if history doesn't exist
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content=[],
+            headers={"Content-Disposition": 'attachment; filename="SpotiFLAC-history.json"'}
+        )
+    return FileResponse(
+        path=HISTORY_FILE,
+        media_type="application/json",
+        filename="SpotiFLAC-history.json"
+    )
+
 def _delete_job_files(job_id: str):
     import shutil
     job_dir = DATA_DIR / job_id
