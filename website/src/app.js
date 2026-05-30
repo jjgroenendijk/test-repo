@@ -47,7 +47,23 @@ function renderJob(job) {
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
   const urlType = classifySpotifyUrl(job.url);
-  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()}</p>` : "";
+
+  let durationText = "";
+  if (job.completed_at && job.created_at) {
+    const durationMs = new Date(job.completed_at) - new Date(job.created_at);
+    if (durationMs >= 0) {
+      const totalSeconds = Math.floor(durationMs / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      if (minutes > 0) {
+        durationText = ` (${minutes}m ${seconds}s)`;
+      } else {
+        durationText = ` (${seconds}s)`;
+      }
+    }
+  }
+
+  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()}${durationText}</p>` : "";
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
