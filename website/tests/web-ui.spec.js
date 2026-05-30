@@ -254,6 +254,7 @@ test('can view job logs', async ({ page }) => {
         id: 'mock-job-id',
         url: 'https://open.spotify.com/album/4aawyAB9vmqN3uQ7FjRGTy',
         status: 'Completed',
+        completed_at: new Date(Date.now() - 1000).toISOString(),
         created_at: new Date().toISOString(),
         files: 10
       }];
@@ -613,6 +614,7 @@ test('displays Download All button on job card when completed', async ({ page })
             id: 'job-12345',
             url: 'https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX',
             status: 'Completed',
+        completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date().toISOString(),
             files: 10,
             error_log: null
@@ -649,6 +651,7 @@ test('displays Download all completed button when completed jobs exist', async (
             id: '123',
             url: 'https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX',
             status: 'Completed',
+        completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date().toISOString(),
             files: 10,
             error_log: null
@@ -784,6 +787,7 @@ test('search input filters jobs by URL and ID', async ({ page }) => {
             id: 'job-111',
             url: 'https://open.spotify.com/track/alpha',
             status: 'Completed',
+        completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date(Date.now() - 2000).toISOString(),
             files: 1,
             error_log: null
@@ -839,6 +843,7 @@ test('renders audio player for audio files', async ({ page }) => {
             id: 'job-audio',
             url: 'https://open.spotify.com/track/audio1',
             status: 'Completed',
+        completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date().toISOString(),
             files: 2,
             error_log: null

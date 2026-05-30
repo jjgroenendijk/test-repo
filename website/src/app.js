@@ -22,6 +22,23 @@ export function classifySpotifyUrl(value) {
   return new URL(value).pathname.split("/").filter(Boolean)[0];
 }
 
+function formatDuration(startStr, endStr) {
+  if (!startStr || !endStr) return "";
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  if (isNaN(start) || isNaN(end)) return "";
+
+  const diffMs = Math.max(0, end - start);
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  }
+  return `${seconds}s`;
+}
+
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
     return unsafe
@@ -47,7 +64,8 @@ function renderJob(job) {
 
   const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
   const urlType = classifySpotifyUrl(job.url);
-  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()}</p>` : "";
+  const durationStr = formatDuration(job.created_at, job.completed_at);
+  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()} (Duration: ${durationStr})</p>` : "";
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">

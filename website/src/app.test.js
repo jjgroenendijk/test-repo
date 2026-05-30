@@ -461,4 +461,47 @@ describe("renderApp", () => {
     expect(downloadAllBtn.getAttribute("href")).toBe("/api/history/download");
     expect(downloadAllBtn.hasAttribute("download")).toBe(true);
   });
+
+  it("calculates and renders the correct execution duration for a completed job", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    const fetchMock = vi.fn();
+    fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/jobs" && (!options || options.method === "GET")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            {
+              id: "duration-job",
+              url: "https://open.spotify.com/track/duration",
+              status: "Completed",
+              created_at: "2023-01-01T00:00:00.000Z",
+              completed_at: "2023-01-01T00:01:23.000Z" // 1m 23s later
+            }
+          ])
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+    global.fetch = fetchMock;
+
+    renderApp(root);
+
+    // Allow async handlers to complete
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const durationText = document.body.textContent;
+    expect(durationText).toContain("(Duration: 1m 23s)");
+  });
 });

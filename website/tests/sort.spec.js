@@ -12,6 +12,7 @@ test.beforeEach(async ({ page }) => {
             id: "older-job",
             url: "https://open.spotify.com/album/older",
             status: "Completed",
+            completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date(Date.now() - 100000).toISOString(),
             files: 10,
             error_log: null
@@ -20,6 +21,7 @@ test.beforeEach(async ({ page }) => {
             id: "newer-job",
             url: "https://open.spotify.com/album/newer",
             status: "Completed",
+            completed_at: new Date(Date.now() - 1000).toISOString(),
             created_at: new Date().toISOString(),
             files: 10,
             error_log: null
