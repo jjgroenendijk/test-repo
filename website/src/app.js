@@ -133,6 +133,20 @@ export function renderApp(root) {
             <div class="storage-progress-bar-fill" id="storage-progress-fill" style="width: 0%;"></div>
           </div>
           <p id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</p>
+          <div id="job-stats-container" style="margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <strong style="color: var(--text-primary);">Total Jobs</strong>
+              <p id="stat-total-jobs" style="margin: 2px 0 0 0;">-</p>
+            </div>
+            <div>
+              <strong style="color: var(--text-primary);">Total Files</strong>
+              <p id="stat-total-files" style="margin: 2px 0 0 0;">-</p>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <strong style="color: var(--text-primary);">Success Rate</strong>
+              <p id="stat-success-rate" style="margin: 2px 0 0 0;">-</p>
+            </div>
+          </div>
         </aside>
       </section>
 
@@ -224,6 +238,25 @@ export function renderApp(root) {
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  async function updateJobStats() {
+    try {
+      const response = await fetch("/api/stats");
+      if (response.ok) {
+        const data = await response.json();
+
+        const totalJobsEl = root.querySelector("#stat-total-jobs");
+        const totalFilesEl = root.querySelector("#stat-total-files");
+        const successRateEl = root.querySelector("#stat-success-rate");
+
+        if (totalJobsEl) totalJobsEl.textContent = data.total_jobs;
+        if (totalFilesEl) totalFilesEl.textContent = data.total_files;
+        if (successRateEl) successRateEl.textContent = `${data.success_rate}%`;
+      }
+    } catch (err) {
+      console.error("Failed to fetch job stats", err);
+    }
   }
 
   async function updateStorageUsage() {
@@ -355,6 +388,7 @@ export function renderApp(root) {
       pollInterval = setInterval(() => {
         fetchJobs();
         updateStorageUsage();
+        updateJobStats();
       }, 5000);
     }
   }
@@ -372,6 +406,7 @@ export function renderApp(root) {
   // Initial load
   fetchJobs();
   updateStorageUsage();
+  updateJobStats();
   applyAutoRefreshState();
 
   const themeToggleBtn = root.querySelector("#theme-toggle");
