@@ -485,3 +485,33 @@ def test_get_system_storage(tmp_path, monkeypatch):
     assert isinstance(data["total"], int)
     assert isinstance(data["used"], int)
     assert isinstance(data["free"], int)
+
+def test_get_stats_empty(tmp_path, monkeypatch):
+    history_file = tmp_path / "history.json"
+    monkeypatch.setattr("server.HISTORY_FILE", history_file)
+
+    response = client.get("/api/stats")
+    assert response.status_code == 200
+    assert response.json() == {"total_jobs": 0, "total_files": 0, "success_rate": 0}
+
+def test_get_stats_with_data(tmp_path, monkeypatch):
+    history_file = tmp_path / "history.json"
+    monkeypatch.setattr("server.HISTORY_FILE", history_file)
+
+    history_data = [
+        {"id": "job-1", "status": "Completed", "files": 5},
+        {"id": "job-2", "status": "Failed", "files": 0},
+        {"id": "job-3", "status": "Running"},
+        {"id": "job-4", "status": "Completed", "files": 2},
+    ]
+    with open(history_file, "w") as f:
+        json.dump(history_data, f)
+
+    response = client.get("/api/stats")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_jobs"] == 4
+    assert data["total_files"] == 7
+    # 2 completed, 1 failed, 1 running
+    # Finished = 3, Completed = 2 -> 2/3 * 100 = 67%
+    assert data["success_rate"] == 67

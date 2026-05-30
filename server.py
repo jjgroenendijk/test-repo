@@ -636,6 +636,45 @@ async def cancel_job(job_id: str):
 
     return {"status": "success"}
 
+def _calculate_stats():
+    import json
+    if not HISTORY_FILE.exists():
+        return {"total_jobs": 0, "total_files": 0, "success_rate": 0}
+
+    try:
+        with open(HISTORY_FILE, "r") as f:
+            history = json.load(f)
+    except json.JSONDecodeError:
+        return {"total_jobs": 0, "total_files": 0, "success_rate": 0}
+
+    total_jobs = len(history)
+    if total_jobs == 0:
+        return {"total_jobs": 0, "total_files": 0, "success_rate": 0}
+
+    total_files = sum(job.get("files", 0) for job in history)
+    completed_jobs = sum(1 for job in history if job.get("status") == "Completed")
+
+    # Calculate success rate as a percentage
+    # To avoid counting currently running/queued jobs as failures, we could either
+    # calculate rate out of finished jobs only, or total jobs. Let's do total jobs for simplicity,
+    # or finished jobs (Completed + Failed) for a more accurate rate.
+    # Let's use (Completed / (Completed + Failed)) if there are finished jobs, else 0
+    finished_jobs = sum(1 for job in history if job.get("status") in ["Completed", "Failed"])
+    if finished_jobs > 0:
+        success_rate = round((completed_jobs / finished_jobs) * 100)
+    else:
+        success_rate = 0
+
+    return {
+        "total_jobs": total_jobs,
+        "total_files": total_files,
+        "success_rate": success_rate
+    }
+
+@app.get("/api/stats")
+async def get_stats():
+    return await asyncio.to_thread(_calculate_stats)
+
 @app.get("/api/system/storage")
 def get_system_storage():
     try:
