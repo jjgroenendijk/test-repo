@@ -143,6 +143,7 @@ export function renderApp(root) {
               required
               rows="3"
             ></textarea>
+            <button type="button" id="clear-input-btn" class="clear-history-btn">Clear input</button>
             <button type="submit">Queue</button>
           </div>
           <p class="hint" id="queue-feedback">Tracks, albums, and playlists will run through the SpotiFLAC module.</p>
@@ -228,6 +229,15 @@ export function renderApp(root) {
   const statusFilter = root.querySelector("#job-status-filter");
   const searchInput = root.querySelector("#job-search-input");
   const sortSelect = root.querySelector("#job-sort-select");
+  const clearInputBtn = root.querySelector("#clear-input-btn");
+
+  if (clearInputBtn) {
+    clearInputBtn.addEventListener("click", () => {
+      input.value = "";
+      feedback.textContent = "Tracks, albums, and playlists will run through the SpotiFLAC module.";
+      feedback.dataset.state = "";
+    });
+  }
 
   async function updateProgress(jobId) {
     const container = root.querySelector(`#progress-container-${jobId}`);
@@ -491,6 +501,9 @@ export function renderApp(root) {
     queueBtn.disabled = true;
     queueBtn.textContent = "Queueing...";
 
+    // Clear the text input immediately upon submitting
+    input.value = "";
+
     try {
       const requests = urls.map(url =>
         fetch("/api/jobs", {
@@ -508,8 +521,6 @@ export function renderApp(root) {
       if (successCount === 0) {
         throw new Error("Failed to queue all jobs");
       }
-
-      input.value = "";
 
       if (failedCount === 0) {
         feedback.textContent = `Successfully queued ${successCount} job${successCount > 1 ? 's' : ''}.`;

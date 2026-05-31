@@ -1162,3 +1162,31 @@ test('can queue multiple comma-separated URLs', async ({ page }) => {
   expect(queuedUrls).toContain('https://open.spotify.com/track/2');
   expect(queuedUrls).toContain('https://open.spotify.com/track/3');
 });
+
+test("can clear input field manually", async ({ page }) => {
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  const input = page.locator("#spotify-url");
+  await input.fill("https://open.spotify.com/track/123");
+  await expect(input).toHaveValue("https://open.spotify.com/track/123");
+
+  const clearBtn = page.locator("#clear-input-btn");
+  await clearBtn.click();
+
+  await expect(input).toHaveValue("");
+
+  const feedback = page.locator("#queue-feedback");
+  await expect(feedback).toContainText("Tracks, albums, and playlists will run through the SpotiFLAC module.");
+});
