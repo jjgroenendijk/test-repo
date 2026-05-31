@@ -462,6 +462,81 @@ describe("renderApp", () => {
     expect(downloadAllBtn.hasAttribute("download")).toBe(true);
   });
 
+  it("copies job URL to clipboard when copy button is clicked", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    // Mock clipboard API
+    Object.defineProperty(global.navigator, 'clipboard', {
+      value: {
+        writeText: vi.fn().mockResolvedValue()
+      },
+      writable: true
+    });
+
+    const root = document.getElementById("root");
+
+    const fetchMock = vi.fn();
+    fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/jobs" && (!options || options.method === "GET")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            {
+              id: "copy-job-1",
+              url: "https://open.spotify.com/track/copy123",
+              status: "Completed",
+              created_at: "2023-01-01T00:00:00Z"
+            }
+          ])
+        });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+    });
+    global.fetch = fetchMock;
+
+    renderApp(root);
+
+    // Allow async handlers to complete
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Use fake timers to test setTimeout, after the async initialization
+    vi.useFakeTimers();
+
+    const copyBtn = document.querySelector(".copy-url-btn");
+    expect(copyBtn).not.toBeNull();
+    expect(copyBtn.getAttribute("data-job-url")).toBe("https://open.spotify.com/track/copy123");
+    expect(copyBtn.textContent).toBe("Copy");
+    expect(copyBtn.disabled).toBe(false);
+
+    // Simulate click
+    copyBtn.click();
+
+    // Verify clipboard was called
+    expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith("https://open.spotify.com/track/copy123");
+
+    // Wait for the async click handler to finish the try block
+    await Promise.resolve();
+
+    // Verify button text changed
+    expect(copyBtn.textContent).toBe("Copied!");
+    expect(copyBtn.disabled).toBe(true);
+
+    // Advance time by 2 seconds
+    vi.advanceTimersByTime(2000);
+
+    // Verify button reverted
+    expect(copyBtn.textContent).toBe("Copy");
+    expect(copyBtn.disabled).toBe(false);
+
+    vi.useRealTimers();
+  });
+
   it("calculates and renders the correct execution duration for a completed job", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
