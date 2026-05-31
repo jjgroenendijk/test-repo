@@ -103,7 +103,10 @@ function renderJob(job) {
       <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
-          <button type="button" class="close-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+          <div>
+            <button type="button" class="refresh-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto; margin-right: 8px;">Refresh Logs</button>
+            <button type="button" class="close-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+          </div>
         </div>
         <pre class="job-logs-content" id="logs-content-${escapeHtml(job.id)}">Loading...</pre>
       </div>
@@ -561,6 +564,40 @@ export function renderApp(root) {
       const logsContainer = root.querySelector(`#logs-container-${jobId}`);
       if (logsContainer) {
         logsContainer.style.display = "none";
+      }
+    }
+
+    if (event.target.classList.contains("refresh-logs-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const btn = event.target;
+      const logsContent = root.querySelector(`#logs-content-${jobId}`);
+
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "Refreshing...";
+
+      try {
+        const response = await fetch(`/api/jobs/${jobId}/log`);
+        if (response.ok) {
+          const data = await response.json();
+          if (logsContent) {
+            logsContent.textContent = data.log || "No logs available.";
+          }
+        } else {
+          if (logsContent) {
+            logsContent.textContent = "Failed to load logs.";
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch logs", err);
+        if (logsContent) {
+          logsContent.textContent = "Failed to load logs.";
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     }
 
