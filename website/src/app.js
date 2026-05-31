@@ -74,6 +74,7 @@ function renderJob(job) {
         <p class="job-title">
           <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener noreferrer" class="source-link">${escapeHtml(job.url)}</a>
           <span class="url-type-badge" style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; text-transform: capitalize; vertical-align: middle;">${escapeHtml(urlType)}</span>
+          <button type="button" class="copy-url-btn" data-job-url="${escapeHtml(job.url)}" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 4px;">Copy</button>
         </p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
         ${completedAtHtml}
@@ -685,6 +686,26 @@ export function renderApp(root) {
         console.error("Failed to delete job", err);
         event.target.disabled = false;
         event.target.textContent = "Delete";
+      }
+    }
+
+    if (event.target.classList.contains("copy-url-btn")) {
+      const jobUrl = event.target.dataset.jobUrl;
+      if (!jobUrl) return;
+
+      try {
+        await navigator.clipboard.writeText(jobUrl);
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.disabled = true;
+
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }, 2000);
+      } catch (err) {
+        console.error("Failed to copy URL", err);
       }
     }
   });
