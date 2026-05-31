@@ -269,8 +269,11 @@ async def get_job_files(job_id: str):
             if p.is_file():
                 # Get path relative to the job directory
                 rel_path = p.relative_to(job_dir)
-                files.append(str(rel_path))
-        return {"files": sorted(files)}
+                size = p.stat().st_size
+                files.append({"name": str(rel_path), "size": size})
+
+        files.sort(key=lambda x: x["name"])
+        return {"files": files}
     except Exception as e:
         logger.error(f"Error listing files for {job_id}: {e}")
         raise HTTPException(status_code=500, detail="Error listing files")

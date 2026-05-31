@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isSpotifyUrl, classifySpotifyUrl, renderApp } from "./app.js";
+import { isSpotifyUrl, classifySpotifyUrl, formatFileSize, renderApp } from "./app.js";
 import { JSDOM } from "jsdom";
 
 // Mock fetch globally for any component tests
@@ -23,6 +23,16 @@ describe("isSpotifyUrl", () => {
 describe("classifySpotifyUrl", () => {
   it("classifies tracks", () => {
     expect(classifySpotifyUrl("https://open.spotify.com/track/123")).toBe("track");
+  });
+});
+
+describe("formatFileSize", () => {
+  it("formats bytes correctly", () => {
+    expect(formatFileSize(0)).toBe("0 B");
+    expect(formatFileSize(1024)).toBe("1 KB");
+    expect(formatFileSize(1048576)).toBe("1 MB");
+    expect(formatFileSize(1073741824)).toBe("1 GB");
+    expect(formatFileSize(1500)).toBe("1.46 KB");
   });
 });
 
@@ -215,7 +225,7 @@ describe("renderApp", () => {
     global.fetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ files: ["album/track1.flac"] })
+        json: () => Promise.resolve({ files: [{ name: "album/track1.flac", size: 1048576 }] })
       })
     );
 
@@ -237,6 +247,9 @@ describe("renderApp", () => {
     expect(link.getAttribute('download')).toBe('track1.flac');
     expect(link.getAttribute('href')).toBe('/api/jobs/test-job-123/files/album/track1.flac');
     expect(link.textContent).toBe('album/track1.flac');
+
+    // Check if file size is rendered
+    expect(filesList.textContent).toContain('(1 MB)');
 
     cleanup();
   });
