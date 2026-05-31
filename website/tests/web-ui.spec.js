@@ -890,6 +890,72 @@ test('renders audio player for audio files', async ({ page }) => {
   expect(nonAudioCount).toBe(0);
 });
 
+test('manual log refresh button updates logs', async ({ page }) => {
+  let logCalls = 0;
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-refresh-logs',
+            url: 'https://open.spotify.com/track/refresh-logs',
+            status: 'Running',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route('/api/jobs/job-refresh-logs/log', async (route) => {
+    logCalls++;
+    if (logCalls === 1) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ log: 'Log line 1' })
+      });
+    } else {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ log: 'Log line 1\nLog line 2' })
+      });
+    }
+  });
+
+  await page.goto('/');
+
+  const jobCard = page.locator('.job-card[data-job-id="job-refresh-logs"]');
+  await expect(jobCard).toBeVisible();
+
+  // Click View Logs
+  const viewLogsBtn = jobCard.locator('button.view-logs-btn');
+  await expect(viewLogsBtn).toBeVisible();
+  await viewLogsBtn.click();
+
+  const logsContainer = page.locator('#logs-container-job-refresh-logs');
+  await expect(logsContainer).toBeVisible();
+
+  const logsContent = logsContainer.locator('#logs-content-job-refresh-logs');
+  await expect(logsContent).toHaveText('Log line 1');
+
+  // Click Refresh Logs
+  const refreshLogsBtn = logsContainer.locator('button.refresh-logs-btn');
+  await expect(refreshLogsBtn).toBeVisible();
+  await refreshLogsBtn.click();
+
+  // Verify updated logs
+  await expect(logsContent).toHaveText('Log line 1\nLog line 2');
+});
+
 test("filters jobs by type", async ({ page }) => {
   await page.route("/api/jobs", async (route) => {
     if (route.request().method() === "GET") {
