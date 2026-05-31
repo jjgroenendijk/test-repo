@@ -1,0 +1,1 @@
+We need to clear the text input field containing the spotify URLs after clicking queue or a user hitting submit. And we should probably provide a 'Clear Input' button next to the input area to wipe the field.
