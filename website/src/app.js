@@ -22,6 +22,14 @@ export function classifySpotifyUrl(value) {
   return new URL(value).pathname.split("/").filter(Boolean)[0];
 }
 
+export function formatFileSize(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 function formatDuration(startStr, endStr) {
   if (!startStr || !endStr) return "";
   const start = new Date(startStr);
@@ -626,19 +634,24 @@ export function renderApp(root) {
           if (response.ok) {
             const data = await response.json();
             if (data.files && data.files.length > 0) {
-                filesList.innerHTML = data.files.map(file => {
+                filesList.innerHTML = data.files.map(fileObj => {
+                    // Handle both old format (string) and new format (object)
+                    const isObject = typeof fileObj === 'object' && fileObj !== null;
+                    const fileNameStr = isObject ? fileObj.name : fileObj;
+                    const fileSizeStr = isObject && fileObj.size !== undefined ? ` <span style="color: #666; font-size: 0.85em;">(${formatFileSize(fileObj.size)})</span>` : "";
+
                     const encodedJobId = encodeURIComponent(jobId);
-                    const encodedFile = file.split('/').map(encodeURIComponent).join('/');
-                    const fileName = file.split('/').pop();
+                    const encodedFile = fileNameStr.split('/').map(encodeURIComponent).join('/');
+                    const fileName = fileNameStr.split('/').pop();
                     const fileUrl = `/api/jobs/${encodedJobId}/files/${encodedFile}`;
 
                     let audioHtml = "";
-                    const lowerFile = file.toLowerCase();
+                    const lowerFile = fileNameStr.toLowerCase();
                     if (lowerFile.endsWith('.flac') || lowerFile.endsWith('.mp3') || lowerFile.endsWith('.wav') || lowerFile.endsWith('.m4a') || lowerFile.endsWith('.ogg')) {
                         audioHtml = `<br><audio controls src="${fileUrl}" style="margin-top: 8px; max-width: 100%; height: 32px;"></audio>`;
                     }
 
-                    return `<li style="margin-bottom: 12px;"><a href="${fileUrl}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(file)}</a>${audioHtml}</li>`;
+                    return `<li style="margin-bottom: 12px;"><a href="${fileUrl}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(fileNameStr)}</a>${fileSizeStr}${audioHtml}</li>`;
                 }).join("");
             } else {
                 filesList.innerHTML = "<li>No files found.</li>";
