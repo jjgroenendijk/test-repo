@@ -432,8 +432,6 @@ export function renderApp(root) {
     if (autoRefreshToggle && autoRefreshToggle.checked) {
       pollInterval = setInterval(() => {
         fetchJobs();
-        updateStorageUsage();
-        updateJobStats();
       }, 5000);
     }
   }
@@ -509,6 +507,11 @@ export function renderApp(root) {
         updateProgress(jobId);
       }
     });
+
+    if (autoRefreshToggle && autoRefreshToggle.checked) {
+      updateStorageUsage();
+      updateJobStats();
+    }
   }, 2000);
 
   form.addEventListener("submit", async (event) => {
