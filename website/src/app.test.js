@@ -59,6 +59,64 @@ describe("renderApp", () => {
     cleanup();
   });
 
+  it("polls api endpoints at correct intervals when auto-refresh is enabled", async () => {
+    vi.useFakeTimers();
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"><input type="checkbox" id="auto-refresh-toggle" checked /></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    const fetchMock = vi.fn((url) => {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+    global.fetch = fetchMock;
+
+    const cleanup = renderApp(root);
+
+    // Initial calls
+    expect(fetchMock).toHaveBeenCalledWith("/api/jobs");
+    expect(fetchMock).toHaveBeenCalledWith("/api/system/storage");
+    expect(fetchMock).toHaveBeenCalledWith("/api/stats");
+
+    fetchMock.mockClear();
+
+    // Advance by 2 seconds
+    vi.advanceTimersByTime(2000);
+
+    // progressPollInterval triggered
+    expect(fetchMock).toHaveBeenCalledWith("/api/system/storage");
+    expect(fetchMock).toHaveBeenCalledWith("/api/stats");
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/jobs");
+
+    fetchMock.mockClear();
+
+    // Advance by 2 seconds (total 4)
+    vi.advanceTimersByTime(2000);
+    expect(fetchMock).toHaveBeenCalledWith("/api/system/storage");
+    expect(fetchMock).toHaveBeenCalledWith("/api/stats");
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/jobs");
+
+    fetchMock.mockClear();
+
+    // Advance by 1 second (total 5)
+    vi.advanceTimersByTime(1000);
+    // pollInterval triggered
+    expect(fetchMock).toHaveBeenCalledWith("/api/jobs");
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/system/storage");
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/stats");
+
+    cleanup();
+    vi.useRealTimers();
+  });
+
   it("updates the storage progress bar correctly", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
