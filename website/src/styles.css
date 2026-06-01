@@ -351,6 +351,10 @@ button:active {
   gap: 10px;
 }
 
+.job-list.compact {
+  gap: 6px;
+}
+
 .job-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -358,6 +362,15 @@ button:active {
   align-items: center;
   padding: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-list.compact .job-card {
+  padding: 8px;
+  gap: 10px;
+}
+
+.job-list.compact .track-cover {
+  display: none;
 }
 
 .track-cover {
