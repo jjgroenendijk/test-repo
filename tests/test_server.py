@@ -1,3 +1,7 @@
+from httpx import AsyncClient
+from server import running_processes, LOGS_DIR
+
+from httpx import ASGITransport
 import json
 from unittest.mock import patch
 import pytest
@@ -515,3 +519,39 @@ def test_get_stats_with_data(tmp_path, monkeypatch):
     # 2 completed, 1 failed, 1 running
     # Finished = 3, Completed = 2 -> 2/3 * 100 = 67%
     assert data["success_rate"] == 67
+@pytest.mark.anyio
+async def test_cancel_all_jobs(clean_history, monkeypatch):
+    monkeypatch.setattr("server.run_spotiflac", lambda job_id, url: None)
+    # Queue a job
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res1 = await client.post("/api/jobs", json={"url": "https://open.spotify.com/track/1234"})
+        assert res1.status_code == 200
+        job1_id = res1.json()["id"]
+
+        res2 = await client.post("/api/jobs", json={"url": "https://open.spotify.com/track/5678"})
+        assert res2.status_code == 200
+        job2_id = res2.json()["id"]
+
+    # Simulate them running
+    running_processes[job1_id] = type("MockProcess", (), {"terminate": lambda self: None})()
+    running_processes[job2_id] = type("MockProcess", (), {"terminate": lambda self: None})()
+
+    # Add fake logs to ensure they are NOT deleted
+    log1 = LOGS_DIR / f"{job1_id}.log"
+    log1.write_text("log 1")
+    log2 = LOGS_DIR / f"{job2_id}.log"
+    log2.write_text("log 2")
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res_cancel = await client.post("/api/jobs/cancel-all")
+        assert res_cancel.status_code == 200
+        assert res_cancel.json()["cancelled"] == 2
+
+        res_list = await client.get("/api/jobs")
+        jobs = res_list.json()
+        assert len(jobs) == 2
+        assert all(j["status"] == "Cancelled" for j in jobs)
+
+    # Check logs are NOT deleted
+    assert log1.exists()
+    assert log2.exists()

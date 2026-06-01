@@ -16,6 +16,14 @@ test.describe('Compact View Toggle', () => {
     // Create a mock job so we have a track cover to check
     // We can do this by mocking the API response or creating a job if the backend is running.
     // For simplicity, we'll intercept the API to return a mock job.
+    await page.route('**/cover', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'image/png',
+        body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+      });
+    });
+
     await page.route('/api/jobs', async route => {
       await route.fulfill({
         status: 200,
@@ -45,7 +53,7 @@ test.describe('Compact View Toggle', () => {
     await expect(jobList).toHaveClass(/compact/);
 
     // The track cover should be hidden
-    await expect(trackCover).toBeHidden();
+    await expect(trackCover).not.toBeVisible();
 
     // Take a screenshot to verify visually
     await page.screenshot({ path: 'compact-view-test.png' });

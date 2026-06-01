@@ -218,6 +218,7 @@ export function renderApp(root) {
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
+            <button type="button" id="cancel-all-btn" class="clear-history-btn" style="border-color: rgba(239, 68, 68, 0.5); color: #ef4444;">Cancel all</button>
             <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Clear queued</button>
@@ -830,6 +831,30 @@ export function renderApp(root) {
       } finally {
         clearRunningBtn.disabled = false;
         clearRunningBtn.textContent = "Clear running";
+      }
+    });
+  }
+
+  const cancelAllBtn = root.querySelector("#cancel-all-btn");
+  if (cancelAllBtn) {
+    cancelAllBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to cancel all running and queued jobs?")) {
+        return;
+      }
+      cancelAllBtn.disabled = true;
+      cancelAllBtn.textContent = "Cancelling...";
+      try {
+        const response = await fetch("/api/jobs/cancel-all", { method: "POST" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to cancel all jobs");
+        }
+      } catch (error) {
+        console.error("Error cancelling all jobs:", error);
+      } finally {
+        cancelAllBtn.disabled = false;
+        cancelAllBtn.textContent = "Cancel all";
       }
     });
   }
