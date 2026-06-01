@@ -1,4 +1,5 @@
 import asyncio
+import io
 import json
 import logging
 import os
@@ -408,6 +409,37 @@ def download_all_completed_jobs(background_tasks: BackgroundTasks):
         path=zip_path,
         media_type="application/zip",
         filename="SpotiFLAC-all-completed.zip"
+    )
+
+def _create_all_logs_zip() -> io.BytesIO | None:
+    import zipfile
+
+    if not LOGS_DIR.exists() or not LOGS_DIR.is_dir():
+        return None
+
+    log_files = list(LOGS_DIR.glob("*.log"))
+    if not log_files:
+        return None
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for f in log_files:
+            zip_file.write(f, arcname=f.name)
+
+    zip_buffer.seek(0)
+    return zip_buffer
+
+@app.get("/api/history/logs/download")
+async def download_all_logs():
+    from fastapi import Response
+    zip_buffer = await asyncio.to_thread(_create_all_logs_zip)
+    if zip_buffer is None:
+        raise HTTPException(status_code=404, detail="No logs found")
+
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=SpotiFLAC-all-logs.zip"}
     )
 
 @app.get("/api/history/export")
