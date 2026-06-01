@@ -515,3 +515,45 @@ def test_get_stats_with_data(tmp_path, monkeypatch):
     # 2 completed, 1 failed, 1 running
     # Finished = 3, Completed = 2 -> 2/3 * 100 = 67%
     assert data["success_rate"] == 67
+
+@patch('server.LOGS_DIR')
+def test_download_all_logs_success(mock_logs_dir, tmp_path):
+    import io
+    import zipfile
+
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create mock logs
+    (logs_dir / "job1.log").write_text("log output 1")
+    (logs_dir / "job2.log").write_text("log output 2")
+
+    mock_logs_dir.exists.return_value = True
+    mock_logs_dir.is_dir.return_value = True
+    mock_logs_dir.glob.return_value = logs_dir.glob("*.log")
+
+    response = client.get("/api/history/logs/download")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+    assert "attachment; filename=SpotiFLAC-all-logs.zip" in response.headers["content-disposition"]
+
+    # Verify zip content
+    zip_data = io.BytesIO(response.content)
+    with zipfile.ZipFile(zip_data, "r") as zip_file:
+        files = zip_file.namelist()
+        assert "job1.log" in files
+        assert "job2.log" in files
+        assert zip_file.read("job1.log") == b"log output 1"
+
+@patch('server.LOGS_DIR')
+def test_download_all_logs_not_found(mock_logs_dir, tmp_path):
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+
+    mock_logs_dir.exists.return_value = True
+    mock_logs_dir.is_dir.return_value = True
+    mock_logs_dir.glob.return_value = []
+
+    response = client.get("/api/history/logs/download")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No logs found"
