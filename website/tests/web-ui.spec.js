@@ -1179,13 +1179,18 @@ test("can clear input field manually", async ({ page }) => {
   await page.goto("/");
 
   const input = page.locator("#spotify-url");
+  const clearBtn = page.locator("#clear-input-btn");
+
+  await expect(clearBtn).toBeHidden();
+
   await input.fill("https://open.spotify.com/track/123");
   await expect(input).toHaveValue("https://open.spotify.com/track/123");
+  await expect(clearBtn).toBeVisible();
 
-  const clearBtn = page.locator("#clear-input-btn");
   await clearBtn.click();
 
   await expect(input).toHaveValue("");
+  await expect(clearBtn).toBeHidden();
 
   const feedback = page.locator("#queue-feedback");
   await expect(feedback).toContainText("Tracks, albums, and playlists will run through the SpotiFLAC module.");

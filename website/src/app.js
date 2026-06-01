@@ -151,7 +151,7 @@ export function renderApp(root) {
               required
               rows="3"
             ></textarea>
-            <button type="button" id="clear-input-btn" class="clear-history-btn">Clear input</button>
+            <button type="button" id="clear-input-btn" class="clear-history-btn" style="display: none;">Clear input</button>
             <button type="submit">Queue</button>
           </div>
           <p class="hint" id="queue-feedback">Tracks, albums, and playlists will run through the SpotiFLAC module.</p>
@@ -244,11 +244,22 @@ export function renderApp(root) {
   const sortSelect = root.querySelector("#job-sort-select");
   const clearInputBtn = root.querySelector("#clear-input-btn");
 
+  if (input && clearInputBtn) {
+    input.addEventListener("input", () => {
+      if (input.value.length > 0) {
+        clearInputBtn.style.display = "inline-block";
+      } else {
+        clearInputBtn.style.display = "none";
+      }
+    });
+  }
+
   if (clearInputBtn) {
     clearInputBtn.addEventListener("click", () => {
       input.value = "";
       feedback.textContent = "Tracks, albums, and playlists will run through the SpotiFLAC module.";
       feedback.dataset.state = "";
+      clearInputBtn.style.display = "none";
     });
   }
 
@@ -539,6 +550,9 @@ export function renderApp(root) {
 
     // Clear the text input immediately upon submitting
     input.value = "";
+    if (clearInputBtn) {
+      clearInputBtn.style.display = "none";
+    }
 
     try {
       const requests = urls.map(url =>
