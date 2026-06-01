@@ -210,6 +210,10 @@ export function renderApp(root) {
               <input type="checkbox" id="auto-refresh-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
               Auto-refresh
             </label>
+            <label style="display: flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; color: var(--text-primary); cursor: pointer;">
+              <input type="checkbox" id="compact-view-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
+              Compact view
+            </label>
             <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
@@ -443,8 +447,28 @@ export function renderApp(root) {
     });
   }
 
+  const compactViewToggle = root.querySelector("#compact-view-toggle");
+  function applyCompactViewState() {
+    if (compactViewToggle && compactViewToggle.checked) {
+      jobList.classList.add("compact");
+    } else {
+      jobList.classList.remove("compact");
+    }
+  }
+
+  if (compactViewToggle) {
+    const savedCompactView = localStorage.getItem("compactView");
+    compactViewToggle.checked = savedCompactView === "true";
+
+    compactViewToggle.addEventListener("change", () => {
+      localStorage.setItem("compactView", compactViewToggle.checked);
+      applyCompactViewState();
+    });
+  }
+
   // Initial load
   fetchJobs();
+  applyCompactViewState();
   updateStorageUsage();
   updateJobStats();
   applyAutoRefreshState();
