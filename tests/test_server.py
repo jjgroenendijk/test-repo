@@ -598,3 +598,8 @@ def test_download_all_logs_not_found(mock_logs_dir, tmp_path):
     response = client.get("/api/history/logs/download")
     assert response.status_code == 404
     assert response.json()["detail"] == "No logs found"
+
+def test_health_endpoint():
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
