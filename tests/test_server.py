@@ -62,6 +62,47 @@ def test_cancel_nonexistent_job():
     response = client.delete("/api/jobs/not-a-real-id")
     assert response.status_code == 404
 
+def test_cancel_all_queued_jobs():
+    import json
+
+    # Write some dummy jobs directly to history file
+    dummy_history = [
+        {"id": "job-q1", "url": "https://open.spotify.com/track/abc", "status": "Queued"},
+        {"id": "job-q2", "url": "https://open.spotify.com/track/def", "status": "Completed"},
+        {"id": "job-q3", "url": "https://open.spotify.com/track/ghi", "status": "Queued"},
+        {"id": "job-q4", "url": "https://open.spotify.com/track/jkl", "status": "Running"}
+    ]
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(dummy_history, f)
+
+    response = client.post("/api/jobs/cancel-queued")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["cancelled"] == 2
+
+    # Verify status in history
+    response = client.get("/api/jobs")
+    jobs = response.json()
+
+    job_q1 = next((j for j in jobs if j["id"] == "job-q1"), None)
+    assert job_q1 is not None
+    assert job_q1["status"] == "Cancelled"
+    assert "completed_at" in job_q1
+
+    job_q2 = next((j for j in jobs if j["id"] == "job-q2"), None)
+    assert job_q2 is not None
+    assert job_q2["status"] == "Completed"
+
+    job_q3 = next((j for j in jobs if j["id"] == "job-q3"), None)
+    assert job_q3 is not None
+    assert job_q3["status"] == "Cancelled"
+    assert "completed_at" in job_q3
+
+    job_q4 = next((j for j in jobs if j["id"] == "job-q4"), None)
+    assert job_q4 is not None
+    assert job_q4["status"] == "Running"
+
 def test_clear_failed_history():
     import json
 

@@ -1019,6 +1019,59 @@ test("filters jobs by type", async ({ page }) => {
   await expect(page.locator('.job-card')).toHaveCount(3);
 });
 
+test('cancel all queued jobs', async ({ page }) => {
+  let cancelCalled = false;
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-queued',
+            url: 'https://open.spotify.com/track/queued-track',
+            status: 'Queued',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route('/api/jobs/cancel-queued', async (route) => {
+    if (route.request().method() === 'POST') {
+      cancelCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'success', cancelled: 1 })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  // Wait for the job card to load
+  await expect(page.locator('.job-card')).toHaveCount(1);
+
+  const cancelAllQueuedBtn = page.locator('#cancel-all-queued-btn');
+  await expect(cancelAllQueuedBtn).toBeVisible();
+
+  await cancelAllQueuedBtn.click();
+
+  // Give it a moment to call the API
+  await page.waitForTimeout(500);
+
+  expect(cancelCalled).toBe(true);
+});
+
 test('retry all cancelled jobs', async ({ page }) => {
   let retryCalled = false;
   let retriedUrl = '';

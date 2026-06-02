@@ -222,6 +222,7 @@ export function renderApp(root) {
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
             <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
+            <button type="button" id="cancel-all-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Cancel all queued</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
@@ -887,6 +888,27 @@ export function renderApp(root) {
       } finally {
         clearCancelledBtn.disabled = false;
         clearCancelledBtn.textContent = "Clear cancelled";
+      }
+    });
+  }
+
+  const cancelAllQueuedBtn = root.querySelector("#cancel-all-queued-btn");
+  if (cancelAllQueuedBtn) {
+    cancelAllQueuedBtn.addEventListener("click", async () => {
+      cancelAllQueuedBtn.disabled = true;
+      cancelAllQueuedBtn.textContent = "Cancelling...";
+      try {
+        const response = await fetch("/api/jobs/cancel-queued", { method: "POST" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to cancel queued jobs");
+        }
+      } catch (error) {
+        console.error("Error cancelling queued jobs:", error);
+      } finally {
+        cancelAllQueuedBtn.disabled = false;
+        cancelAllQueuedBtn.textContent = "Cancel all queued";
       }
     });
   }
