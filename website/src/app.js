@@ -895,6 +895,9 @@ export function renderApp(root) {
   const cancelAllQueuedBtn = root.querySelector("#cancel-all-queued-btn");
   if (cancelAllQueuedBtn) {
     cancelAllQueuedBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to cancel all queued jobs? This cannot be undone.")) {
+        return;
+      }
       cancelAllQueuedBtn.disabled = true;
       cancelAllQueuedBtn.textContent = "Cancelling...";
       try {
