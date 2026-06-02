@@ -186,6 +186,7 @@ export function renderApp(root) {
           <h2>Recent jobs</h2>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
+            <button type="button" id="clear-search-btn" class="clear-search-btn" style="display: none;" aria-label="Clear search">X</button>
             <select id="job-sort-select" class="job-status-filter clear-history-btn" aria-label="Sort jobs">
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -241,6 +242,7 @@ export function renderApp(root) {
   const typeFilter = root.querySelector("#job-type-filter");
   const statusFilter = root.querySelector("#job-status-filter");
   const searchInput = root.querySelector("#job-search-input");
+  const clearSearchBtn = root.querySelector("#clear-search-btn");
   const sortSelect = root.querySelector("#job-sort-select");
   const clearInputBtn = root.querySelector("#clear-input-btn");
 
@@ -428,8 +430,21 @@ export function renderApp(root) {
   if (searchInput) {
     let debounceTimer;
     searchInput.addEventListener("input", () => {
+      if (clearSearchBtn) {
+        clearSearchBtn.style.display = searchInput.value.length > 0 ? "inline-block" : "none";
+      }
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(fetchJobs, 300);
+    });
+  }
+
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener("click", () => {
+      if (searchInput) {
+        searchInput.value = "";
+      }
+      clearSearchBtn.style.display = "none";
+      fetchJobs();
     });
   }
 
