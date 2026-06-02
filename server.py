@@ -626,6 +626,29 @@ async def clear_failed_history():
 
     return {"status": "success", "cleared": len(cleared_jobs)}
 
+@app.post("/api/jobs/cancel-queued")
+async def cancel_all_queued():
+    history = []
+    cancelled_count = 0
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        new_history = []
+
+        for job in history:
+            if job.get("status") == "Queued":
+                job["status"] = "Cancelled"
+                job["completed_at"] = datetime.now(timezone.utc).isoformat()
+                cancelled_count += 1
+            new_history.append(job)
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(new_history, f, indent=2)
+
+    return {"status": "success", "cancelled": cancelled_count}
+
 @app.delete("/api/jobs/{job_id}")
 async def cancel_job(job_id: str):
     history = []
