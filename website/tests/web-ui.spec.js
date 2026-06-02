@@ -1195,3 +1195,53 @@ test("can clear input field manually", async ({ page }) => {
   const feedback = page.locator("#queue-feedback");
   await expect(feedback).toContainText("Tracks, albums, and playlists will run through the SpotiFLAC module.");
 });
+
+test('can retry an individual failed job from its card', async ({ page }) => {
+  let retryCalled = false;
+  let retriedUrl = '';
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-failed-single',
+            url: 'https://open.spotify.com/track/failed-single',
+            status: 'Failed',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: 'Single job error'
+          }
+        ])
+      });
+    } else if (route.request().method() === 'POST') {
+      retryCalled = true;
+      const postData = JSON.parse(route.request().postData() || '{}');
+      retriedUrl = postData.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id-single' })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const jobCard = page.locator('.job-card[data-job-id="job-failed-single"]');
+  await expect(jobCard).toBeVisible();
+
+  const retryBtn = jobCard.locator('.retry-job-btn');
+  await expect(retryBtn).toBeVisible();
+
+  const requestPromise = page.waitForRequest('/api/jobs');
+  await retryBtn.click();
+  await requestPromise;
+
+  expect(retryCalled).toBe(true);
+  expect(retriedUrl).toBe('https://open.spotify.com/track/failed-single');
+});
