@@ -733,6 +733,10 @@ def _calculate_stats():
 async def get_stats():
     return await asyncio.to_thread(_calculate_stats)
 
+@app.get("/api/health")
+async def get_health():
+    return {"status": "ok"}
+
 @app.get("/api/system/storage")
 def get_system_storage():
     try:
