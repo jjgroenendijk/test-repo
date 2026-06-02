@@ -1064,6 +1064,10 @@ test('cancel all queued jobs', async ({ page }) => {
   const cancelAllQueuedBtn = page.locator('#cancel-all-queued-btn');
   await expect(cancelAllQueuedBtn).toBeVisible();
 
+  page.on('dialog', async (dialog) => {
+    await dialog.accept();
+  });
+
   await cancelAllQueuedBtn.click();
 
   // Give it a moment to call the API
