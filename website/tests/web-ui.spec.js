@@ -238,6 +238,8 @@ test("shows cancel button for queued job and handles click", async ({ page }) =>
   const cancelBtn = page.getByRole("button", { name: "Cancel", exact: true });
   await expect(cancelBtn).toBeVisible();
 
+  page.once("dialog", dialog => dialog.accept());
+
   await cancelBtn.click();
 
   // Since we don't mock the subsequent GET /api/jobs in a way that changes state
