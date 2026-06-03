@@ -163,7 +163,10 @@ export function renderApp(root) {
           <div class="storage-progress-bar-bg" aria-hidden="true" style="margin-top: 8px; margin-bottom: 8px;">
             <div class="storage-progress-bar-fill" id="storage-progress-fill" style="width: 0%;"></div>
           </div>
-          <p id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</p>
+          <p style="margin: 0;">
+            <span id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</span>
+            <span id="storage-percentage-text" style="color: var(--text-secondary); font-size: 0.85em; margin-left: 4px;"></span>
+          </p>
           <div id="job-stats-container" style="margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
               <strong style="color: var(--text-primary);">Total Jobs</strong>
@@ -324,17 +327,26 @@ export function renderApp(root) {
       if (response.ok) {
         const data = await response.json();
         const textElement = root.querySelector("#storage-usage-text");
+        const percentageElement = root.querySelector("#storage-percentage-text");
+
         if (textElement && data.free !== undefined && data.total !== undefined) {
           textElement.textContent = `${formatBytes(data.free)} free of ${formatBytes(data.total)}`;
 
-          const fillElement = root.querySelector("#storage-progress-fill");
-          if (fillElement && data.total > 0) {
+          if (data.total > 0) {
             const usedPercentage = ((data.total - data.free) / data.total) * 100;
-            fillElement.style.width = `${Math.min(100, Math.max(0, usedPercentage))}%`;
-            if (usedPercentage > 90) {
-              fillElement.classList.add("danger");
-            } else {
-              fillElement.classList.remove("danger");
+
+            if (percentageElement) {
+                percentageElement.textContent = `(${Math.round(usedPercentage)}% used)`;
+            }
+
+            const fillElement = root.querySelector("#storage-progress-fill");
+            if (fillElement) {
+              fillElement.style.width = `${Math.min(100, Math.max(0, usedPercentage))}%`;
+              if (usedPercentage > 90) {
+                fillElement.classList.add("danger");
+              } else {
+                fillElement.classList.remove("danger");
+              }
             }
           }
         }
