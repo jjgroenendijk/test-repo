@@ -112,6 +112,7 @@ function renderJob(job) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
           <div>
+            <button type="button" class="copy-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto; margin-right: 8px;">Copy Logs</button>
             <button type="button" class="refresh-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto; margin-right: 8px;">Refresh Logs</button>
             <button type="button" class="close-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
           </div>
@@ -642,6 +643,29 @@ export function renderApp(root) {
         } catch (err) {
           logsContent.textContent = "Error fetching logs.";
           console.error(err);
+        }
+      }
+    }
+
+    if (event.target.classList.contains("copy-logs-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      const logsContent = root.querySelector(`#logs-content-${jobId}`);
+      if (logsContent) {
+        try {
+          await navigator.clipboard.writeText(logsContent.textContent);
+          const btn = event.target;
+          const originalText = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.disabled = true;
+
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+          }, 2000);
+        } catch (err) {
+          console.error("Failed to copy logs", err);
         }
       }
     }
