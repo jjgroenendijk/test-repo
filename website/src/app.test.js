@@ -419,6 +419,62 @@ describe("renderApp", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/history/clear-completed", { method: "DELETE" });
   });
 
+  it("calls the retry all completed jobs API when Retry completed is clicked", async () => {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
+      url: "http://localhost",
+    });
+    global.document = dom.window.document;
+    global.window = dom.window;
+    global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+
+    const root = document.getElementById("root");
+
+    const fetchMock = vi.fn();
+    fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/jobs" && (!options || options.method === "GET")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: "1", url: "https://open.spotify.com/track/1", status: "Completed" },
+            { id: "2", url: "https://open.spotify.com/track/2", status: "Failed" }
+          ])
+        });
+      }
+      if (url === "/api/jobs" && options && options.method === "POST") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      });
+    });
+    global.fetch = fetchMock;
+
+    renderApp(root);
+
+    // Initial fetch from renderApp
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const retryCompletedBtn = document.getElementById("retry-completed-btn");
+    expect(retryCompletedBtn).not.toBeNull();
+
+    retryCompletedBtn.click();
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/jobs", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({ url: "https://open.spotify.com/track/1" })
+    }));
+
+    // Should not retry the failed job
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/jobs", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({ url: "https://open.spotify.com/track/2" })
+    }));
+  });
+
   it("calls the retry all cancelled jobs API when Retry cancelled is clicked", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
