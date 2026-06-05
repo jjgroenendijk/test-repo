@@ -1304,3 +1304,49 @@ test('can retry an individual failed job from its card', async ({ page }) => {
   expect(retryCalled).toBe(true);
   expect(retriedUrl).toBe('https://open.spotify.com/track/failed-single');
 });
+
+test('sorts jobs by newest and oldest', async ({ page }) => {
+  // Override the GET /api/jobs route for this specific test
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: "job-oldest",
+            url: "https://open.spotify.com/track/old",
+            status: "Completed",
+            created_at: "2023-01-01T00:00:00Z",
+            files: 1,
+            error_log: null
+          },
+          {
+            id: "job-newest",
+            url: "https://open.spotify.com/track/new",
+            status: "Completed",
+            created_at: "2023-12-31T23:59:59Z",
+            files: 1,
+            error_log: null
+          }
+        ]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  // Actually wait for it to be visible first
+  await expect(page.locator('.job-card').first()).toBeVisible();
+
+  // Re-fetch since UI updates async
+  await expect(page.locator('.job-card').first().locator('.source-link')).toHaveText("https://open.spotify.com/track/new");
+
+  // Change sort to oldest
+  await page.selectOption('#job-sort-select', 'oldest');
+
+  // Verify the first job is now the oldest
+  await expect(page.locator('.job-card').first().locator('.source-link')).toHaveText("https://open.spotify.com/track/old");
+});
