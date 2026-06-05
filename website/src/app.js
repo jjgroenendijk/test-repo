@@ -85,6 +85,7 @@ function renderJob(job) {
           <button type="button" class="copy-url-btn" data-job-url="${escapeHtml(job.url)}" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 4px;">Copy</button>
         </p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
+        <p class="job-id-display" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">ID: ${escapeHtml(job.id)} <button type="button" class="copy-job-id-btn" data-job-id="${escapeHtml(job.id)}" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 4px;">Copy ID</button></p>
         ${completedAtHtml}
       </div>
       <div class="job-meta">
@@ -866,6 +867,26 @@ export function renderApp(root) {
         }, 2000);
       } catch (err) {
         console.error("Failed to copy URL", err);
+      }
+    }
+
+    if (event.target.classList.contains("copy-job-id-btn")) {
+      const jobId = event.target.dataset.jobId;
+      if (!jobId) return;
+
+      try {
+        await navigator.clipboard.writeText(jobId);
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.disabled = true;
+
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }, 2000);
+      } catch (err) {
+        console.error("Failed to copy Job ID", err);
       }
     }
   });
