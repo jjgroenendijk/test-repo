@@ -1332,7 +1332,7 @@ test('can retry an individual failed job from its card', async ({ page }) => {
   const jobCard = page.locator('.job-card[data-job-id="job-failed-single"]');
   await expect(jobCard).toBeVisible();
 
-  const retryBtn = jobCard.locator('.retry-job-btn');
+  const retryBtn = jobCard.getByRole("button", { name: "Retry", exact: true });
   await expect(retryBtn).toBeVisible();
 
   const requestPromise = page.waitForRequest('/api/jobs');
