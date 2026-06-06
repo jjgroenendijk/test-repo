@@ -1388,3 +1388,77 @@ test('sorts jobs by newest and oldest', async ({ page }) => {
   // Verify the first job is now the oldest
   await expect(page.locator('.job-card').first().locator('.source-link')).toHaveText("https://open.spotify.com/track/old");
 });
+
+test('can retry all running jobs', async ({ page }) => {
+  let deleteCalled = false;
+  let retryCalled = false;
+  let retriedUrl = '';
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'job-running',
+            url: 'https://open.spotify.com/track/running-track',
+            status: 'Running',
+            created_at: new Date().toISOString(),
+            files: 0,
+            error_log: null
+          }
+        ])
+      });
+    } else if (route.request().method() === 'POST') {
+      retryCalled = true;
+      const postData = JSON.parse(route.request().postData() || '{}');
+      retriedUrl = postData.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id' })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route('/api/jobs/job-running', async (route) => {
+    if (route.request().method() === 'DELETE') {
+      deleteCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'success' })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.route('/api/stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ total_jobs: 1, total_files: 0, success_rate: 0 })
+    });
+  });
+
+  await page.goto('/');
+
+  // Wait for the job card to load
+  await expect(page.locator('.job-card')).toHaveCount(1);
+
+  const retryRunningBtn = page.locator('#retry-running-btn');
+  await expect(retryRunningBtn).toBeVisible();
+
+  await retryRunningBtn.click();
+
+  // Give it a moment to call the API
+  await page.waitForTimeout(500);
+
+  expect(deleteCalled).toBe(true);
+  expect(retryCalled).toBe(true);
+  expect(retriedUrl).toBe('https://open.spotify.com/track/running-track');
+});

@@ -225,6 +225,7 @@ export function renderApp(root) {
             <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
             <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
             <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
+            <button type="button" id="retry-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Retry running</button>
             <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
             <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
@@ -1082,6 +1083,42 @@ export function renderApp(root) {
       } finally {
         retryFailedBtn.disabled = false;
         retryFailedBtn.textContent = "Retry failed";
+      }
+    });
+  }
+
+  const retryRunningBtn = root.querySelector("#retry-running-btn");
+  if (retryRunningBtn) {
+    retryRunningBtn.addEventListener("click", async () => {
+      retryRunningBtn.disabled = true;
+      retryRunningBtn.textContent = "Retrying...";
+      try {
+        const jobsResponse = await fetch("/api/jobs");
+        if (jobsResponse.ok) {
+          const jobs = await jobsResponse.json();
+          const runningJobs = jobs.filter(job => job.status === "Running");
+
+          const retryRequests = runningJobs.map(async (job) => {
+            // First delete the running job
+            await fetch(`/api/jobs/${encodeURIComponent(job.id)}`, {
+              method: "DELETE",
+            });
+            // Then re-queue it
+            return fetch("/api/jobs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: job.url })
+            });
+          });
+
+          await Promise.allSettled(retryRequests);
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to retry running jobs", err);
+      } finally {
+        retryRunningBtn.disabled = false;
+        retryRunningBtn.textContent = "Retry running";
       }
     });
   }
