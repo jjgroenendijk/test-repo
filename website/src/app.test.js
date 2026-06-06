@@ -15,6 +15,10 @@ describe("isSpotifyUrl", () => {
     expect(isSpotifyUrl("https://open.spotify.com/track/1ATL5GLyefJaxhQzSPVrLX")).toBe(true);
   });
 
+  it("accepts valid album URLs", () => {
+    expect(isSpotifyUrl("https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX")).toBe(true);
+  });
+
   it("rejects invalid hosts", () => {
     expect(isSpotifyUrl("https://soundcloud.com/track/123")).toBe(false);
   });
@@ -23,6 +27,10 @@ describe("isSpotifyUrl", () => {
 describe("classifySpotifyUrl", () => {
   it("classifies tracks", () => {
     expect(classifySpotifyUrl("https://open.spotify.com/track/123")).toBe("track");
+  });
+
+  it("classifies albums", () => {
+    expect(classifySpotifyUrl("https://open.spotify.com/album/123")).toBe("album");
   });
 });
 

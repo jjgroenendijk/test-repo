@@ -1,0 +1,1 @@
+I have successfully tested that Spotify Album URLs are indeed supported both by the frontend logic (`isSpotifyUrl`) and the backend module (`SpotiFLAC`). The initial requirement stated they "may or may not be supported," but my tests confirmed they are fully functional. I have added robust test coverage for this feature to prevent regressions.

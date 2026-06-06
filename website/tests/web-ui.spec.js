@@ -1181,6 +1181,44 @@ test('can retry all failed jobs', async ({ page }) => {
 });
 
 
+test('can queue an album URL', async ({ page }) => {
+  let queuedUrl = '';
+
+  await page.route('/api/jobs', async (route) => {
+    if (route.request().method() === 'POST') {
+      const postData = JSON.parse(route.request().postData() || '{}');
+      queuedUrl = postData.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ job_id: 'new-job-id-album' })
+      });
+    } else if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([])
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto('/');
+
+  const input = page.locator('#spotify-url');
+  await input.fill('https://open.spotify.com/album/123');
+
+  const queueBtn = page.locator('button[type="submit"]');
+  await queueBtn.click();
+
+  // Wait for the feedback to indicate success
+  const feedback = page.locator('#queue-feedback');
+  await expect(feedback).toContainText('Successfully queued 1 job.');
+
+  expect(queuedUrl).toBe('https://open.spotify.com/album/123');
+});
+
 test('can queue multiple comma-separated URLs', async ({ page }) => {
   let queuedUrls = [];
 
