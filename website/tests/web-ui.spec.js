@@ -187,7 +187,7 @@ test("can delete a job", async ({ page }) => {
 
   await page.goto("/");
 
-  const deleteBtn = page.getByRole("button", { name: "Delete" });
+  const deleteBtn = page.getByRole("button", { name: "Delete", exact: true });
   await expect(deleteBtn).toBeVisible();
 
   await deleteBtn.click();
