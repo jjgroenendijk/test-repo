@@ -649,6 +649,73 @@ async def cancel_all_queued():
 
     return {"status": "success", "cancelled": cancelled_count}
 
+async def _delete_all_files_background(history):
+    # This will run concurrently in the background so it doesn't block the API
+    tasks = []
+    for job in history:
+        job_id = job["id"]
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        tasks.append(asyncio.to_thread(_delete_job_files, job_id))
+
+    if tasks:
+        await asyncio.gather(*tasks)
+
+@app.delete("/api/jobs")
+async def delete_all_jobs(background_tasks: BackgroundTasks):
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+        else:
+            history = []
+
+        # Mark queued jobs as cancelled so `run_spotiflac` exits early
+        # even if we clear history right away or later
+        for job in history:
+            if job["status"] == "Queued":
+                job["status"] = "Cancelled"
+
+        # Write it back briefly so background workers can read the "Cancelled" state
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(history, f, indent=2)
+
+        # Terminate running processes
+        for job in history:
+            job_id = job["id"]
+            if job_id in running_processes:
+                process = running_processes[job_id]
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
+                # We do NOT delete from running_processes here so the worker task handles it
+
+        # Clear history file
+        with open(HISTORY_FILE, "w") as f:
+            json.dump([], f, indent=2)
+
+    # Allow the background tasks (which wait for process.wait()) some time to finish their logic and update history
+    # Wait for running jobs to finish gracefully so they don't rewrite to our empty history
+    # Or simply let them rewrite and then clear it again?
+    # Better: Give them 1 second to write, then clear again.
+
+    # Run the file deletions in background
+    background_tasks.add_task(_delete_all_files_background, history)
+
+    # Return immediately, the worker tasks will rewrite to history file because they see the job completed
+    # BUT we want history to be empty.
+    # To fix this race condition, we can just clear the history file again after a small delay in a background task
+    async def _clear_history_again():
+        await asyncio.sleep(2)
+        async with history_lock:
+            with open(HISTORY_FILE, "w") as f:
+                json.dump([], f, indent=2)
+
+    background_tasks.add_task(_clear_history_again)
+
+    return {"status": "success", "deleted": len(history)}
+
 @app.delete("/api/jobs/{job_id}")
 async def cancel_job(job_id: str):
     history = []

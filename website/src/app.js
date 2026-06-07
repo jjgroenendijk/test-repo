@@ -233,6 +233,7 @@ export function renderApp(root) {
             <button type="button" id="cancel-all-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Cancel all queued</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+            <button type="button" id="delete-all-jobs-btn" class="clear-history-btn" style="border-color: rgba(239, 68, 68, 0.5); color: #ef4444;">Delete all jobs</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
           </div>
         </div>
@@ -1022,6 +1023,30 @@ export function renderApp(root) {
       } finally {
         clearHistoryBtn.disabled = false;
         clearHistoryBtn.textContent = "Clear history";
+      }
+    });
+  }
+
+  const deleteAllJobsBtn = root.querySelector("#delete-all-jobs-btn");
+  if (deleteAllJobsBtn) {
+    deleteAllJobsBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to delete all jobs, including running ones? This cannot be undone.")) {
+        return;
+      }
+      deleteAllJobsBtn.disabled = true;
+      deleteAllJobsBtn.textContent = "Deleting...";
+      try {
+        const response = await fetch("/api/jobs", { method: "DELETE" });
+        if (response.ok) {
+          fetchJobs();
+        } else {
+          console.error("Failed to delete all jobs");
+        }
+      } catch (err) {
+        console.error("Error deleting all jobs:", err);
+      } finally {
+        deleteAllJobsBtn.disabled = false;
+        deleteAllJobsBtn.textContent = "Delete all jobs";
       }
     });
   }
