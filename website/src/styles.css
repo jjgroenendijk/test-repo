@@ -748,3 +748,21 @@ button:active {
   color: var(--btn-bg);
   text-decoration-color: var(--btn-bg);
 }
+
+/* Hide Job ID by default, show on hover */
+.job-id-display {
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+  margin-top: 0 !important; /* Override inline style margin-top when hidden */
+}
+
+.job-card:hover .job-id-display,
+.job-card:focus-within .job-id-display {
+  opacity: 1;
+  pointer-events: auto;
+  height: auto;
+  margin-top: 4px !important; /* Restore inline style margin-top when shown */
+}
