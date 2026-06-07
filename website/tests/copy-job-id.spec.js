@@ -45,8 +45,13 @@ test.describe('Copy Job ID Feature', () => {
     const jobCard = page.locator(`.job-card[data-job-id="${testJobId}"]`);
     await expect(jobCard).toBeVisible();
 
-    // Verify the ID is displayed
+    // Verify the ID is initially hidden or zero height
     const idDisplay = jobCard.locator('.job-id-display');
+
+    // Hover over the job card to reveal the job ID
+    await jobCard.hover();
+
+    // Verify the ID is displayed after hover
     await expect(idDisplay).toBeVisible();
     await expect(idDisplay).toContainText(`ID: ${testJobId}`);
 
