@@ -1290,7 +1290,7 @@ test("can clear input field manually", async ({ page }) => {
   await expect(clearBtn).toBeHidden();
 
   const feedback = page.locator("#queue-feedback");
-  await expect(feedback).toContainText("Tracks, albums, and playlists will run through the SpotiFLAC module.");
+  await expect(feedback).toContainText("Tracks, albums, playlists, and artists will run through the SpotiFLAC module.");
 });
 
 test('can retry an individual failed job from its card', async ({ page }) => {
@@ -1461,4 +1461,68 @@ test('can retry all running jobs', async ({ page }) => {
   expect(deleteCalled).toBe(true);
   expect(retryCalled).toBe(true);
   expect(retriedUrl).toBe('https://open.spotify.com/track/running-track');
+});
+
+test('can queue an artist URL and filter by Artist type', async ({ page }) => {
+  let requestMade = false;
+  let requestUrl = '';
+
+  await page.route('**/api/jobs*', async (route) => {
+    if (route.request().method() === 'POST') {
+      requestMade = true;
+      const body = JSON.parse(route.request().postData());
+      requestUrl = body.url;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: '123',
+          url: body.url,
+          status: 'Queued',
+          created_at: new Date().toISOString(),
+          files: 0,
+          error_log: null
+        })
+      });
+    } else if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([])
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  await page.route('**/api/stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ total_jobs: 0, total_files: 0, success_rate: 0 })
+    });
+  });
+
+  await page.goto('/');
+
+  // Verify Artist filter option
+  const typeFilter = page.locator('#job-type-filter');
+  await expect(typeFilter).toBeVisible();
+  const options = await typeFilter.locator('option').allTextContents();
+  expect(options).toContain('Artist');
+
+  // Fill and queue artist URL
+  const artistUrl = 'https://open.spotify.com/artist/0TnOYISbd1XYRBk9myaseg';
+  await page.fill('[name="spotify-url"]', artistUrl);
+
+  // Set up request listener before clicking
+  const requestPromise = page.waitForRequest('**/api/jobs*');
+  await page.click('button[type="submit"]');
+
+  // Wait for the request to be made
+  const request = await requestPromise;
+
+  expect(request.method()).toBe('POST');
+  expect(requestMade).toBe(true);
+  expect(requestUrl).toBe(artistUrl);
 });

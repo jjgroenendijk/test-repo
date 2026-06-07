@@ -6,7 +6,7 @@ export function isSpotifyUrl(value) {
 
     return (
       host === "open.spotify.com" &&
-      ["track", "album", "playlist"].includes(parts[0]) &&
+      ["track", "album", "playlist", "artist"].includes(parts[0]) &&
       Boolean(parts[1])
     );
   } catch {
@@ -148,7 +148,7 @@ export function renderApp(root) {
             <textarea
               id="spotify-url"
               name="spotify-url"
-              placeholder="https://open.spotify.com/album/..."
+              placeholder="https://open.spotify.com/artist/..."
               autocomplete="off"
               required
               rows="3"
@@ -156,7 +156,7 @@ export function renderApp(root) {
             <button type="button" id="clear-input-btn" class="clear-history-btn" style="display: none;">Clear input</button>
             <button type="submit">Queue</button>
           </div>
-          <p class="hint" id="queue-feedback">Tracks, albums, and playlists will run through the SpotiFLAC module.</p>
+          <p class="hint" id="queue-feedback">Tracks, albums, playlists, and artists will run through the SpotiFLAC module.</p>
         </form>
 
         <aside class="storage-panel" aria-label="Storage status">
@@ -201,6 +201,7 @@ export function renderApp(root) {
               <option value="Track">Track</option>
               <option value="Album">Album</option>
               <option value="Playlist">Playlist</option>
+              <option value="Artist">Artist</option>
             </select>
             <select id="job-status-filter" class="job-status-filter clear-history-btn" aria-label="Filter jobs by status">
               <option value="All">All</option>
@@ -267,7 +268,7 @@ export function renderApp(root) {
   if (clearInputBtn) {
     clearInputBtn.addEventListener("click", () => {
       input.value = "";
-      feedback.textContent = "Tracks, albums, and playlists will run through the SpotiFLAC module.";
+      feedback.textContent = "Tracks, albums, playlists, and artists will run through the SpotiFLAC module.";
       feedback.dataset.state = "";
       clearInputBtn.style.display = "none";
     });
