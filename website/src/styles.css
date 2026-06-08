@@ -805,3 +805,225 @@ button:active {
   opacity: 0;
   transform: translateY(20px);
 }
+
+/* UI Improvements - Extracted from Inline Styles */
+
+.job-progress {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #476154;
+}
+
+.job-progress-details {
+  margin-bottom: 4px;
+}
+
+.job-completed-time {
+  margin-top: 4px;
+}
+
+.url-type-badge {
+  font-size: 0.75rem;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  text-transform: capitalize;
+  vertical-align: middle;
+}
+
+.copy-url-btn,
+.copy-job-id-btn {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.job-id-display {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.job-files-container {
+  display: none;
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.job-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.job-section-title {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #476154;
+}
+
+.job-section-btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  min-height: auto;
+}
+
+.job-section-btn-mr {
+  margin-right: 8px;
+}
+
+.job-files-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.job-logs-container {
+  display: none;
+  grid-column: 1 / -1;
+}
+
+.clear-input-btn-hidden {
+  display: none;
+}
+
+.storage-progress-wrapper {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.storage-info-text {
+  margin: 0;
+}
+
+.storage-percentage-text {
+  color: var(--text-secondary);
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.job-stats-container {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.job-stat-title {
+  color: var(--text-primary);
+}
+
+.job-stat-value {
+  margin: 2px 0 0 0;
+}
+
+.job-stat-full-width {
+  grid-column: 1 / -1;
+}
+
+.job-controls-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hidden-btn {
+  display: none;
+}
+
+.download-link {
+  text-decoration: none;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.toggle-input {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.btn-completed {
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+}
+
+.btn-failed {
+  border-color: rgba(234, 179, 8, 0.5);
+  color: #eab308;
+}
+
+.btn-running {
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #3b82f6;
+}
+
+.btn-cancelled {
+  border-color: rgba(156, 163, 175, 0.5);
+  color: #9ca3af;
+}
+
+.btn-queued {
+  border-color: rgba(249, 115, 22, 0.5);
+  color: #f97316;
+}
+
+.btn-danger {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.btn-export {
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #8b5cf6;
+}
+
+.queue-status-summary {
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.file-size-text {
+  color: #666;
+  font-size: 0.85em;
+}
+
+.audio-preview {
+  margin-top: 8px;
+  max-width: 100%;
+  height: 32px;
+}
+
+.job-files-list-item {
+  margin-bottom: 12px;
+}
