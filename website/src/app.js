@@ -124,6 +124,31 @@ function renderJob(job) {
   `;
 }
 
+export function showNotification(message, type = "success") {
+  let container = document.querySelector(".notification-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "notification-container";
+    document.body.appendChild(container);
+  }
+
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+
+  container.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add("hiding");
+    notification.addEventListener("transitionend", () => {
+      notification.remove();
+      if (container.childNodes.length === 0) {
+        container.remove();
+      }
+    });
+  }, 3000);
+}
+
 export function renderApp(root) {
   root.innerHTML = `
     <section class="shell">
@@ -664,6 +689,7 @@ export function renderApp(root) {
           const originalText = btn.textContent;
           btn.textContent = "Copied!";
           btn.disabled = true;
+          showNotification("Copied logs!", "success");
 
           setTimeout(() => {
             btn.textContent = originalText;
@@ -671,6 +697,7 @@ export function renderApp(root) {
           }, 2000);
         } catch (err) {
           console.error("Failed to copy logs", err);
+          showNotification("Failed to copy logs", "error");
         }
       }
     }
@@ -863,6 +890,7 @@ export function renderApp(root) {
         const originalText = btn.textContent;
         btn.textContent = "Copied!";
         btn.disabled = true;
+        showNotification("Copied URL!", "success");
 
         setTimeout(() => {
           btn.textContent = originalText;
@@ -870,6 +898,7 @@ export function renderApp(root) {
         }, 2000);
       } catch (err) {
         console.error("Failed to copy URL", err);
+        showNotification("Failed to copy URL", "error");
       }
     }
 
@@ -883,6 +912,7 @@ export function renderApp(root) {
         const originalText = btn.textContent;
         btn.textContent = "Copied!";
         btn.disabled = true;
+        showNotification("Copied Job ID!", "success");
 
         setTimeout(() => {
           btn.textContent = originalText;
@@ -890,6 +920,7 @@ export function renderApp(root) {
         }, 2000);
       } catch (err) {
         console.error("Failed to copy Job ID", err);
+        showNotification("Failed to copy Job ID", "error");
       }
     }
   });
