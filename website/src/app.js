@@ -413,6 +413,13 @@ export function renderApp(root) {
         return acc;
       }, { Queued: 0, Running: 0, Completed: 0, Failed: 0 });
 
+      const activeCount = statusCounts.Running + statusCounts.Queued;
+      if (activeCount > 0) {
+        document.title = `(${activeCount}) SpotiFLAC`;
+      } else {
+        document.title = "SpotiFLAC";
+      }
+
       const summaryElement = root.querySelector("#queue-status-summary");
       if (summaryElement) {
         summaryElement.textContent = `Queued: ${statusCounts.Queued} | Running: ${statusCounts.Running} | Completed: ${statusCounts.Completed} | Failed: ${statusCounts.Failed}`;
