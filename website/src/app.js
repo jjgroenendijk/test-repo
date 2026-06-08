@@ -70,10 +70,10 @@ function renderJob(job) {
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
   const downloadZipBtnHtml = job.status === "Completed" ? `<a href="/api/jobs/${escapeHtml(job.id)}/download" download class="download-zip-btn view-files-btn">Download All</a>` : "";
 
-  const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}" style="grid-column: 1 / -1; margin-top: 8px; font-size: 0.85rem; color: #476154;">Loading progress...</div>` : "";
+  const progressHtml = job.status === "Running" ? `<div class="job-progress" id="progress-container-${escapeHtml(job.id)}">Loading progress...</div>` : "";
   const urlType = classifySpotifyUrl(job.url);
   const durationStr = formatDuration(job.created_at, job.completed_at);
-  const completedAtHtml = job.completed_at ? `<p class="job-source" style="margin-top: 4px;">Completed: ${new Date(job.completed_at).toLocaleString()} (Duration: ${durationStr})</p>` : "";
+  const completedAtHtml = job.completed_at ? `<p class="job-source job-completed-time">Completed: ${new Date(job.completed_at).toLocaleString()} (Duration: ${durationStr})</p>` : "";
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
@@ -81,11 +81,11 @@ function renderJob(job) {
       <div>
         <p class="job-title">
           <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener noreferrer" class="source-link">${escapeHtml(job.url)}</a>
-          <span class="url-type-badge" style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-left: 8px; text-transform: capitalize; vertical-align: middle;">${escapeHtml(urlType)}</span>
-          <button type="button" class="copy-url-btn" data-job-url="${escapeHtml(job.url)}" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 4px;">Copy</button>
+          <span class="url-type-badge">${escapeHtml(urlType)}</span>
+          <button type="button" class="copy-url-btn" data-job-url="${escapeHtml(job.url)}">Copy</button>
         </p>
         <p class="job-source">Started: ${new Date(job.created_at).toLocaleString()}</p>
-        <p class="job-id-display" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">ID: ${escapeHtml(job.id)} <button type="button" class="copy-job-id-btn" data-job-id="${escapeHtml(job.id)}" style="font-size: 0.75rem; padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; border-radius: 4px;">Copy ID</button></p>
+        <p class="job-id-display">ID: ${escapeHtml(job.id)} <button type="button" class="copy-job-id-btn" data-job-id="${escapeHtml(job.id)}">Copy ID</button></p>
         ${completedAtHtml}
       </div>
       <div class="job-meta">
@@ -102,20 +102,20 @@ function renderJob(job) {
       </div>
       ${errorHtml}
       ${progressHtml}
-      <div class="job-files-container glass" id="files-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1; margin-top: 12px; padding: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Downloaded Files</h3>
-          <button type="button" class="close-files-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+      <div class="job-files-container glass" id="files-container-${escapeHtml(job.id)}">
+        <div class="job-section-header">
+          <h3 class="job-section-title">Downloaded Files</h3>
+          <button type="button" class="close-files-btn job-section-btn" data-job-id="${escapeHtml(job.id)}">Close</button>
         </div>
-        <ul class="job-files-list" id="files-list-${escapeHtml(job.id)}" style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #333;">Loading...</ul>
+        <ul class="job-files-list" id="files-list-${escapeHtml(job.id)}">Loading...</ul>
       </div>
-      <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}" style="display: none; grid-column: 1 / -1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <h3 style="margin: 0; font-size: 0.9rem; color: #476154;">Execution Logs</h3>
+      <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}">
+        <div class="job-section-header">
+          <h3 class="job-section-title">Execution Logs</h3>
           <div>
-            <button type="button" class="copy-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto; margin-right: 8px;">Copy Logs</button>
-            <button type="button" class="refresh-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto; margin-right: 8px;">Refresh Logs</button>
-            <button type="button" class="close-logs-btn" data-job-id="${escapeHtml(job.id)}" style="padding: 4px 8px; font-size: 0.75rem; min-height: auto;">Close</button>
+            <button type="button" class="copy-logs-btn job-section-btn job-section-btn-mr" data-job-id="${escapeHtml(job.id)}">Copy Logs</button>
+            <button type="button" class="refresh-logs-btn job-section-btn job-section-btn-mr" data-job-id="${escapeHtml(job.id)}">Refresh Logs</button>
+            <button type="button" class="close-logs-btn job-section-btn" data-job-id="${escapeHtml(job.id)}">Close</button>
           </div>
         </div>
         <pre class="job-logs-content" id="logs-content-${escapeHtml(job.id)}">Loading...</pre>
@@ -178,7 +178,7 @@ export function renderApp(root) {
               required
               rows="3"
             ></textarea>
-            <button type="button" id="clear-input-btn" class="clear-history-btn" style="display: none;">Clear input</button>
+            <button type="button" id="clear-input-btn" class="clear-history-btn hidden-btn">Clear input</button>
             <button type="submit">Queue</button>
           </div>
           <p class="hint" id="queue-feedback">Tracks, albums, playlists, and artists will run through the SpotiFLAC module.</p>
@@ -187,25 +187,25 @@ export function renderApp(root) {
         <aside class="storage-panel" aria-label="Storage status">
           <span>Data volume</span>
           <strong>/data</strong>
-          <div class="storage-progress-bar-bg" aria-hidden="true" style="margin-top: 8px; margin-bottom: 8px;">
+          <div class="storage-progress-bar-bg storage-progress-wrapper" aria-hidden="true">
             <div class="storage-progress-bar-fill" id="storage-progress-fill" style="width: 0%;"></div>
           </div>
-          <p style="margin: 0;">
+          <p class="storage-info-text">
             <span id="storage-usage-text">Job history, logs, and produced files will persist outside the container.</span>
-            <span id="storage-percentage-text" style="color: var(--text-secondary); font-size: 0.85em; margin-left: 4px;"></span>
+            <span id="storage-percentage-text" class="storage-percentage-text"></span>
           </p>
-          <div id="job-stats-container" style="margin-top: 16px; font-size: 0.85rem; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div id="job-stats-container" class="job-stats-container">
             <div>
-              <strong style="color: var(--text-primary);">Total Jobs</strong>
-              <p id="stat-total-jobs" style="margin: 2px 0 0 0;">-</p>
+              <strong class="job-stat-title">Total Jobs</strong>
+              <p id="stat-total-jobs" class="job-stat-value">-</p>
             </div>
             <div>
-              <strong style="color: var(--text-primary);">Total Files</strong>
-              <p id="stat-total-files" style="margin: 2px 0 0 0;">-</p>
+              <strong class="job-stat-title">Total Files</strong>
+              <p id="stat-total-files" class="job-stat-value">-</p>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <strong style="color: var(--text-primary);">Success Rate</strong>
-              <p id="stat-success-rate" style="margin: 2px 0 0 0;">-</p>
+            <div class="job-stat-full-width">
+              <strong class="job-stat-title">Success Rate</strong>
+              <p id="stat-success-rate" class="job-stat-value">-</p>
             </div>
           </div>
         </aside>
@@ -214,9 +214,9 @@ export function renderApp(root) {
       <section class="jobs" aria-label="Recent jobs">
         <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div class="job-controls-row">
             <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
-            <button type="button" id="clear-search-btn" class="clear-search-btn" style="display: none;" aria-label="Clear search">X</button>
+            <button type="button" id="clear-search-btn" class="clear-search-btn hidden-btn" aria-label="Clear search">X</button>
             <select id="job-sort-select" class="job-status-filter clear-history-btn" aria-label="Sort jobs">
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -236,33 +236,33 @@ export function renderApp(root) {
               <option value="Failed">Failed</option>
               <option value="Cancelled">Cancelled</option>
             </select>
-            <a href="/api/history/download" id="download-all-btn" class="clear-history-btn" download style="text-decoration: none;">Download all completed</a>
-            <a href="/api/history/logs/download" id="download-all-logs-btn" class="clear-history-btn" download style="text-decoration: none;">Download all logs</a>
+            <a href="/api/history/download" id="download-all-btn" class="clear-history-btn download-link" download>Download all completed</a>
+            <a href="/api/history/logs/download" id="download-all-logs-btn" class="clear-history-btn download-link" download>Download all logs</a>
             <button type="button" id="refresh-jobs-btn" class="clear-history-btn">Refresh jobs</button>
-            <label style="display: flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; color: var(--text-primary); cursor: pointer;">
-              <input type="checkbox" id="auto-refresh-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
+            <label class="toggle-label">
+              <input type="checkbox" id="auto-refresh-toggle" class="toggle-input">
               Auto-refresh
             </label>
-            <label style="display: flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; color: var(--text-primary); cursor: pointer;">
-              <input type="checkbox" id="compact-view-toggle" style="width: auto; min-height: auto; margin: 0; cursor: pointer;">
+            <label class="toggle-label">
+              <input type="checkbox" id="compact-view-toggle" class="toggle-input">
               Compact view
             </label>
-            <button type="button" id="retry-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Retry completed</button>
-            <button type="button" id="clear-completed-btn" class="clear-history-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #10b981;">Clear completed</button>
-            <button type="button" id="retry-failed-btn" class="clear-history-btn" style="border-color: rgba(234, 179, 8, 0.5); color: #eab308;">Retry failed</button>
-            <button type="button" id="clear-failed-btn" class="clear-history-btn" style="border-color: rgba(220, 38, 38, 0.5); color: #dc2626;">Clear failed</button>
-            <button type="button" id="retry-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Retry running</button>
-            <button type="button" id="clear-running-btn" class="clear-history-btn" style="border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;">Clear running</button>
-            <button type="button" id="retry-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Retry cancelled</button>
-            <button type="button" id="clear-cancelled-btn" class="clear-history-btn" style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af;">Clear cancelled</button>
-            <button type="button" id="cancel-all-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Cancel all queued</button>
-            <button type="button" id="clear-queued-btn" class="clear-history-btn" style="border-color: rgba(249, 115, 22, 0.5); color: #f97316;">Clear queued</button>
+            <button type="button" id="retry-completed-btn" class="clear-history-btn btn-completed">Retry completed</button>
+            <button type="button" id="clear-completed-btn" class="clear-history-btn btn-completed">Clear completed</button>
+            <button type="button" id="retry-failed-btn" class="clear-history-btn btn-failed">Retry failed</button>
+            <button type="button" id="clear-failed-btn" class="clear-history-btn btn-failed">Clear failed</button>
+            <button type="button" id="retry-running-btn" class="clear-history-btn btn-running">Retry running</button>
+            <button type="button" id="clear-running-btn" class="clear-history-btn btn-running">Clear running</button>
+            <button type="button" id="retry-cancelled-btn" class="clear-history-btn btn-cancelled">Retry cancelled</button>
+            <button type="button" id="clear-cancelled-btn" class="clear-history-btn btn-cancelled">Clear cancelled</button>
+            <button type="button" id="cancel-all-queued-btn" class="clear-history-btn btn-queued">Cancel all queued</button>
+            <button type="button" id="clear-queued-btn" class="clear-history-btn btn-queued">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
-            <button type="button" id="delete-all-jobs-btn" class="clear-history-btn" style="border-color: rgba(239, 68, 68, 0.5); color: #ef4444;">Delete all jobs</button>
-            <a href="/api/history/export" id="export-history-btn" class="clear-history-btn" download style="text-decoration: none; border-color: rgba(139, 92, 246, 0.5); color: #8b5cf6;">Export JSON</a>
+            <button type="button" id="delete-all-jobs-btn" class="clear-history-btn btn-danger">Delete all jobs</button>
+            <a href="/api/history/export" id="export-history-btn" class="clear-history-btn btn-export download-link" download>Export JSON</a>
           </div>
         </div>
-        <div id="queue-status-summary" style="margin-bottom: 16px; font-size: 0.9rem; font-weight: 500; color: var(--text-primary);"></div>
+        <div id="queue-status-summary" class="queue-status-summary"></div>
         <div class="job-list" id="job-list">
           <!-- Jobs will be loaded here -->
         </div>
@@ -311,7 +311,7 @@ export function renderApp(root) {
         if (data) {
           const trackInfo = data.track ? `: ${escapeHtml(data.track)}` : '';
           container.innerHTML = `
-            <div style="margin-bottom: 4px;"><strong>Progress:</strong> [${data.current}/${data.total}]${trackInfo} (${data.percentage}%)</div>
+            <div class="job-progress-details"><strong>Progress:</strong> [${data.current}/${data.total}]${trackInfo} (${data.percentage}%)</div>
             <div class="progress-bar-bg" aria-hidden="true">
               <div class="progress-bar-fill" style="width: ${data.percentage}%;"></div>
             </div>
@@ -764,7 +764,7 @@ export function renderApp(root) {
                     // Handle both old format (string) and new format (object)
                     const isObject = typeof fileObj === 'object' && fileObj !== null;
                     const fileNameStr = isObject ? fileObj.name : fileObj;
-                    const fileSizeStr = isObject && fileObj.size !== undefined ? ` <span style="color: #666; font-size: 0.85em;">(${formatFileSize(fileObj.size)})</span>` : "";
+                    const fileSizeStr = isObject && fileObj.size !== undefined ? ` <span class="file-size-text">(${formatFileSize(fileObj.size)})</span>` : "";
 
                     const encodedJobId = encodeURIComponent(jobId);
                     const encodedFile = fileNameStr.split('/').map(encodeURIComponent).join('/');
@@ -774,10 +774,10 @@ export function renderApp(root) {
                     let audioHtml = "";
                     const lowerFile = fileNameStr.toLowerCase();
                     if (lowerFile.endsWith('.flac') || lowerFile.endsWith('.mp3') || lowerFile.endsWith('.wav') || lowerFile.endsWith('.m4a') || lowerFile.endsWith('.ogg')) {
-                        audioHtml = `<br><audio controls src="${fileUrl}" style="margin-top: 8px; max-width: 100%; height: 32px;"></audio>`;
+                        audioHtml = `<br><audio controls src="${fileUrl}" class="audio-preview"></audio>`;
                     }
 
-                    return `<li style="margin-bottom: 12px;"><a href="${fileUrl}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(fileNameStr)}</a>${fileSizeStr}${audioHtml}</li>`;
+                    return `<li class="job-files-list-item"><a href="${fileUrl}" download="${escapeHtml(fileName)}" class="file-download-link">${escapeHtml(fileNameStr)}</a>${fileSizeStr}${audioHtml}</li>`;
                 }).join("");
             } else {
                 filesList.innerHTML = "<li>No files found.</li>";
