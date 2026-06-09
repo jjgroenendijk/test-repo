@@ -1526,3 +1526,61 @@ test('can queue an artist URL and filter by Artist type', async ({ page }) => {
   expect(requestMade).toBe(true);
   expect(requestUrl).toBe(artistUrl);
 });
+
+test('can re-queue a completed job', async ({ page }) => {
+  let retryCalled = false;
+  await page.route("/api/jobs", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "123",
+            url: "https://open.spotify.com/track/123",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            files: 1,
+            error_log: null
+          }
+        ])
+      });
+    } else if (route.request().method() === "POST") {
+      retryCalled = true;
+      const body = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "124",
+          url: body.url,
+          status: "Queued",
+          created_at: new Date().toISOString(),
+          files: 0,
+          error_log: null
+        })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto("/");
+
+  // Wait for the completed job card to appear
+  const jobCard = page.locator(".job-card").filter({ hasText: "Completed" });
+  await expect(jobCard).toBeVisible();
+
+  // Find the Re-queue button and verify it's visible
+  const requeueBtn = jobCard.getByRole("button", { name: "Re-queue" });
+  await expect(requeueBtn).toBeVisible();
+
+  // Click the button
+  await requeueBtn.click();
+
+  // Give the UI a moment to call the API
+  await page.waitForTimeout(500);
+
+  // Assert the POST /api/jobs route was called
+  expect(retryCalled).toBe(true);
+});
