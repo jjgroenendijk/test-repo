@@ -180,6 +180,8 @@ h2 {
   -webkit-backdrop-filter: blur(10px) saturate(180%);
   box-shadow: 0 4px 12px 0 var(--glass-shadow);
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .theme-toggle-btn:hover {
@@ -188,20 +190,29 @@ h2 {
   box-shadow: 0 6px 16px 0 var(--glass-shadow-hover);
 }
 
+.theme-icon-dark, .theme-icon-light {
+  position: absolute;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 :root .theme-icon-dark {
-  display: block;
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 :root .theme-icon-light {
-  display: none;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0);
 }
 
 :root.dark .theme-icon-dark {
-  display: none;
+  opacity: 0;
+  transform: rotate(90deg) scale(0);
 }
 
 :root.dark .theme-icon-light {
-  display: block;
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 .runtime-badge {
