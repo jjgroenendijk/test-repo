@@ -255,6 +255,7 @@ export function renderApp(root) {
             <button type="button" id="clear-running-btn" class="clear-history-btn btn-running">Clear running</button>
             <button type="button" id="retry-cancelled-btn" class="clear-history-btn btn-cancelled">Retry cancelled</button>
             <button type="button" id="clear-cancelled-btn" class="clear-history-btn btn-cancelled">Clear cancelled</button>
+            <button type="button" id="cancel-all-running-btn" class="clear-history-btn btn-running">Cancel all running</button>
             <button type="button" id="cancel-all-queued-btn" class="clear-history-btn btn-queued">Cancel all queued</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn btn-queued">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
@@ -1008,6 +1009,28 @@ export function renderApp(root) {
       } finally {
         cancelAllQueuedBtn.disabled = false;
         cancelAllQueuedBtn.textContent = "Cancel all queued";
+      }
+    });
+  }
+
+  const cancelAllRunningBtn = root.querySelector("#cancel-all-running-btn");
+  if (cancelAllRunningBtn) {
+    cancelAllRunningBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to cancel all running jobs? This cannot be undone.")) {
+        return;
+      }
+      cancelAllRunningBtn.disabled = true;
+      cancelAllRunningBtn.textContent = "Cancelling...";
+      try {
+        const response = await fetch("/api/jobs/cancel-running", { method: "POST" });
+        if (response.ok) {
+          fetchJobs();
+        }
+      } catch (error) {
+        console.error("Error cancelling running jobs:", error);
+      } finally {
+        cancelAllRunningBtn.disabled = false;
+        cancelAllRunningBtn.textContent = "Cancel all running";
       }
     });
   }
