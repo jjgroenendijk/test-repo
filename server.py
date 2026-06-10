@@ -804,6 +804,13 @@ async def get_stats():
 async def get_health():
     return {"status": "ok"}
 
+@app.get("/api/system/info")
+def get_system_info():
+    return {
+        "version": "1.0.0",
+        "platform": "linux"
+    }
+
 @app.get("/api/system/storage")
 def get_system_storage():
     try:

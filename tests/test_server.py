@@ -512,6 +512,15 @@ def test_download_single_file_path_traversal(tmp_path, monkeypatch):
     response = client.get(f"/api/jobs/{job_id}/files/%2E%2E/secret.txt")
     assert response.status_code == 403
 
+def test_get_system_info():
+    response = client.get("/api/system/info")
+    assert response.status_code == 200
+    data = response.json()
+    assert "version" in data
+    assert "platform" in data
+    assert data["version"] == "1.0.0"
+    assert data["platform"] == "linux"
+
 def test_get_system_storage(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
