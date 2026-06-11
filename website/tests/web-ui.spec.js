@@ -190,6 +190,7 @@ test("can delete a job", async ({ page }) => {
   const deleteBtn = page.getByRole("button", { name: "Delete", exact: true });
   await expect(deleteBtn).toBeVisible();
 
+  page.on('dialog', dialog => dialog.accept());
   await deleteBtn.click();
   await expect(page.getByRole("button", { name: "Deleting..." })).toBeVisible();
 
