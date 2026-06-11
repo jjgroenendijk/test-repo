@@ -65,7 +65,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.136.3" },
     { name = "requests", specifier = ">=2.34.2" },
-    { name = "spotiflac", specifier = ">=0.8.4" },
+    { name = "spotiflac", specifier = ">=1.0.5" },
     { name = "uvicorn", specifier = ">=0.49.0" },
 ]
 
@@ -904,7 +904,7 @@ wheels = [
 
 [[package]]
 name = "spotiflac"
-version = "0.8.4"
+version = "1.0.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -920,9 +920,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "yt-dlp" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/a7/c6af296e208474c34694f437fd3bb2e6775e64aeceb8fdd38cde78c09e24/spotiflac-0.8.4.tar.gz", hash = "sha256:95a862e5ebebdd27c28fa6cf599c8f5e68c8aef0fac58afcfb4d083c86d93bef", size = 531614, upload-time = "2026-06-03T01:04:40.516Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/4d/768accb79fa8328964dbeda62adefd6f3e7883f6fb56d1cd73df972f0ff9/spotiflac-1.0.5.tar.gz", hash = "sha256:534801352d858f3a08f4c66ff40abe5e7c26f91fd441415cf1b38b700e302a15", size = 663848, upload-time = "2026-06-11T00:31:37.395Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/63/45c447c02447a7b8fb6ac4c9a93eadaac73a68065e0441151f5154eb08c1/spotiflac-0.8.4-py3-none-any.whl", hash = "sha256:6888ff515e6d1fd7409df85d1fa2bbb7bfcd77ec59b6168ed7eeb75d9dd75f2c", size = 538247, upload-time = "2026-06-03T01:04:39.029Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/b9/dfa40120157da39a4357b07a409c997ca529f6f3e5844448e997a054bdaa/spotiflac-1.0.5-py3-none-any.whl", hash = "sha256:b5629758f477bec353e077d194c02deecc5d771aa02aa40a48ef785db4b122ec", size = 681662, upload-time = "2026-06-11T00:31:35.676Z" },
 ]
 
 [[package]]
