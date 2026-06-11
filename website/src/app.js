@@ -861,6 +861,10 @@ export function renderApp(root) {
       const jobId = event.target.dataset.jobId;
       if (!jobId) return;
 
+      if (!window.confirm("Are you sure you want to delete this job? This cannot be undone.")) {
+        return;
+      }
+
       event.target.disabled = true;
       event.target.textContent = "Deleting...";
 
