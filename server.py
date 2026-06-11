@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
@@ -693,6 +693,53 @@ async def _delete_all_files_background(history):
 
     if tasks:
         await asyncio.gather(*tasks)
+
+@app.post("/api/jobs/delete-selected")
+async def delete_selected_jobs(request: Request, background_tasks: BackgroundTasks):
+    data = await request.json()
+    job_ids = data.get("job_ids", [])
+    if not isinstance(job_ids, list) or not job_ids:
+        raise HTTPException(status_code=400, detail="Invalid or empty job_ids list")
+
+    history = []
+    deleted_jobs = []
+    async with history_lock:
+        if HISTORY_FILE.exists():
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+
+        new_history = []
+        for job in history:
+            if job["id"] in job_ids:
+                if job["status"] in ["Queued", "Running"]:
+                    job["status"] = "Cancelled"
+                    job["completed_at"] = datetime.now(timezone.utc).isoformat()
+                    # We keep it in history for now, background tasks will clean it up later if needed
+                    # but actually we want to delete it from UI immediately. So we don't append to new_history
+                    deleted_jobs.append(job["id"])
+                else:
+                    deleted_jobs.append(job["id"])
+            else:
+                new_history.append(job)
+
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(new_history, f, indent=2)
+
+    # Terminate running processes for selected jobs
+    for job_id in deleted_jobs:
+        if job_id in running_processes:
+            process = running_processes[job_id]
+            try:
+                process.terminate()
+            except ProcessLookupError:
+                pass
+
+    for job_id in deleted_jobs:
+        log_file = LOGS_DIR / f"{job_id}.log"
+        log_file.unlink(missing_ok=True)
+        background_tasks.add_task(_delete_job_files, job_id)
+
+    return {"status": "success", "deleted": len(deleted_jobs)}
 
 @app.delete("/api/jobs")
 async def delete_all_jobs(background_tasks: BackgroundTasks):

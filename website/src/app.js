@@ -77,6 +77,7 @@ function renderJob(job) {
 
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
+      <input type="checkbox" class="job-select-checkbox" data-job-id="${escapeHtml(job.id)}" aria-label="Select job" style="margin-right: 10px; margin-bottom: 10px; width: 18px; height: 18px; accent-color: var(--primary-color);">
       <img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.style.display='none'" alt="Cover art" />
       <div>
         <p class="job-title">
@@ -259,6 +260,7 @@ export function renderApp(root) {
             <button type="button" id="cancel-all-queued-btn" class="clear-history-btn btn-queued">Cancel all queued</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn btn-queued">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+            <button type="button" id="delete-selected-btn" class="clear-history-btn btn-danger hidden-btn" disabled>Delete selected</button>
             <button type="button" id="delete-all-jobs-btn" class="clear-history-btn btn-danger">Delete all jobs</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn btn-export download-link" download>Export JSON</a>
           </div>
@@ -1105,6 +1107,69 @@ export function renderApp(root) {
       } finally {
         deleteAllJobsBtn.disabled = false;
         deleteAllJobsBtn.textContent = "Delete all jobs";
+      }
+    });
+  }
+
+  const deleteSelectedBtn = root.querySelector("#delete-selected-btn");
+
+  if (root.querySelector("#app")) {
+    root.querySelector("#app").addEventListener("change", (e) => {
+      if (e.target.classList.contains("job-select-checkbox")) {
+        const anyChecked = Array.from(root.querySelectorAll(".job-select-checkbox")).some(cb => cb.checked);
+        if (anyChecked) {
+          deleteSelectedBtn.classList.remove("hidden-btn");
+          deleteSelectedBtn.disabled = false;
+        } else {
+          deleteSelectedBtn.classList.add("hidden-btn");
+          deleteSelectedBtn.disabled = true;
+        }
+      }
+    });
+  } else {
+    // If we're already in the app element, listen on root
+    root.addEventListener("change", (e) => {
+      if (e.target.classList.contains("job-select-checkbox")) {
+        const anyChecked = Array.from(root.querySelectorAll(".job-select-checkbox")).some(cb => cb.checked);
+        if (anyChecked) {
+          deleteSelectedBtn.classList.remove("hidden-btn");
+          deleteSelectedBtn.disabled = false;
+        } else {
+          deleteSelectedBtn.classList.add("hidden-btn");
+          deleteSelectedBtn.disabled = true;
+        }
+      }
+    });
+  }
+
+  if (deleteSelectedBtn) {
+    deleteSelectedBtn.addEventListener("click", async () => {
+      if (!window.confirm("Are you sure you want to delete the selected jobs? This cannot be undone.")) {
+        return;
+      }
+      const selectedCheckboxes = Array.from(root.querySelectorAll(".job-select-checkbox:checked"));
+      const jobIds = selectedCheckboxes.map(cb => cb.dataset.jobId);
+      if (jobIds.length === 0) return;
+
+      deleteSelectedBtn.disabled = true;
+      deleteSelectedBtn.textContent = "Deleting...";
+      try {
+        const response = await fetch("/api/jobs/delete-selected", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_ids: jobIds })
+        });
+        if (response.ok) {
+          deleteSelectedBtn.classList.add("hidden-btn");
+          fetchJobs();
+        } else {
+          console.error("Failed to delete selected jobs");
+        }
+      } catch (err) {
+        console.error("Error deleting selected jobs:", err);
+      } finally {
+        deleteSelectedBtn.textContent = "Delete selected";
+        deleteSelectedBtn.disabled = false;
       }
     });
   }
