@@ -292,6 +292,13 @@ export function renderApp(root) {
         clearInputBtn.style.display = "none";
       }
     });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
   }
 
   if (clearInputBtn) {
