@@ -400,7 +400,9 @@ test("can clear queued jobs", async ({ page }) => {
 
   page.once("dialog", dialog => dialog.accept());
 
-  const requestPromise = page.waitForRequest("/api/history/clear-queued");
+  const requestPromise = page.waitForRequest(request =>
+    request.url().includes("/api/history/clear-queued") && request.method() === "DELETE"
+  );
   await clearQueuedBtn.click();
   await requestPromise;
 
