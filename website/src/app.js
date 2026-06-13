@@ -159,6 +159,10 @@ export function renderApp(root) {
           <h1>SpotiFLAC</h1>
         </div>
         <div class="topbar-actions">
+          <div id="connection-status" class="connection-status status-online" aria-label="Backend connection status">
+            <span class="status-dot"></span>
+            <span class="status-text">Online</span>
+          </div>
           <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon theme-icon-dark"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun theme-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
@@ -362,6 +366,27 @@ export function renderApp(root) {
     }
   }
 
+  async function checkConnectionStatus() {
+    const statusContainer = root.querySelector("#connection-status");
+    const statusText = root.querySelector(".status-text");
+    if (!statusContainer || !statusText) return;
+
+    try {
+      const response = await fetch("/api/health");
+      if (response.ok) {
+        statusContainer.classList.remove("status-offline");
+        statusContainer.classList.add("status-online");
+        statusText.textContent = "Online";
+      } else {
+        throw new Error("Backend not ok");
+      }
+    } catch (err) {
+      statusContainer.classList.remove("status-online");
+      statusContainer.classList.add("status-offline");
+      statusText.textContent = "Offline";
+    }
+  }
+
   async function updateStorageUsage() {
     try {
       const response = await fetch("/api/system/storage");
@@ -551,6 +576,8 @@ export function renderApp(root) {
   updateStorageUsage();
   updateJobStats();
   applyAutoRefreshState();
+  checkConnectionStatus();
+  setInterval(checkConnectionStatus, 10000); // Update connection status every 10 seconds
 
   const themeToggleBtn = root.querySelector("#theme-toggle");
 
