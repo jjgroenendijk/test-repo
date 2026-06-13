@@ -20,22 +20,22 @@ test.describe('Remove Multiple Selected Jobs', () => {
         id: 'job-1',
         url: 'https://open.spotify.com/track/111',
         status: 'Completed',
-        created_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
+        created_at: new Date('2024-01-01T12:00:00Z').toISOString(),
+        completed_at: new Date('2024-01-01T12:05:00Z').toISOString(),
       },
       {
         id: 'job-2',
         url: 'https://open.spotify.com/track/222',
         status: 'Completed',
-        created_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
+        created_at: new Date('2024-01-01T11:00:00Z').toISOString(),
+        completed_at: new Date('2024-01-01T11:05:00Z').toISOString(),
       },
       {
         id: 'job-3',
         url: 'https://open.spotify.com/track/333',
         status: 'Failed',
-        created_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
+        created_at: new Date('2024-01-01T10:00:00Z').toISOString(),
+        completed_at: new Date('2024-01-01T10:05:00Z').toISOString(),
       }
     ];
 
@@ -78,9 +78,9 @@ test.describe('Remove Multiple Selected Jobs', () => {
     const deleteBtn = page.locator('#delete-selected-btn');
     await expect(deleteBtn).toBeHidden();
 
-    // Select the first two jobs
-    const checkbox1 = page.locator('.job-select-checkbox').nth(0);
-    const checkbox2 = page.locator('.job-select-checkbox').nth(1);
+    // Select the first two jobs (job-1 and job-2 since they are sorted newest first)
+    const checkbox1 = page.locator('.job-select-checkbox[data-job-id="job-1"]');
+    const checkbox2 = page.locator('.job-select-checkbox[data-job-id="job-2"]');
 
     await checkbox1.evaluate(node => node.click());
     await checkbox2.evaluate(node => node.click());
@@ -106,7 +106,7 @@ test.describe('Remove Multiple Selected Jobs', () => {
     expect(deletedJobIds).not.toContain('job-3');
     expect(deletedJobIds).toHaveLength(2);
 
-    // After success, button should be hidden again (assuming re-render unchecks or removes jobs, though we didn't update the mock return, the button is manually hidden in app.js)
+    // After success, button should be hidden again
     await expect(deleteBtn).toBeHidden();
   });
 });

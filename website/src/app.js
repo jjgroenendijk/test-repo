@@ -187,6 +187,11 @@ export function renderApp(root) {
               required
               rows="3"
             ></textarea>
+            <select id="quality-select" name="quality" class="job-status-filter" aria-label="Quality Setting" style="align-self: flex-start; margin-right: 10px; background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-color);">
+              <option value="128kbps">128kbps</option>
+              <option value="256kbps" selected>256kbps</option>
+              <option value="320kbps">320kbps</option>
+            </select>
             <button type="button" id="clear-input-btn" class="clear-history-btn hidden-btn">Clear input</button>
             <button type="submit">Queue</button>
           </div>
@@ -655,11 +660,13 @@ export function renderApp(root) {
     }
 
     try {
+      const qualitySelect = form.querySelector('#quality-select');
+      const quality = qualitySelect ? qualitySelect.value : "256kbps";
       const requests = urls.map(url =>
         fetch("/api/jobs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url })
+          body: JSON.stringify({ url, quality })
         })
       );
 
