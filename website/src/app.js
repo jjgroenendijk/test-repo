@@ -183,6 +183,7 @@ export function renderApp(root) {
               name="spotify-url"
               placeholder="https://open.spotify.com/artist/..."
               autocomplete="off"
+              autofocus
               required
               rows="3"
             ></textarea>
