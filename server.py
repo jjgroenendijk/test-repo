@@ -80,7 +80,7 @@ async def write_history(history: List[Dict]):
         logger.error(f"Error writing history: {e}")
 
 
-async def update_job_status(job_id: str, status: str, error_log: Optional[str] = None, files: Optional[int] = None):
+async def update_job_status(job_id: str, status: str, error_log: Optional[str] = None, files: Optional[int] = None, total_size: Optional[int] = None):
     history = await read_history()
     for job in history:
         if job["id"] == job_id:
@@ -89,6 +89,8 @@ async def update_job_status(job_id: str, status: str, error_log: Optional[str] =
                 job["error_log"] = error_log
             if files is not None:
                 job["files"] = files
+            if total_size is not None:
+                job["total_size"] = total_size
             if status in ("Completed", "Failed", "Cancelled"):
                 job["completed_at"] = datetime.now(timezone.utc).isoformat()
             break
@@ -132,7 +134,8 @@ async def run_spotiflac(job_id: str, url: str):
             if process.returncode == 0:
                 # Count files
                 file_count = sum(1 for _ in job_output_dir.rglob("*") if _.is_file())
-                await update_job_status(job_id, "Completed", files=file_count)
+                total_size = sum(_.stat().st_size for _ in job_output_dir.rglob("*") if _.is_file())
+                await update_job_status(job_id, "Completed", files=file_count, total_size=total_size)
             elif process.returncode == -15: # Terminated
                 logger.info(f"Job {job_id} was terminated.")
                 # Status already updated by DELETE endpoint
@@ -163,7 +166,8 @@ async def create_job(request: JobRequest, background_tasks: BackgroundTasks):
         "status": "Queued",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "error_log": None,
-        "files": 0
+        "files": 0,
+        "total_size": 0
     }
 
     history = await read_history()
