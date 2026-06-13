@@ -59,7 +59,10 @@ function escapeHtml(unsafe) {
 
 function renderJob(job) {
   const errorHtml = job.error_log ? `<pre class="job-error">${escapeHtml(job.error_log)}</pre>` : "";
-  const filesText = job.files === 1 ? "1 file" : `${job.files} files`;
+  let filesText = job.files === 1 ? "1 file" : `${job.files} files`;
+  if (job.total_size) {
+    filesText += ` (${formatFileSize(job.total_size)})`;
+  }
   const canCancel = job.status === "Queued" || job.status === "Running";
   const canRetry = job.status === "Failed" || job.status === "Cancelled";
   const canDelete = job.status === "Completed" || job.status === "Failed" || job.status === "Cancelled";
