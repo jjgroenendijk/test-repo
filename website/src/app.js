@@ -116,7 +116,10 @@ function renderJob(job) {
       <div class="job-logs-container" id="logs-container-${escapeHtml(job.id)}">
         <div class="job-section-header">
           <h3 class="job-section-title">Execution Logs</h3>
-          <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="display: flex; align-items: center; cursor: pointer; color: var(--text-color); font-size: 13px;">
+              <input type="checkbox" class="auto-refresh-logs-toggle" data-job-id="${escapeHtml(job.id)}" style="margin-right: 4px; accent-color: var(--primary-color);"> Auto-refresh
+            </label>
             <button type="button" class="copy-logs-btn job-section-btn job-section-btn-mr" data-job-id="${escapeHtml(job.id)}">Copy Logs</button>
             <button type="button" class="refresh-logs-btn job-section-btn job-section-btn-mr" data-job-id="${escapeHtml(job.id)}">Refresh Logs</button>
             <button type="button" class="close-logs-btn job-section-btn" data-job-id="${escapeHtml(job.id)}">Close</button>
@@ -658,6 +661,30 @@ export function renderApp(root) {
       const jobId = card.dataset.jobId;
       if (jobId) {
         updateProgress(jobId);
+      }
+    });
+
+    // Auto-refresh logs
+    const autoRefreshLogsToggles = root.querySelectorAll('.auto-refresh-logs-toggle:checked');
+    autoRefreshLogsToggles.forEach(async (toggle) => {
+      const jobId = toggle.dataset.jobId;
+      if (!jobId) return;
+      const logsContainer = root.querySelector(`#logs-container-${jobId}`);
+      if (logsContainer && logsContainer.style.display !== 'none') {
+        try {
+          const response = await fetch(`/api/jobs/${jobId}/log`);
+          if (response.ok) {
+            const data = await response.json();
+            const logsContent = root.querySelector(`#logs-content-${jobId}`);
+            if (logsContent) {
+              logsContent.textContent = data.log || "No logs available.";
+              // Auto-scroll to bottom
+              logsContent.scrollTop = logsContent.scrollHeight;
+            }
+          }
+        } catch (err) {
+          console.error("Failed to auto-refresh logs", err);
+        }
       }
     });
 
