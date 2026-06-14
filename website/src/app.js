@@ -279,6 +279,11 @@ export function renderApp(root) {
           </div>
         </div>
         <div id="queue-status-summary" class="queue-status-summary"></div>
+        <div class="select-all-container" style="margin-bottom: 15px; display: none;" id="select-all-container">
+          <label style="display: flex; align-items: center; cursor: pointer; color: var(--text-color);">
+            <input type="checkbox" id="select-all-jobs" style="margin-right: 10px; width: 18px; height: 18px; accent-color: var(--primary-color);"> Select All
+          </label>
+        </div>
         <div class="job-list" id="job-list">
           <!-- Jobs will be loaded here -->
         </div>
@@ -479,6 +484,15 @@ export function renderApp(root) {
         );
       }
 
+      const selectAllContainer = root.querySelector("#select-all-container");
+      if (selectAllContainer) {
+        if (filteredJobs.length > 0) {
+          selectAllContainer.style.display = "block";
+        } else {
+          selectAllContainer.style.display = "none";
+        }
+      }
+
       if (filteredJobs.length === 0) {
         if (jobs.length === 0) {
           jobList.innerHTML = `<p class="empty-state">No jobs yet.</p>`;
@@ -496,6 +510,22 @@ export function renderApp(root) {
             updateProgress(job.id);
           }
         }
+      }
+
+      const selectAllCheckbox = root.querySelector("#select-all-jobs");
+      if (selectAllCheckbox) {
+        selectAllCheckbox.checked = false;
+      }
+
+      if (typeof updateDeleteSelectedBtn === "function") {
+          updateDeleteSelectedBtn();
+      } else {
+          // manually reset delete button if update function is out of scope here
+          const deleteSelectedBtn = root.querySelector("#delete-selected-btn");
+          if (deleteSelectedBtn) {
+            deleteSelectedBtn.classList.add("hidden-btn");
+            deleteSelectedBtn.disabled = true;
+          }
       }
     } catch (err) {
       console.error(err);
@@ -1158,31 +1188,47 @@ export function renderApp(root) {
 
   const deleteSelectedBtn = root.querySelector("#delete-selected-btn");
 
+  function updateDeleteSelectedBtn() {
+    const allCheckboxes = Array.from(root.querySelectorAll(".job-select-checkbox"));
+    const anyChecked = allCheckboxes.some(cb => cb.checked);
+    const allChecked = allCheckboxes.length > 0 && allCheckboxes.every(cb => cb.checked);
+
+    if (anyChecked) {
+      deleteSelectedBtn.classList.remove("hidden-btn");
+      deleteSelectedBtn.disabled = false;
+    } else {
+      deleteSelectedBtn.classList.add("hidden-btn");
+      deleteSelectedBtn.disabled = true;
+    }
+
+    const selectAllCheckbox = root.querySelector("#select-all-jobs");
+    if (selectAllCheckbox) {
+      selectAllCheckbox.checked = allChecked;
+    }
+  }
+
+  const selectAllCheckbox = root.querySelector("#select-all-jobs");
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", (e) => {
+      const isChecked = e.target.checked;
+      const allCheckboxes = Array.from(root.querySelectorAll(".job-select-checkbox"));
+      allCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+      });
+      updateDeleteSelectedBtn();
+    });
+  }
+
   if (root.querySelector("#app")) {
     root.querySelector("#app").addEventListener("change", (e) => {
       if (e.target.classList.contains("job-select-checkbox")) {
-        const anyChecked = Array.from(root.querySelectorAll(".job-select-checkbox")).some(cb => cb.checked);
-        if (anyChecked) {
-          deleteSelectedBtn.classList.remove("hidden-btn");
-          deleteSelectedBtn.disabled = false;
-        } else {
-          deleteSelectedBtn.classList.add("hidden-btn");
-          deleteSelectedBtn.disabled = true;
-        }
+        updateDeleteSelectedBtn();
       }
     });
   } else {
-    // If we're already in the app element, listen on root
     root.addEventListener("change", (e) => {
       if (e.target.classList.contains("job-select-checkbox")) {
-        const anyChecked = Array.from(root.querySelectorAll(".job-select-checkbox")).some(cb => cb.checked);
-        if (anyChecked) {
-          deleteSelectedBtn.classList.remove("hidden-btn");
-          deleteSelectedBtn.disabled = false;
-        } else {
-          deleteSelectedBtn.classList.add("hidden-btn");
-          deleteSelectedBtn.disabled = true;
-        }
+        updateDeleteSelectedBtn();
       }
     });
   }
