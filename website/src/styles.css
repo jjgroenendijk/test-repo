@@ -1073,3 +1073,11 @@ button:active {
 .job-files-list-item {
   margin-bottom: 12px;
 }
+
+.system-info {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-top: 2rem;
+}

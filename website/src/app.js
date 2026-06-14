@@ -291,6 +291,7 @@ export function renderApp(root) {
           <!-- Jobs will be loaded here -->
         </div>
       </section>
+      <footer class="system-info" id="system-info-container"></footer>
     </section>
   `;
 
@@ -401,6 +402,22 @@ export function renderApp(root) {
       statusContainer.classList.remove("status-online");
       statusContainer.classList.add("status-offline");
       statusText.textContent = "Offline";
+    }
+  }
+
+
+  async function fetchSystemInfo() {
+    try {
+      const response = await fetch("/api/system/info");
+      if (response.ok) {
+        const data = await response.json();
+        const container = root.querySelector("#system-info-container");
+        if (container) {
+          container.textContent = `SpotiFLAC v${data.version} (${data.platform})`;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch system info", err);
     }
   }
 
@@ -623,6 +640,7 @@ export function renderApp(root) {
   fetchJobs();
   applyCompactViewState();
   updateStorageUsage();
+  fetchSystemInfo();
   updateJobStats();
   applyAutoRefreshState();
   checkConnectionStatus();
