@@ -442,6 +442,13 @@ export function renderApp(root) {
       if (!response.ok) throw new Error("Failed to fetch");
       const jobs = await response.json();
 
+      const activeJobsCount = jobs.filter(job => job.status === "Running" || job.status === "Queued").length;
+      if (activeJobsCount > 0) {
+        document.title = `(${activeJobsCount}) SpotiFLAC`;
+      } else {
+        document.title = "SpotiFLAC";
+      }
+
       const downloadAllBtn = root.querySelector("#download-all-btn");
       if (downloadAllBtn) {
         const hasCompleted = jobs.some(job => job.status === "Completed");
