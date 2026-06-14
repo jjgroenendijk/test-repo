@@ -137,6 +137,12 @@ describe("renderApp", () => {
     const root = document.getElementById("root");
 
     global.fetch.mockImplementation((url) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/system/storage") {
         return Promise.resolve({
           ok: true,
@@ -179,6 +185,12 @@ describe("renderApp", () => {
     const root = document.getElementById("root");
 
     global.fetch.mockImplementation((url) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/system/storage") {
         return Promise.resolve({
           ok: true,
@@ -406,6 +418,12 @@ describe("renderApp", () => {
     // Setup fetch mock to track calls
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve([])
@@ -440,6 +458,12 @@ describe("renderApp", () => {
 
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/jobs" && (!options || options.method === "GET")) {
         return Promise.resolve({
           ok: true,
@@ -496,6 +520,12 @@ describe("renderApp", () => {
 
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/jobs" && (!options || options.method === "GET")) {
         return Promise.resolve({
           ok: true,
@@ -555,6 +585,12 @@ describe("renderApp", () => {
     // Setup fetch mock to track calls
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve([])
@@ -618,6 +654,12 @@ describe("renderApp", () => {
 
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/jobs" && (!options || options.method === "GET")) {
         return Promise.resolve({
           ok: true,
@@ -685,6 +727,12 @@ describe("renderApp", () => {
 
     const fetchMock = vi.fn();
     fetchMock.mockImplementation((url, options) => {
+      if (url === "/api/system/info") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ version: "1.0.0", platform: "linux" })
+        });
+      }
       if (url === "/api/jobs" && (!options || options.method === "GET")) {
         return Promise.resolve({
           ok: true,
