@@ -380,8 +380,8 @@ test("can clear queued jobs", async ({ page }) => {
   });
 
   let clearQueuedCalled = false;
-  await page.route("/api/history/clear-queued", async (route) => {
-    if (route.request().method() === "DELETE") {
+  await page.route("/api/history/clear-queued", async (route, request) => {
+    if (request.method() === "DELETE") {
       clearQueuedCalled = true;
       await route.fulfill({
         status: 200,
@@ -399,6 +399,19 @@ test("can clear queued jobs", async ({ page }) => {
   await expect(clearQueuedBtn).toBeVisible();
 
   page.once("dialog", dialog => dialog.accept());
+
+  await page.route("/api/history/clear-queued", async (route) => {
+    if (route.request().method() === "DELETE") {
+      clearQueuedCalled = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "success", cleared: 1 })
+      });
+    } else {
+      await route.fallback();
+    }
+  });
 
   const requestPromise = page.waitForRequest(request =>
     request.url().includes("/api/history/clear-queued") && request.method() === "DELETE"

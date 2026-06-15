@@ -55,7 +55,8 @@ test('Download job form submits with URL and quality setting', async ({ page }) 
   await page.fill('#spotify-url', testUrl);
 
   // Select a quality setting
-  await page.selectOption('#quality-select', '320kbps');
+  await page.selectOption('#service-select', 'qobuz');
+  await page.selectOption('#quality-select', 'LOSSLESS');
 
   // Submit the form
   await page.click('button[type="submit"]');
@@ -65,7 +66,8 @@ test('Download job form submits with URL and quality setting', async ({ page }) 
   await page.waitForResponse(response => response.url().includes('/api/jobs') && response.request().method() === 'POST');
   expect(submittedPayload).not.toBeNull();
   expect(submittedPayload.url).toBe(testUrl);
-  expect(submittedPayload.quality).toBe('320kbps');
+  expect(submittedPayload.quality).toBe('LOSSLESS');
+  expect(submittedPayload.service).toBe('qobuz');
   expect(postCalls).toBe(1);
 
   // Verify feedback message

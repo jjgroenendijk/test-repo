@@ -190,10 +190,22 @@ export function renderApp(root) {
               required
               rows="3"
             ></textarea>
+            <select id="service-select" name="service" class="job-status-filter" aria-label="Provider Service Setting" style="align-self: flex-start; margin-right: 10px; background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-color);">
+              <option value="tidal" selected>Tidal</option>
+              <option value="qobuz">Qobuz</option>
+              <option value="deezer">Deezer</option>
+              <option value="amazon">Amazon</option>
+              <option value="spoti">Spotify</option>
+              <option value="soundcloud">Soundcloud</option>
+              <option value="youtube">YouTube</option>
+              <option value="apple">Apple</option>
+              <option value="pandora">Pandora</option>
+            </select>
             <select id="quality-select" name="quality" class="job-status-filter" aria-label="Quality Setting" style="align-self: flex-start; margin-right: 10px; background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-color);">
-              <option value="128kbps">128kbps</option>
-              <option value="256kbps" selected>256kbps</option>
-              <option value="320kbps">320kbps</option>
+              <option value="LOSSLESS" selected>LOSSLESS</option>
+              <option value="HI_RES_LOSSLESS">HI_RES_LOSSLESS</option>
+              <option value="HIGH">HIGH</option>
+              <option value="LOW">LOW</option>
             </select>
             <button type="button" id="clear-input-btn" class="clear-history-btn hidden-btn">Clear input</button>
             <button type="submit">Queue</button>
@@ -743,12 +755,14 @@ export function renderApp(root) {
 
     try {
       const qualitySelect = form.querySelector('#quality-select');
-      const quality = qualitySelect ? qualitySelect.value : "256kbps";
+      const quality = qualitySelect ? qualitySelect.value : "LOSSLESS";
+      const serviceSelect = form.querySelector('#service-select');
+      const service = serviceSelect ? serviceSelect.value : "tidal";
       const requests = urls.map(url =>
         fetch("/api/jobs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, quality })
+          body: JSON.stringify({ url, quality, service })
         })
       );
 
