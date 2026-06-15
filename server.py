@@ -47,6 +47,8 @@ running_processes = {}
 
 class JobRequest(BaseModel):
     url: HttpUrl
+    quality: Optional[str] = None
+    service: Optional[str] = None
 
 
 class JobResponse(BaseModel):
@@ -97,7 +99,7 @@ async def update_job_status(job_id: str, status: str, error_log: Optional[str] =
     await write_history(history)
 
 
-async def run_spotiflac(job_id: str, url: str):
+async def run_spotiflac(job_id: str, url: str, quality: Optional[str] = None, service: Optional[str] = None):
     logger.info(f"Starting job {job_id} for URL {url}")
 
     # Check if job was already cancelled while queued
@@ -121,8 +123,13 @@ async def run_spotiflac(job_id: str, url: str):
     process = None
     try:
         with open(log_file_path, "w") as log_file:
+            cmd = ["uv", "run", "spotiflac", url, str(job_output_dir)]
+            if quality:
+                cmd.extend(["--quality", quality])
+            if service:
+                cmd.extend(["--service", service])
             process = await asyncio.create_subprocess_exec(
-                "uv", "run", "spotiflac", url, str(job_output_dir),
+                *cmd,
                 stdout=log_file,
                 stderr=asyncio.subprocess.STDOUT
             )
@@ -174,7 +181,7 @@ async def create_job(request: JobRequest, background_tasks: BackgroundTasks):
     history.insert(0, new_job)
     await write_history(history)
 
-    background_tasks.add_task(run_spotiflac, job_id, url_str)
+    background_tasks.add_task(run_spotiflac, job_id, url_str, request.quality, request.service)
 
     return new_job
 
