@@ -317,6 +317,29 @@ export function renderApp(root) {
   const clearSearchBtn = root.querySelector("#clear-search-btn");
   const sortSelect = root.querySelector("#job-sort-select");
   const clearInputBtn = root.querySelector("#clear-input-btn");
+  const serviceSelect = root.querySelector("#service-select");
+  const qualitySelect = root.querySelector("#quality-select");
+
+  if (serviceSelect) {
+    const savedService = localStorage.getItem("savedService");
+    if (savedService) {
+      serviceSelect.value = savedService;
+    }
+    serviceSelect.addEventListener("change", (e) => {
+      localStorage.setItem("savedService", e.target.value);
+    });
+  }
+
+  if (qualitySelect) {
+    const savedQuality = localStorage.getItem("savedQuality");
+    if (savedQuality) {
+      qualitySelect.value = savedQuality;
+    }
+    qualitySelect.addEventListener("change", (e) => {
+      localStorage.setItem("savedQuality", e.target.value);
+    });
+  }
+
 
   if (input && clearInputBtn) {
     input.addEventListener("input", () => {
