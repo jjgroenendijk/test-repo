@@ -272,6 +272,7 @@ export function renderApp(root) {
               <input type="checkbox" id="auto-refresh-toggle" class="toggle-input">
               Auto-refresh
             </label>
+            <button type="button" id="pause-polling-btn" class="clear-history-btn pause-polling-btn">Pause Polling</button>
             <label class="toggle-label">
               <input type="checkbox" id="compact-view-toggle" class="toggle-input">
               Compact view
@@ -606,15 +607,19 @@ export function renderApp(root) {
   }
 
   const autoRefreshToggle = root.querySelector("#auto-refresh-toggle");
+  const pausePollingBtn = root.querySelector("#pause-polling-btn");
+  let isPollingPaused = false;
   let pollInterval;
 
   function applyAutoRefreshState() {
     if (pollInterval) {
       clearInterval(pollInterval);
     }
-    if (autoRefreshToggle && autoRefreshToggle.checked) {
+    if (autoRefreshToggle && autoRefreshToggle.checked && !isPollingPaused) {
       pollInterval = setInterval(() => {
-        fetchJobs();
+        if (!isPollingPaused) {
+          fetchJobs();
+        }
       }, 5000);
     }
   }
@@ -626,6 +631,21 @@ export function renderApp(root) {
     autoRefreshToggle.addEventListener("change", () => {
       localStorage.setItem("autoRefresh", autoRefreshToggle.checked);
       applyAutoRefreshState();
+    });
+  }
+
+  if (pausePollingBtn) {
+    pausePollingBtn.addEventListener("click", () => {
+      isPollingPaused = !isPollingPaused;
+      if (isPollingPaused) {
+        pausePollingBtn.textContent = "Resume Polling";
+        pausePollingBtn.classList.add("paused");
+        applyAutoRefreshState(); // Clear interval
+      } else {
+        pausePollingBtn.textContent = "Pause Polling";
+        pausePollingBtn.classList.remove("paused");
+        applyAutoRefreshState(); // Restart interval
+      }
     });
   }
 
@@ -656,7 +676,11 @@ export function renderApp(root) {
   updateJobStats();
   applyAutoRefreshState();
   checkConnectionStatus();
-  setInterval(checkConnectionStatus, 10000); // Update connection status every 10 seconds
+  setInterval(() => {
+    if (!isPollingPaused) {
+      checkConnectionStatus();
+    }
+  }, 10000); // Update connection status every 10 seconds
 
   const themeToggleBtn = root.querySelector("#theme-toggle");
 
@@ -682,6 +706,8 @@ export function renderApp(root) {
 
   // Poll progress more frequently (e.g., every 2 seconds) for smoother updates
   const progressPollInterval = setInterval(() => {
+    if (isPollingPaused) return;
+
     const runningJobs = Array.from(root.querySelectorAll('.job-card')).filter(card => {
       const statusText = card.querySelector('.job-meta span:first-child')?.textContent;
       return statusText === 'Running';
@@ -718,7 +744,7 @@ export function renderApp(root) {
       }
     });
 
-    if (autoRefreshToggle && autoRefreshToggle.checked) {
+    if (autoRefreshToggle && autoRefreshToggle.checked && !isPollingPaused) {
       updateStorageUsage();
       updateJobStats();
     }
