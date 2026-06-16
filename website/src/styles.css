@@ -1081,3 +1081,10 @@ button:active {
   color: var(--text-tertiary);
   margin-top: 2rem;
 }
+
+/* Pause Polling Button */
+.pause-polling-btn.paused {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
