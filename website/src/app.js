@@ -64,10 +64,11 @@ function renderJob(job) {
     filesText += ` (${formatFileSize(job.total_size)})`;
   }
   const canCancel = job.status === "Queued" || job.status === "Running";
-  const canRetry = job.status === "Failed" || job.status === "Cancelled";
+  const canRetry = job.status === "Failed" || job.status === "Cancelled" || job.status === "Completed";
   const canDelete = job.status === "Completed" || job.status === "Failed" || job.status === "Cancelled";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
-  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">Retry</button>` : "";
+  const retryText = job.status === "Completed" ? "Re-queue" : "Retry";
+  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">${retryText}</button>` : "";
   const deleteBtnHtml = canDelete ? `<button type="button" class="delete-job-btn" data-job-id="${escapeHtml(job.id)}">Delete</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
@@ -1027,8 +1028,9 @@ export function renderApp(root) {
       const jobUrl = event.target.dataset.jobUrl;
       if (!jobUrl) return;
 
+      const isRequeue = event.target.textContent.trim() === "Re-queue";
       event.target.disabled = true;
-      event.target.textContent = "Retrying...";
+      event.target.textContent = isRequeue ? "Re-queueing..." : "Retrying...";
 
       try {
         const response = await fetch("/api/jobs", {
@@ -1040,12 +1042,12 @@ export function renderApp(root) {
           fetchJobs();
         } else {
           event.target.disabled = false;
-          event.target.textContent = "Retry";
+          event.target.textContent = isRequeue ? "Re-queue" : "Retry";
         }
       } catch (err) {
         console.error("Failed to retry job", err);
         event.target.disabled = false;
-        event.target.textContent = "Retry";
+        event.target.textContent = isRequeue ? "Re-queue" : "Retry";
       }
     }
 
