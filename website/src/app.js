@@ -208,6 +208,8 @@ export function renderApp(root) {
               <option value="HIGH">HIGH</option>
               <option value="LOW">LOW</option>
             </select>
+            <input type="file" id="bulk-url-file-input" accept=".txt" style="display: none;" />
+            <button type="button" id="load-file-btn" class="clear-history-btn">Load File</button>
             <button type="button" id="clear-input-btn" class="clear-history-btn hidden-btn">Clear input</button>
             <button type="submit">Queue</button>
           </div>
@@ -315,6 +317,8 @@ export function renderApp(root) {
   const clearSearchBtn = root.querySelector("#clear-search-btn");
   const sortSelect = root.querySelector("#job-sort-select");
   const clearInputBtn = root.querySelector("#clear-input-btn");
+  const loadFileBtn = root.querySelector("#load-file-btn");
+  const bulkUrlFileInput = root.querySelector("#bulk-url-file-input");
   const serviceSelect = root.querySelector("#service-select");
   const qualitySelect = root.querySelector("#quality-select");
 
@@ -362,6 +366,35 @@ export function renderApp(root) {
       feedback.textContent = "Tracks, albums, playlists, and artists will run through the SpotiFLAC module.";
       feedback.dataset.state = "";
       clearInputBtn.style.display = "none";
+    });
+  }
+
+  if (loadFileBtn && bulkUrlFileInput) {
+    loadFileBtn.addEventListener("click", () => {
+      bulkUrlFileInput.click();
+    });
+
+    bulkUrlFileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        if (input.value) {
+           input.value = input.value + "\n" + content;
+        } else {
+           input.value = content;
+        }
+
+        if (input.value.length > 0 && clearInputBtn) {
+          clearInputBtn.style.display = "inline-block";
+        }
+
+        // Reset input so the same file can be loaded again if needed
+        bulkUrlFileInput.value = '';
+      };
+      reader.readAsText(file);
     });
   }
 
