@@ -1,5 +1,6 @@
 import asyncio
 import io
+import csv
 import json
 import logging
 import os
@@ -9,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request, Response
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
@@ -468,7 +469,39 @@ async def export_history_json():
         filename="SpotiFLAC-history.json"
     )
 
+
+@app.get("/api/history/export/csv")
+async def export_history_csv():
+    if not HISTORY_FILE.exists():
+        return Response(
+            content="",
+            media_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="SpotiFLAC-history.csv"'}
+        )
+
+    try:
+        with open(HISTORY_FILE, "r") as f:
+            history = json.load(f)
+    except json.JSONDecodeError:
+        history = []
+
+    output = io.StringIO()
+    # Define standard fields based on JobResponse properties
+    fieldnames = ["id", "url", "status", "created_at", "error_log", "files", "completed_at"]
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+
+    writer.writeheader()
+    for job in history:
+        writer.writerow(job)
+
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="SpotiFLAC-history.csv"'}
+    )
+
 def _delete_job_files(job_id: str):
+
     import shutil
     job_dir = DATA_DIR / job_id
     if job_dir.exists() and job_dir.is_dir():
