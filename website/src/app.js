@@ -68,7 +68,7 @@ function renderJob(job) {
   const canDelete = job.status === "Completed" || job.status === "Failed" || job.status === "Cancelled";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
   const retryText = job.status === "Completed" ? "Re-queue" : "Retry";
-  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}">${retryText}</button>` : "";
+  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}" data-job-service="${escapeHtml(job.service || '')}" data-job-quality="${escapeHtml(job.quality || '')}">${retryText}</button>` : "";
   const deleteBtnHtml = canDelete ? `<button type="button" class="delete-job-btn" data-job-id="${escapeHtml(job.id)}">Delete</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
@@ -1017,6 +1017,8 @@ export function renderApp(root) {
 
     if (event.target.classList.contains("retry-job-btn")) {
       const jobUrl = event.target.dataset.jobUrl;
+      const jobService = event.target.dataset.jobService;
+      const jobQuality = event.target.dataset.jobQuality;
       if (!jobUrl) return;
 
       const isRequeue = event.target.textContent.trim() === "Re-queue";
@@ -1027,7 +1029,7 @@ export function renderApp(root) {
         const response = await fetch("/api/jobs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: jobUrl })
+          body: JSON.stringify({ url: jobUrl, service: jobService || undefined, quality: jobQuality || undefined })
         });
         if (response.ok) {
           fetchJobs();
@@ -1388,7 +1390,7 @@ export function renderApp(root) {
             fetch("/api/jobs", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: job.url })
+              body: JSON.stringify({ url: job.url, service: job.service, quality: job.quality })
             })
           );
 
@@ -1419,7 +1421,7 @@ export function renderApp(root) {
             fetch("/api/jobs", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: job.url })
+              body: JSON.stringify({ url: job.url, service: job.service, quality: job.quality })
             })
           );
 
@@ -1455,7 +1457,7 @@ export function renderApp(root) {
             return fetch("/api/jobs", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: job.url })
+              body: JSON.stringify({ url: job.url, service: job.service, quality: job.quality })
             });
           });
 
@@ -1486,7 +1488,7 @@ export function renderApp(root) {
             fetch("/api/jobs", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: job.url })
+              body: JSON.stringify({ url: job.url, service: job.service, quality: job.quality })
             })
           );
 
