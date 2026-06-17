@@ -612,3 +612,25 @@ def test_health_endpoint():
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+@patch('server.run_spotiflac')
+def test_export_history_csv(mock_run):
+    # Clear history first
+    client.delete("/api/jobs")
+
+    # Create a job
+    response = client.post("/api/jobs", json={"url": "https://open.spotify.com/track/123"})
+    assert response.status_code == 200
+
+    # Get the CSV
+    csv_response = client.get("/api/history/export/csv")
+    assert csv_response.status_code == 200
+    assert csv_response.headers["Content-Type"] == "text/csv; charset=utf-8"
+    assert 'attachment; filename="SpotiFLAC-history.csv"' in csv_response.headers["Content-Disposition"]
+
+    csv_data = csv_response.text
+    # Check headers
+    assert "id,url,status,created_at,error_log,files,completed_at" in csv_data
+    # Check data row exists and contains the correct url and status
+    assert "https://open.spotify.com/track/123" in csv_data
+    assert "Queued" in csv_data

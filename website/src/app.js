@@ -291,6 +291,7 @@ export function renderApp(root) {
             <button type="button" id="delete-selected-btn" class="clear-history-btn btn-danger hidden-btn" disabled>Delete selected</button>
             <button type="button" id="delete-all-jobs-btn" class="clear-history-btn btn-danger">Delete all jobs</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn btn-export download-link" download>Export JSON</a>
+            <a href="/api/history/export/csv" id="export-history-csv-btn" class="clear-history-btn btn-export download-link" download>Export CSV</a>
           </div>
         </div>
         <div id="queue-status-summary" class="queue-status-summary"></div>
