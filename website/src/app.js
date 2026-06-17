@@ -82,7 +82,7 @@ function renderJob(job) {
   return `
     <article class="job-card" data-job-id="${escapeHtml(job.id)}">
       <input type="checkbox" class="job-select-checkbox" data-job-id="${escapeHtml(job.id)}" aria-label="Select job" style="margin-right: 10px; margin-bottom: 10px; width: 18px; height: 18px; accent-color: var(--primary-color);">
-      <img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.style.display='none'" alt="Cover art" />
+      <a href="/api/jobs/${escapeHtml(job.id)}/cover" download="cover.jpg" class="cover-download-link"><img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.parentNode.style.display='none'" alt="Cover art" /></a>
       <div>
         <p class="job-title">
           <a href="${escapeHtml(job.url)}" target="_blank" rel="noopener noreferrer" class="source-link">${escapeHtml(job.url)}</a>
