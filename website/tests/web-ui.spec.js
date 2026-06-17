@@ -306,29 +306,24 @@ test('can view job logs', async ({ page }) => {
 test("can toggle auto-refresh", async ({ page }) => {
   await page.goto("/");
 
-  const autoRefreshCheckbox = page.getByRole("checkbox", { name: "Auto-refresh" });
-  await expect(autoRefreshCheckbox).toBeVisible();
+  const pauseBtn = page.locator('#pause-polling-btn');
+  await expect(pauseBtn).toBeVisible();
+  await expect(pauseBtn).toHaveText('Pause Auto-refresh');
 
-  // Default is true based on our implementation, so unchecking it should work
-  if (await autoRefreshCheckbox.isChecked()) {
-      await autoRefreshCheckbox.uncheck();
-      await expect(autoRefreshCheckbox).not.toBeChecked();
-  } else {
-      await autoRefreshCheckbox.check();
-      await expect(autoRefreshCheckbox).toBeChecked();
-  }
+  // Click to pause
+  await pauseBtn.click();
+  await expect(pauseBtn).toHaveText('Resume Auto-refresh');
+  await expect(pauseBtn).toHaveClass(/paused/);
 
   // Reload to verify it persists
   await page.reload();
+  await expect(pauseBtn).toHaveText('Resume Auto-refresh');
+  await expect(pauseBtn).toHaveClass(/paused/);
 
-  // Because we don't mock localStorage directly in Playwright across reloads easily without extra setup,
-  // the page context usually retains localStorage if on same origin. Let's verify it stayed unchecked/checked based on last action.
-  // We can just flip it and check the immediate UI state.
-  await autoRefreshCheckbox.uncheck();
-  await expect(autoRefreshCheckbox).not.toBeChecked();
-
-  await autoRefreshCheckbox.check();
-  await expect(autoRefreshCheckbox).toBeChecked();
+  // Click to resume
+  await pauseBtn.click();
+  await expect(pauseBtn).toHaveText('Pause Auto-refresh');
+  await expect(pauseBtn).not.toHaveClass(/paused/);
 });
 
 test("can refresh job list", async ({ page }) => {
@@ -1519,11 +1514,13 @@ test('can queue an artist URL and filter by Artist type', async ({ page }) => {
   await page.fill('[name="spotify-url"]', artistUrl);
 
   // Set up request listener before clicking
-  const requestPromise = page.waitForRequest('**/api/jobs*');
+  const requestPromise = page.waitForRequest(req => req.url().includes('/api/jobs') && req.method() === 'POST');
   await page.click('button[type="submit"]');
 
   // Wait for the request to be made
   const request = await requestPromise;
+
+  await page.waitForTimeout(100);
 
   expect(request.method()).toBe('POST');
   expect(requestMade).toBe(true);

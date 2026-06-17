@@ -269,11 +269,7 @@ export function renderApp(root) {
             <a href="/api/history/download" id="download-all-btn" class="clear-history-btn download-link" download>Download all completed</a>
             <a href="/api/history/logs/download" id="download-all-logs-btn" class="clear-history-btn download-link" download>Download all logs</a>
             <button type="button" id="refresh-jobs-btn" class="clear-history-btn">Refresh jobs</button>
-            <label class="toggle-label">
-              <input type="checkbox" id="auto-refresh-toggle" class="toggle-input">
-              Auto-refresh
-            </label>
-            <button type="button" id="pause-polling-btn" class="clear-history-btn pause-polling-btn">Pause Polling</button>
+            <button type="button" id="pause-polling-btn" class="clear-history-btn pause-polling-btn">Pause Auto-refresh</button>
             <label class="toggle-label">
               <input type="checkbox" id="compact-view-toggle" class="toggle-input">
               Compact view
@@ -630,45 +626,40 @@ export function renderApp(root) {
     });
   }
 
-  const autoRefreshToggle = root.querySelector("#auto-refresh-toggle");
   const pausePollingBtn = root.querySelector("#pause-polling-btn");
-  let isPollingPaused = false;
+  let isPollingPaused = localStorage.getItem("isPollingPaused") === "true";
   let pollInterval;
 
   function applyAutoRefreshState() {
     if (pollInterval) {
       clearInterval(pollInterval);
     }
-    if (autoRefreshToggle && autoRefreshToggle.checked && !isPollingPaused) {
-      pollInterval = setInterval(() => {
-        if (!isPollingPaused) {
-          fetchJobs();
-        }
-      }, 5000);
-    }
-  }
-
-  if (autoRefreshToggle) {
-    const savedAutoRefresh = localStorage.getItem("autoRefresh");
-    autoRefreshToggle.checked = savedAutoRefresh !== "false"; // Default to true
-
-    autoRefreshToggle.addEventListener("change", () => {
-      localStorage.setItem("autoRefresh", autoRefreshToggle.checked);
-      applyAutoRefreshState();
-    });
+    pollInterval = setInterval(() => {
+      if (!isPollingPaused) {
+        fetchJobs();
+      }
+    }, 5000);
   }
 
   if (pausePollingBtn) {
+    // Initial UI state
+    if (isPollingPaused) {
+      pausePollingBtn.textContent = "Resume Auto-refresh";
+      pausePollingBtn.classList.add("paused");
+    } else {
+      pausePollingBtn.textContent = "Pause Auto-refresh";
+      pausePollingBtn.classList.remove("paused");
+    }
+
     pausePollingBtn.addEventListener("click", () => {
       isPollingPaused = !isPollingPaused;
+      localStorage.setItem("isPollingPaused", isPollingPaused);
       if (isPollingPaused) {
-        pausePollingBtn.textContent = "Resume Polling";
+        pausePollingBtn.textContent = "Resume Auto-refresh";
         pausePollingBtn.classList.add("paused");
-        applyAutoRefreshState(); // Clear interval
       } else {
-        pausePollingBtn.textContent = "Pause Polling";
+        pausePollingBtn.textContent = "Pause Auto-refresh";
         pausePollingBtn.classList.remove("paused");
-        applyAutoRefreshState(); // Restart interval
       }
     });
   }
@@ -768,7 +759,7 @@ export function renderApp(root) {
       }
     });
 
-    if (autoRefreshToggle && autoRefreshToggle.checked && !isPollingPaused) {
+    if (!isPollingPaused) {
       updateStorageUsage();
       updateJobStats();
     }

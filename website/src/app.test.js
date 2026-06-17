@@ -69,7 +69,7 @@ describe("renderApp", () => {
 
   it("polls api endpoints at correct intervals when auto-refresh is enabled", async () => {
     vi.useFakeTimers();
-    const dom = new JSDOM('<!DOCTYPE html><div id="root"><input type="checkbox" id="auto-refresh-toggle" checked /></div>', {
+    const dom = new JSDOM('<!DOCTYPE html><div id="root"><button type="button" id="pause-polling-btn">Pause Auto-refresh</button></div>', {
       url: "http://localhost",
     });
     global.document = dom.window.document;
