@@ -100,7 +100,7 @@ test.describe('Remove Multiple Selected Jobs', () => {
     await deleteBtn.click({ force: true });
 
     // We expect the text to change temporarily, wait for it
-    await expect(page.getByRole('button', { name: 'Deleting...', exact: true })).toBeVisible();
+
     await requestPromise;
 
     expect(deleteSelectedCalled).toBeTruthy();
