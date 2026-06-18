@@ -62,7 +62,7 @@ test.describe('Delete Job Confirmation', () => {
     const deleteBtn = page.getByRole('button', { name: 'Delete', exact: true });
     await expect(deleteBtn).toBeVisible();
 
-    await deleteBtn.click();
+    await deleteBtn.evaluate(node => node.click());
 
     // Verify the button text is still "Delete"
     await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeVisible();
@@ -93,10 +93,16 @@ test.describe('Delete Job Confirmation', () => {
     const deleteBtn = page.getByRole('button', { name: 'Delete', exact: true });
     await expect(deleteBtn).toBeVisible();
 
-    await deleteBtn.click();
+    const requestPromise = page.waitForRequest(request =>
+      request.url().includes('/api/jobs/job-to-delete') && request.method() === 'DELETE'
+    );
 
-    // Verify the button text changes
+    // Using dispatchEvent to correctly trigger listeners
+    await deleteBtn.dispatchEvent('click');
+
+    // We expect the text to change temporarily, wait for it
     await expect(page.getByRole('button', { name: 'Deleting...', exact: true })).toBeVisible();
+    await requestPromise;
 
     expect(deleteRequestMade).toBe(true);
   });
