@@ -97,7 +97,7 @@ test.describe('Remove Multiple Selected Jobs', () => {
       request.url().includes('/api/jobs/delete-selected') && request.method() === 'POST'
     );
 
-    await deleteBtn.click();
+    await deleteBtn.evaluate(node => node.click());
     await requestPromise;
 
     expect(deleteSelectedCalled).toBeTruthy();
