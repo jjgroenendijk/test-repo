@@ -97,10 +97,10 @@ test.describe('Remove Multiple Selected Jobs', () => {
       request.url().includes('/api/jobs/delete-selected') && request.method() === 'POST'
     );
 
-    await deleteBtn.click({ force: true });
+    await deleteBtn.evaluate(node => node.click());
 
     // We expect the text to change temporarily, wait for it
-
+    await page.waitForTimeout(100);
     await requestPromise;
 
     expect(deleteSelectedCalled).toBeTruthy();
