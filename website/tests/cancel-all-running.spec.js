@@ -50,7 +50,7 @@ test.describe('Cancel All Running Feature', () => {
     await expect(cancelBtn).toBeVisible();
 
     // Setup request listener to wait for API call
-    const requestPromise = page.waitForRequest('/api/jobs/cancel-running');
+    const requestPromise = page.waitForRequest(request => request.url().includes('/api/jobs/cancel-running') && request.method() === 'POST');
 
     // Click the button
     await cancelBtn.click();

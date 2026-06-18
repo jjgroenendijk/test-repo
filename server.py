@@ -470,6 +470,7 @@ async def export_history_json():
     )
 
 
+# Endpoint to export the job history as a CSV file for spreadsheet analysis.
 @app.get("/api/history/export/csv")
 async def export_history_csv():
     if not HISTORY_FILE.exists():

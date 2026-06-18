@@ -71,7 +71,7 @@ test('Queue form can be submitted with Ctrl+Enter or Meta+Enter', async ({ page 
 
   // Wait for the route to be hit when we press Control+Enter
   const requestPromise = page.waitForRequest(request =>
-    request.url().includes('/api/jobs') && request.method() === 'POST'
+    request.url().endsWith('/api/jobs') && request.method() === 'POST'
   );
 
   // Press Control+Enter inside the textarea
