@@ -80,7 +80,7 @@ function renderJob(job) {
   const completedAtHtml = job.completed_at ? `<p class="job-source job-completed-time">Completed: ${new Date(job.completed_at).toLocaleString()} (Duration: ${durationStr})</p>` : "";
 
   return `
-    <article class="job-card" data-job-id="${escapeHtml(job.id)}">
+    <article class="job-card" data-job-id="${escapeHtml(job.id)}" tabindex="0" aria-label="Job for ${escapeHtml(job.url)}">
       <input type="checkbox" class="job-select-checkbox" data-job-id="${escapeHtml(job.id)}" aria-label="Select job" style="margin-right: 10px; margin-bottom: 10px; width: 18px; height: 18px; accent-color: var(--primary-color);">
       <a href="/api/jobs/${escapeHtml(job.id)}/cover" download="cover.jpg" class="cover-download-link"><img src="/api/jobs/${escapeHtml(job.id)}/cover" class="track-cover" onerror="this.parentNode.style.display='none'" alt="Cover art" /></a>
       <div>
@@ -866,6 +866,27 @@ export function renderApp(root) {
     } finally {
       queueBtn.disabled = false;
       queueBtn.textContent = "Queue";
+    }
+  });
+
+  jobList.addEventListener("keydown", (event) => {
+    const card = event.target.closest(".job-card");
+    if (!card) return;
+
+    // Only trigger navigation if the card itself has focus
+    if (event.target !== card) return;
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const cards = Array.from(jobList.querySelectorAll(".job-card"));
+      const currentIndex = cards.indexOf(card);
+      let nextIndex;
+      if (event.key === "ArrowDown") {
+        nextIndex = currentIndex + 1 < cards.length ? currentIndex + 1 : 0;
+      } else {
+        nextIndex = currentIndex - 1 >= 0 ? currentIndex - 1 : cards.length - 1;
+      }
+      cards[nextIndex].focus();
     }
   });
 
