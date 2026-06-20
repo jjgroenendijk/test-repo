@@ -19,6 +19,14 @@ describe("isSpotifyUrl", () => {
     expect(isSpotifyUrl("https://open.spotify.com/album/1ATL5GLyefJaxhQzSPVrLX")).toBe(true);
   });
 
+  it("accepts valid show URLs", () => {
+    expect(isSpotifyUrl("https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk")).toBe(true);
+  });
+
+  it("accepts valid episode URLs", () => {
+    expect(isSpotifyUrl("https://open.spotify.com/episode/7G5O2wWmbpExz8wKqR24wR")).toBe(true);
+  });
+
   it("rejects invalid hosts", () => {
     expect(isSpotifyUrl("https://soundcloud.com/track/123")).toBe(false);
   });
@@ -31,6 +39,14 @@ describe("classifySpotifyUrl", () => {
 
   it("classifies albums", () => {
     expect(classifySpotifyUrl("https://open.spotify.com/album/123")).toBe("album");
+  });
+
+  it("classifies shows", () => {
+    expect(classifySpotifyUrl("https://open.spotify.com/show/123")).toBe("show");
+  });
+
+  it("classifies episodes", () => {
+    expect(classifySpotifyUrl("https://open.spotify.com/episode/123")).toBe("episode");
   });
 });
 

@@ -6,7 +6,7 @@ export function isSpotifyUrl(value) {
 
     return (
       host === "open.spotify.com" &&
-      ["track", "album", "playlist", "artist"].includes(parts[0]) &&
+      ["track", "album", "playlist", "artist", "show", "episode"].includes(parts[0]) &&
       Boolean(parts[1])
     );
   } catch {
