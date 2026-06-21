@@ -458,8 +458,12 @@ export function renderApp(root) {
     const statusText = root.querySelector(".status-text");
     if (!statusContainer || !statusText) return;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
-      const response = await fetch("/api/health");
+      const response = await fetch("/api/health", { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         statusContainer.classList.remove("status-offline");
         statusContainer.classList.add("status-online");
@@ -1406,6 +1410,7 @@ export function renderApp(root) {
         retrySelectedBtn.classList.add("hidden-btn");
         retrySelectedBtn.disabled = true;
       }
+
     }
 
     const selectAllCheckbox = root.querySelector("#select-all-jobs");
@@ -1478,6 +1483,7 @@ export function renderApp(root) {
       }
     });
   }
+
 
   if (deleteSelectedBtn) {
     deleteSelectedBtn.addEventListener("click", async () => {

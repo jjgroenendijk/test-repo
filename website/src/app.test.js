@@ -414,6 +414,7 @@ describe("renderApp", () => {
     const themeSelector = document.getElementById("theme-selector");
     themeSelector.value = "dark";
     themeSelector.dispatchEvent(new global.window.Event("change"));
+
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(global.localStorage.setItem).toHaveBeenCalledWith("theme", "dark");
   });
