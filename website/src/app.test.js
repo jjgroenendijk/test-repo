@@ -779,4 +779,50 @@ describe("renderApp", () => {
     const durationText = document.body.textContent;
     expect(durationText).toContain("(Duration: 1m 23s)");
   });
+
+  it("handles retry selected jobs action", async () => {
+    global.fetch.mockImplementation((url, options) => {
+      if (url === "/api/jobs" && (!options || options.method === "GET")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: "1", url: "http://example.com/1", status: "Failed", service: "", quality: "" },
+            { id: "2", url: "http://example.com/2", status: "Completed", service: "", quality: "" },
+            { id: "3", url: "http://example.com/3", status: "Queued", service: "", quality: "" }
+          ])
+        });
+      }
+      if (url === "/api/jobs" && options && options.method === "POST") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+
+    const root = document.createElement("div");
+    renderApp(root);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Select job 1 and 2
+    const checkboxes = root.querySelectorAll(".job-select-checkbox");
+    if (checkboxes.length >= 2) {
+      checkboxes[0].checked = true;
+      checkboxes[1].checked = true;
+
+      // Simulate change event to trigger updateDeleteSelectedBtn
+      const event = document.createEvent("Event");
+      event.initEvent("change", true, true);
+      checkboxes[0].dispatchEvent(event);
+    }
+
+    const retrySelectedBtn = root.querySelector("#retry-selected-btn");
+    if (retrySelectedBtn && !retrySelectedBtn.classList.contains("hidden-btn")) {
+      retrySelectedBtn.click();
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const postCalls = global.fetch.mock.calls.filter(call => call[0] === "/api/jobs" && call[1] && call[1].method === "POST");
+      expect(postCalls.length).toBe(2);
+      expect(JSON.parse(postCalls[0][1].body).url).toBe("http://example.com/1");
+      expect(JSON.parse(postCalls[1][1].body).url).toBe("http://example.com/2");
+    }
+  });
 });

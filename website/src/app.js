@@ -289,6 +289,7 @@ export function renderApp(root) {
             <button type="button" id="cancel-all-queued-btn" class="clear-history-btn btn-queued">Cancel all queued</button>
             <button type="button" id="clear-queued-btn" class="clear-history-btn btn-queued">Clear queued</button>
             <button type="button" id="clear-history-btn" class="clear-history-btn">Clear history</button>
+            <button type="button" id="retry-selected-btn" class="clear-history-btn btn-primary hidden-btn" disabled>Retry selected</button>
             <button type="button" id="delete-selected-btn" class="clear-history-btn btn-danger hidden-btn" disabled>Delete selected</button>
             <button type="button" id="delete-all-jobs-btn" class="clear-history-btn btn-danger">Delete all jobs</button>
             <a href="/api/history/export" id="export-history-btn" class="clear-history-btn btn-export download-link" download>Export JSON</a>
@@ -620,6 +621,11 @@ export function renderApp(root) {
           if (deleteSelectedBtn) {
             deleteSelectedBtn.classList.add("hidden-btn");
             deleteSelectedBtn.disabled = true;
+          }
+          const retrySelectedBtn = root.querySelector("#retry-selected-btn");
+          if (retrySelectedBtn) {
+            retrySelectedBtn.classList.add("hidden-btn");
+            retrySelectedBtn.disabled = true;
           }
       }
     } catch (err) {
@@ -1379,6 +1385,8 @@ export function renderApp(root) {
 
   const deleteSelectedBtn = root.querySelector("#delete-selected-btn");
 
+  const retrySelectedBtn = root.querySelector("#retry-selected-btn");
+
   function updateDeleteSelectedBtn() {
     const allCheckboxes = Array.from(root.querySelectorAll(".job-select-checkbox"));
     const anyChecked = allCheckboxes.some(cb => cb.checked);
@@ -1387,9 +1395,17 @@ export function renderApp(root) {
     if (anyChecked) {
       deleteSelectedBtn.classList.remove("hidden-btn");
       deleteSelectedBtn.disabled = false;
+      if (retrySelectedBtn) {
+        retrySelectedBtn.classList.remove("hidden-btn");
+        retrySelectedBtn.disabled = false;
+      }
     } else {
       deleteSelectedBtn.classList.add("hidden-btn");
       deleteSelectedBtn.disabled = true;
+      if (retrySelectedBtn) {
+        retrySelectedBtn.classList.add("hidden-btn");
+        retrySelectedBtn.disabled = true;
+      }
     }
 
     const selectAllCheckbox = root.querySelector("#select-all-jobs");
@@ -1420,6 +1436,45 @@ export function renderApp(root) {
     root.addEventListener("change", (e) => {
       if (e.target.classList.contains("job-select-checkbox")) {
         updateDeleteSelectedBtn();
+      }
+    });
+  }
+
+  if (retrySelectedBtn) {
+    retrySelectedBtn.addEventListener("click", async () => {
+      const selectedCheckboxes = Array.from(root.querySelectorAll(".job-select-checkbox:checked"));
+      const jobIds = selectedCheckboxes.map(cb => cb.dataset.jobId);
+      if (jobIds.length === 0) return;
+
+      retrySelectedBtn.disabled = true;
+      retrySelectedBtn.textContent = "Retrying...";
+      try {
+        const jobsResponse = await fetch("/api/jobs");
+        if (jobsResponse.ok) {
+          const jobs = await jobsResponse.json();
+          // Filter to only the selected jobs that are in a retryable state
+          const jobsToRetry = jobs.filter(job => jobIds.includes(job.id) && ["Completed", "Failed", "Cancelled"].includes(job.status));
+
+          const retryRequests = jobsToRetry.map(job =>
+            fetch("/api/jobs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: job.url, service: job.service, quality: job.quality })
+            })
+          );
+
+          await Promise.allSettled(retryRequests);
+
+          if (typeof updateDeleteSelectedBtn === "function") {
+            updateDeleteSelectedBtn();
+          }
+          fetchJobs();
+        }
+      } catch (err) {
+        console.error("Failed to retry selected jobs", err);
+      } finally {
+        retrySelectedBtn.textContent = "Retry selected";
+        retrySelectedBtn.disabled = false;
       }
     });
   }
