@@ -59,11 +59,12 @@ test('Download job form submits with URL and quality setting', async ({ page }) 
   await page.selectOption('#quality-select', 'LOSSLESS');
 
   // Submit the form
+  const responsePromise = page.waitForResponse(response => response.url().endsWith('/api/jobs') && response.request().method() === 'POST');
   await page.click('button[type="submit"]');
 
   // Verify the payload includes the quality
   // Add a small wait to ensure request is dispatched
-  await page.waitForResponse(response => response.url().includes('/api/jobs') && response.request().method() === 'POST');
+  await responsePromise;
   expect(submittedPayload).not.toBeNull();
   expect(submittedPayload.url).toBe(testUrl);
   expect(submittedPayload.quality).toBe('LOSSLESS');
