@@ -170,10 +170,11 @@ export function renderApp(root) {
             <span class="status-dot"></span>
             <span class="status-text">Online</span>
           </div>
-          <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark mode">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon theme-icon-dark"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun theme-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-          </button>
+          <select id="theme-selector" class="theme-selector" aria-label="Select theme">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
           <span class="runtime-badge">Single container</span>
         </div>
       </header>
@@ -731,24 +732,49 @@ export function renderApp(root) {
     }
   }, 10000); // Update connection status every 10 seconds
 
-  const themeToggleBtn = root.querySelector("#theme-toggle");
+  const themeSelector = root.querySelector("#theme-selector");
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-  function initTheme() {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+  function applyTheme(theme) {
+    if (theme === "dark" || (theme === "system" && mediaQuery.matches)) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
   }
 
-  function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+  function initTheme() {
+    const savedTheme = localStorage.getItem("theme") || "system";
+    if (themeSelector) {
+      themeSelector.value = savedTheme;
+    }
+    applyTheme(savedTheme);
   }
 
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", toggleTheme);
+  function handleThemeChange(e) {
+    const theme = e.target.value;
+    localStorage.setItem("theme", theme);
+    applyTheme(theme);
+  }
+
+  if (themeSelector) {
+    themeSelector.addEventListener("change", handleThemeChange);
+  }
+
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener("change", () => {
+      const savedTheme = localStorage.getItem("theme") || "system";
+      if (savedTheme === "system") {
+        applyTheme("system");
+      }
+    });
+  } else if (mediaQuery.addListener) {
+    mediaQuery.addListener(() => {
+      const savedTheme = localStorage.getItem("theme") || "system";
+      if (savedTheme === "system") {
+        applyTheme("system");
+      }
+    });
   }
 
   initTheme();

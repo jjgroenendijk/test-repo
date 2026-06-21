@@ -671,13 +671,15 @@ test('displays Download all completed button when completed jobs exist', async (
   await expect(downloadAllBtn).toHaveAttribute('download', '');
 });
 
-test("toggles dark mode", async ({ page }) => {
+test("changes theme via selector", async ({ page }) => {
   await page.goto("/");
-  const themeToggle = page.locator("#theme-toggle");
+  const themeSelector = page.locator("#theme-selector");
   const html = page.locator("html");
-  await themeToggle.click();
+
+  await themeSelector.selectOption("dark");
   await expect(html).toHaveClass(/dark/);
-  await themeToggle.click();
+
+  await themeSelector.selectOption("light");
   await expect(html).not.toHaveClass(/dark/);
 });
 
