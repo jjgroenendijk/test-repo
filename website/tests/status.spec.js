@@ -79,4 +79,40 @@ test.describe("Connection Status Indicator", () => {
     await expect(statusContainer).toHaveClass(/status-offline/);
     await expect(statusContainer.locator(".status-text")).toHaveText("Offline");
   });
+  test("shows offline status when health endpoint times out", async ({ page }) => {
+    // We expect the frontend to time out after 5 seconds, so we need a slightly longer timeout for the test to wait for the UI update.
+    test.setTimeout(15000);
+    await page.route("**/api/health", () => {
+      // Do not fulfill, simulate a hang
+    });
+
+    await page.route("**/api/jobs", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    });
+    await page.route("**/api/system/storage", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ total: 100, used: 10, free: 90 }),
+      });
+    });
+    await page.route("**/api/stats", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ total_jobs: 0, total_files: 0, success_rate: 0 }),
+      });
+    });
+
+    await page.goto("/");
+
+    const statusContainer = page.locator("#connection-status");
+    await expect(statusContainer).toBeVisible();
+    await expect(statusContainer).toHaveClass(/status-offline/, { timeout: 10000 });
+    await expect(statusContainer.locator(".status-text")).toHaveText("Offline", { timeout: 10000 });
+  });
 });
