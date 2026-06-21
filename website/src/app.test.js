@@ -401,18 +401,19 @@ describe("renderApp", () => {
     cleanup();
   });
 
-  it("toggles dark mode and updates localStorage", async () => {
+  it("changes theme via selector and updates localStorage", async () => {
     const dom = new JSDOM('<!DOCTYPE html><div id="root"></div>', {
       url: "http://localhost",
     });
     global.document = dom.window.document;
     global.window = dom.window;
     global.localStorage = { getItem: vi.fn(), setItem: vi.fn() };
-    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+    global.window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn() });
     const root = document.getElementById("root");
     renderApp(root);
-    const themeToggleBtn = document.getElementById("theme-toggle");
-    themeToggleBtn.click();
+    const themeSelector = document.getElementById("theme-selector");
+    themeSelector.value = "dark";
+    themeSelector.dispatchEvent(new global.window.Event("change"));
     expect(document.documentElement.classList.contains("dark")).toBe(true);
     expect(global.localStorage.setItem).toHaveBeenCalledWith("theme", "dark");
   });
