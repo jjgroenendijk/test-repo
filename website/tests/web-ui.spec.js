@@ -1335,7 +1335,7 @@ test('can retry an individual failed job from its card', async ({ page }) => {
   const retryBtn = jobCard.getByRole("button", { name: "Retry", exact: true });
   await expect(retryBtn).toBeVisible();
 
-  const requestPromise = page.waitForRequest('/api/jobs');
+  const requestPromise = page.waitForRequest(req => req.url().endsWith('/api/jobs') && req.method() === 'POST');
   await retryBtn.click();
   await requestPromise;
 
@@ -1516,7 +1516,7 @@ test('can queue an artist URL and filter by Artist type', async ({ page }) => {
   await page.fill('[name="spotify-url"]', artistUrl);
 
   // Set up request listener before clicking
-  const requestPromise = page.waitForRequest(req => req.url().includes('/api/jobs') && req.method() === 'POST');
+  const requestPromise = page.waitForRequest(req => req.url().endsWith('/api/jobs') && req.method() === 'POST');
   await page.click('button[type="submit"]');
 
   // Wait for the request to be made

@@ -1,0 +1,7 @@
+fix: playwright test waitForRequest predicates for api/jobs
+
+Context: CI failed for tests/web-ui.spec.js and tests/ctrl-enter-shortcut.spec.js because `waitForRequest` matched `OPTIONS` preflight requests or incorrect API paths.
+Change: Update `waitForRequest` in `tests/web-ui.spec.js` and `tests/ctrl-enter-shortcut.spec.js` to specifically check for `req.url().endsWith('/api/jobs')` and `req.method() === 'POST'`.
+Rationale: Ensuring the request matcher strictly targets the `POST` request to `/api/jobs` avoids race conditions and false positives with CORS or other API requests, matching the memory requirements.
+Impact/Risk: Fixes CI flaky/failing tests. No application code changes.
+Tests: Ran `cd website && npm install && npm run build && npm run test && npx playwright test && cd .. && uv run ruff check . --no-cache && PYTHONPATH=. uv run pytest` and all passed.
