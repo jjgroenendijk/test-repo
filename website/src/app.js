@@ -319,6 +319,32 @@ export function renderApp(root) {
   const searchInput = root.querySelector("#job-search-input");
   const clearSearchBtn = root.querySelector("#clear-search-btn");
   const sortSelect = root.querySelector("#job-sort-select");
+
+  // Load persisted status filter if any
+  const savedStatusFilter = localStorage.getItem("jobStatusFilter");
+  if (savedStatusFilter && statusFilter) {
+    statusFilter.value = savedStatusFilter;
+  }
+
+  const downloadAllBtn = root.querySelector("#download-all-btn");
+  if (downloadAllBtn) {
+    downloadAllBtn.addEventListener("click", () => {
+      if (downloadAllBtn.classList.contains("loading")) return;
+
+      const originalText = downloadAllBtn.textContent;
+      downloadAllBtn.textContent = "Preparing Download...";
+      downloadAllBtn.classList.add("loading");
+      downloadAllBtn.style.pointerEvents = "none";
+      downloadAllBtn.style.opacity = "0.7";
+
+      setTimeout(() => {
+        downloadAllBtn.textContent = originalText;
+        downloadAllBtn.classList.remove("loading");
+        downloadAllBtn.style.pointerEvents = "auto";
+        downloadAllBtn.style.opacity = "1";
+      }, 5000);
+    });
+  }
   const clearInputBtn = root.querySelector("#clear-input-btn");
   const loadFileBtn = root.querySelector("#load-file-btn");
   const bulkUrlFileInput = root.querySelector("#bulk-url-file-input");
@@ -643,7 +669,10 @@ export function renderApp(root) {
   }
 
   if (statusFilter) {
-    statusFilter.addEventListener("change", fetchJobs);
+    statusFilter.addEventListener("change", () => {
+      localStorage.setItem("jobStatusFilter", statusFilter.value);
+      fetchJobs();
+    });
   }
 
   if (sortSelect) {
