@@ -358,12 +358,14 @@ export function renderApp(root) {
       }
     });
 
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-      event.preventDefault();
-      form.requestSubmit();
-    }
-  });
+  if (input) {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  }
   }
 
   if (clearInputBtn) {
