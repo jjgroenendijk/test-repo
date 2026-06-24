@@ -548,6 +548,11 @@ export function renderApp(root) {
         downloadAllBtn.style.display = hasCompleted ? "inline-flex" : "none";
       }
 
+      const downloadAllLogsBtn = root.querySelector("#download-all-logs-btn");
+      if (downloadAllLogsBtn) {
+        downloadAllLogsBtn.style.display = jobs.length > 0 ? "inline-flex" : "none";
+      }
+
       // Sort jobs
       const sortOrder = sortSelect ? sortSelect.value : "newest";
       const sortedJobs = [...jobs].sort((a, b) => {

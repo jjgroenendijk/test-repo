@@ -7,7 +7,14 @@ test.describe('Download All Logs Button', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([])
+        body: JSON.stringify([
+          {
+            id: 'test-job-123',
+            url: 'https://open.spotify.com/track/123',
+            status: 'Completed',
+            created_at: new Date().toISOString()
+          }
+        ])
       });
     });
 
