@@ -78,7 +78,7 @@ test('Queue form can be submitted with Ctrl+Enter or Meta+Enter', async ({ page 
   await requestPromise;
 
   // Verify the POST request was hit
-  expect(createJobCalled).toBe(true);
+  await expect.poll(() => createJobCalled).toBe(true);
 
   // Verify the textarea input was cleared
   await expect(textarea).toHaveValue('');
