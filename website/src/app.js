@@ -659,7 +659,7 @@ export function renderApp(root) {
     let debounceTimer;
     searchInput.addEventListener("input", () => {
       if (clearSearchBtn) {
-        clearSearchBtn.style.display = searchInput.value.length > 0 ? "inline-block" : "none";
+        clearSearchBtn.classList.toggle("hidden-btn", searchInput.value.length === 0);
       }
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(fetchJobs, 300);
@@ -671,7 +671,7 @@ export function renderApp(root) {
       if (searchInput) {
         searchInput.value = "";
       }
-      clearSearchBtn.style.display = "none";
+      clearSearchBtn.classList.add("hidden-btn");
       fetchJobs();
     });
   }
