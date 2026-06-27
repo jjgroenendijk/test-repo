@@ -22,12 +22,14 @@ def test_get_jobs_empty():
 
 @patch('server.run_spotiflac')
 def test_create_job(mock_run):
-    response = client.post("/api/jobs", json={"url": "https://open.spotify.com/track/123"})
+    response = client.post("/api/jobs", json={"url": "https://open.spotify.com/track/123", "quality": "LOSSLESS", "service": "tidal"})
     assert response.status_code == 200
     data = response.json()
     assert "id" in data
     assert data["url"] == "https://open.spotify.com/track/123"
     assert data["status"] == "Queued"
+    assert data["quality"] == "LOSSLESS"
+    assert data["service"] == "tidal"
     assert "completed_at" not in data or data["completed_at"] is None
 
     # Verify it was added to history
@@ -36,6 +38,8 @@ def test_create_job(mock_run):
     jobs = response.json()
     assert len(jobs) == 1
     assert jobs[0]["id"] == data["id"]
+    assert jobs[0]["quality"] == "LOSSLESS"
+    assert jobs[0]["service"] == "tidal"
     assert "completed_at" not in jobs[0] or jobs[0]["completed_at"] is None
 
 @patch('server.run_spotiflac')
