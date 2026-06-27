@@ -60,6 +60,8 @@ class JobResponse(BaseModel):
     error_log: Optional[str] = None
     files: Optional[int] = 0
     completed_at: Optional[str] = None
+    quality: Optional[str] = None
+    service: Optional[str] = None
 
 
 async def read_history() -> List[Dict]:
@@ -175,7 +177,9 @@ async def create_job(request: JobRequest, background_tasks: BackgroundTasks):
         "created_at": datetime.now(timezone.utc).isoformat(),
         "error_log": None,
         "files": 0,
-        "total_size": 0
+        "total_size": 0,
+        "quality": request.quality,
+        "service": request.service
     }
 
     history = await read_history()

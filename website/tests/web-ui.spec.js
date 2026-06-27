@@ -457,7 +457,7 @@ test("can clear running jobs", async ({ page }) => {
 
   await clearRunningBtn.click();
 
-  expect(clearRunningCalled).toBe(true);
+  await expect.poll(() => clearRunningCalled).toBe(true);
 });
 
 test("can clear job history", async ({ page }) => {
