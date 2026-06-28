@@ -248,8 +248,11 @@ export function renderApp(root) {
         <div class="section-heading section-heading-with-action">
           <h2>Recent jobs</h2>
           <div class="job-controls-row">
-            <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
-            <button type="button" id="clear-search-btn" class="clear-search-btn hidden-btn" aria-label="Clear search">X</button>
+            <div class="search-input-container">
+              <input type="text" id="job-search-input" placeholder="Search URL or ID..." class="job-search-input" aria-label="Search jobs" />
+              <kbd class="search-shortcut-badge" id="search-shortcut-badge"></kbd>
+              <button type="button" id="clear-search-btn" class="clear-search-btn hidden-btn" aria-label="Clear search">X</button>
+            </div>
             <select id="job-sort-select" class="job-status-filter clear-history-btn" aria-label="Sort jobs">
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -355,12 +358,14 @@ export function renderApp(root) {
       }
     });
 
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-      event.preventDefault();
-      form.requestSubmit();
-    }
-  });
+  if (input) {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  }
   }
 
   if (clearInputBtn) {
@@ -732,6 +737,23 @@ export function renderApp(root) {
       applyCompactViewState();
     });
   }
+
+  const searchShortcutBadge = root.querySelector("#search-shortcut-badge");
+  if (searchShortcutBadge) {
+    const isMac = navigator.userAgent.toLowerCase().includes('mac');
+    searchShortcutBadge.textContent = isMac ? '⌘K' : 'Ctrl K';
+  }
+
+  // Global Keyboard Shortcut for Search (Cmd/Ctrl + K)
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const searchInput = root.querySelector("#job-search-input");
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+  });
 
   // Initial load
   fetchJobs();
