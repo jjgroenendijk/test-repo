@@ -55,7 +55,7 @@ test.describe('Remove Multiple Selected Jobs', () => {
     // Mock delete-selected endpoint
     let deleteSelectedCalled = false;
     let deletedJobIds = [];
-    await page.route('**/api/jobs/delete-selected', async (route) => {
+    await page.route('**/api/jobs/delete-selected*', async (route) => {
       if (route.request().method() === 'POST') {
         deleteSelectedCalled = true;
         const postData = JSON.parse(route.request().postData() || '{}');

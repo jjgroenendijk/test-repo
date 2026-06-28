@@ -68,7 +68,7 @@ function renderJob(job) {
   const canDelete = job.status === "Completed" || job.status === "Failed" || job.status === "Cancelled";
   const cancelBtnHtml = canCancel ? `<button type="button" class="cancel-job-btn" data-job-id="${escapeHtml(job.id)}">Cancel</button>` : "";
   const retryText = job.status === "Completed" ? "Re-queue" : "Retry";
-  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-url="${escapeHtml(job.url)}" data-job-service="${escapeHtml(job.service || '')}" data-job-quality="${escapeHtml(job.quality || '')}">${retryText}</button>` : "";
+  const retryBtnHtml = canRetry ? `<button type="button" class="retry-job-btn" data-job-id="${escapeHtml(job.id)}" data-job-url="${escapeHtml(job.url)}" data-job-service="${escapeHtml(job.service || '')}" data-job-quality="${escapeHtml(job.quality || '')}">${retryText}</button>` : "";
   const deleteBtnHtml = canDelete ? `<button type="button" class="delete-job-btn" data-job-id="${escapeHtml(job.id)}">Delete</button>` : "";
   const viewLogsBtnHtml = `<button type="button" class="view-logs-btn" data-job-id="${escapeHtml(job.id)}">View Logs</button>`;
   const viewFilesBtnHtml = job.status === "Completed" ? `<button type="button" class="view-files-btn" data-job-id="${escapeHtml(job.id)}">View Files</button>` : "";
