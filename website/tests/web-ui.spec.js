@@ -375,7 +375,7 @@ test("can clear queued jobs", async ({ page }) => {
   });
 
   let clearQueuedCalled = false;
-  await page.route("/api/history/clear-queued", async (route) => {
+  await page.route("**/api/history/clear-queued*", async (route) => {
     if (route.request().method() === "DELETE") {
       clearQueuedCalled = true;
       await route.fulfill({
